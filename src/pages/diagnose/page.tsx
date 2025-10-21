@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { usePredictDiagnosis } from "@/lib/api";
 
 type Step = {
   id: number;
@@ -61,8 +62,8 @@ const steps: Step[] = [
 
 export default function DiagnosePage() {
   const router = useRouter();
+  const predict = usePredictDiagnosis();
   const [currentStep, setCurrentStep] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     industry: "",
     region: "",
@@ -120,28 +121,33 @@ export default function DiagnosePage() {
   };
 
   const handleSubmit = async (lastValue?: string) => {
-    setIsLoading(true);
     setMessages((prev) => [...prev, { role: "assistant", content: "분석 중입니다... 잠시만 기다려주세요." }]);
 
     // Prepare final data
     const finalData = lastValue ? { ...formData, [currentStepData.field]: lastValue } : formData;
 
     try {
-      // Mock API call - replace with actual API endpoint
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // API call - convert form data to diagnosis request
+      const result = await predict.mutateAsync({
+        industry: finalData.industry,
+        yearsInBusiness: 3, // Mock value - could be added to form
+        monthlyRevenue: Number(finalData.sales_1m),
+        monthlyExpenses: Number(finalData.sales_1m) * 0.8, // Mock calculation
+        customerCount: Number(finalData.cust_1m),
+      });
 
-      // Store data in sessionStorage for results page
+      // Store result in sessionStorage for results page
       sessionStorage.setItem("diagnosisData", JSON.stringify(finalData));
+      sessionStorage.setItem("diagnosisResult", JSON.stringify(result));
 
       // Navigate to results page
       router.push("/results");
     } catch (error) {
-      console.error("[v0] Error submitting diagnosis:", error);
+      console.error("Error submitting diagnosis:", error);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "일시적인 오류가 발생했습니다. 다시 시도해주세요." },
       ]);
-      setIsLoading(false);
     }
   };
 
@@ -195,7 +201,7 @@ export default function DiagnosePage() {
                     </div>
                   </div>
                 ))}
-                {isLoading && (
+                {predict.isPending && (
                   <div className="flex gap-3 justify-start">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <Loader2 className="h-5 w-5 text-primary animate-spin" />
@@ -221,7 +227,7 @@ export default function DiagnosePage() {
               </div>
 
               {/* Input Area */}
-              {!isLoading && (
+              {!predict.isPending && (
                 <div className="border-t pt-6">
                   {currentStepData.type === "select" ? (
                     <div className="flex flex-wrap gap-2">
@@ -269,11 +275,11 @@ export default function DiagnosePage() {
 
           {/* Navigation */}
           <div className="flex justify-between">
-            <Button onClick={handleBack} variant="ghost" disabled={currentStep === 0 || isLoading}>
+            <Button onClick={handleBack} variant="ghost" disabled={currentStep === 0 || predict.isPending}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               이전
             </Button>
-            <Button onClick={() => router.push("/")} variant="ghost">
+            <Button onClick={() => router.push("/")} variant="ghost" disabled={predict.isPending}>
               취소
             </Button>
           </div>

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "@/lib/next-compat";
 import { Calendar, TrendingUp, AlertCircle, Eye, Download, MessageCircle, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Badge } from "@/components/ui/badge";
 import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { useDiagnosisHistory, useAuth } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -21,24 +21,28 @@ type HistoryRecord = {
 };
 
 export default function DashboardPage() {
-  // Mock data - replace with actual API call
-  const [latestDiagnosis] = useState<HistoryRecord>({
-    id: "1",
-    date: "2025-01-10",
-    riskScore: 25,
-    alert: "YELLOW",
-    salesChange: -5,
-    customerChange: -3,
-  });
+  const { data: authData } = useAuth();
+  const { data: diagnosisData, isLoading } = useDiagnosisHistory();
 
-  const [historyData] = useState<HistoryRecord[]>([
-    { id: "1", date: "2025-01-10", riskScore: 25, alert: "YELLOW", salesChange: -5, customerChange: -3 },
-    { id: "2", date: "2024-12-10", riskScore: 22, alert: "YELLOW", salesChange: -3, customerChange: -2 },
-    { id: "3", date: "2024-11-10", riskScore: 18, alert: "GREEN", salesChange: 2, customerChange: 1 },
-    { id: "4", date: "2024-10-10", riskScore: 15, alert: "GREEN", salesChange: 5, customerChange: 3 },
-    { id: "5", date: "2024-09-10", riskScore: 20, alert: "YELLOW", salesChange: -2, customerChange: 0 },
-    { id: "6", date: "2024-08-10", riskScore: 17, alert: "GREEN", salesChange: 3, customerChange: 2 },
-  ]);
+  // Convert API data to UI format
+  const historyData: HistoryRecord[] =
+    diagnosisData?.diagnoses.map((d) => ({
+      id: d.id,
+      date: d.createdAt,
+      riskScore: d.overallScore,
+      alert: d.riskLevel,
+      salesChange: d.components.sales.score - 50, // Mock calculation
+      customerChange: d.components.customer.score - 50, // Mock calculation
+    })) || [];
+
+  const latestDiagnosis = historyData[0] || {
+    id: "1",
+    date: new Date().toISOString(),
+    riskScore: 0,
+    alert: "GREEN" as AlertLevel,
+    salesChange: 0,
+    customerChange: 0,
+  };
 
   const chartData = historyData
     .slice()
@@ -98,6 +102,24 @@ export default function DashboardPage() {
 
   const trendAnalysis = getTrendAnalysis();
 
+  if (isLoading) {
+    return (
+      <>
+        <AppHeader />
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+          <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-muted-foreground">진단 기록을 불러오는 중...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <AppHeader />
@@ -106,7 +128,9 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">내 대시보드</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
+              {authData?.user.name ? `${authData.user.name}님의 대시보드` : "내 대시보드"}
+            </h1>
             <p className="text-lg text-muted-foreground">우리 가게의 위험도 추세를 확인하고 관리하세요</p>
           </div>
 

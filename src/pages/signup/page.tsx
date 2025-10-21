@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { signUp } from "@/lib/auth";
+import { useSignup } from "@/lib/api";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
 const INDUSTRIES = [
@@ -26,6 +26,7 @@ const INDUSTRIES = [
 
 export default function SignupPage() {
   const router = useRouter();
+  const signup = useSignup();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -34,42 +35,41 @@ export default function SignupPage() {
     businessName: "",
     industry: "",
   });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
+    setValidationError("");
 
     // Validate inputs
     if (!formData.email || !formData.password || !formData.name) {
-      setError("필수 항목을 모두 입력해주세요.");
-      setIsLoading(false);
+      setValidationError("필수 항목을 모두 입력해주세요.");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("비밀번호는 최소 6자 이상이어야 합니다.");
-      setIsLoading(false);
+      setValidationError("비밀번호는 최소 6자 이상이어야 합니다.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.");
-      setIsLoading(false);
+      setValidationError("비밀번호가 일치하지 않습니다.");
       return;
     }
 
-    // Sign up
-    const result = signUp(formData.email, formData.password, formData.name, formData.businessName, formData.industry);
-
-    if (result.success) {
+    try {
+      // Sign up
+      await signup.mutateAsync({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        businessName: formData.businessName || undefined,
+        industry: formData.industry || undefined,
+      });
       // Redirect to dashboard
       router.push("/dashboard");
-    } else {
-      setError(result.error || "회원가입에 실패했습니다.");
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Signup failed:", error);
     }
   };
 
@@ -91,10 +91,10 @@ export default function SignupPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
+              {(validationError || signup.error) && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{validationError || signup.error?.message}</AlertDescription>
                 </Alert>
               )}
 
@@ -176,8 +176,8 @@ export default function SignupPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "가입 중..." : "회원가입"}
+              <Button type="submit" className="w-full" disabled={signup.isPending}>
+                {signup.isPending ? "가입 중..." : "회원가입"}
               </Button>
             </form>
           </CardContent>

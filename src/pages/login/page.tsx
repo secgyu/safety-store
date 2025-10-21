@@ -8,37 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { signIn } from "@/lib/auth";
+import { useLogin } from "@/lib/api";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const login = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
     // Validate inputs
     if (!email || !password) {
-      setError("이메일과 비밀번호를 입력해주세요.");
-      setIsLoading(false);
       return;
     }
 
-    // Sign in
-    const result = signIn(email, password);
-
-    if (result.success) {
+    try {
+      await login.mutateAsync({ email, password });
       // Redirect to dashboard
       router.push("/dashboard");
-    } else {
-      setError(result.error || "로그인에 실패했습니다.");
-      setIsLoading(false);
+    } catch (error) {
+      // Error is already handled by mutation
+      console.error("Login failed:", error);
     }
   };
 
@@ -60,10 +53,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
+              {login.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{login.error.message}</AlertDescription>
                 </Alert>
               )}
 
@@ -91,8 +84,8 @@ export default function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "로그인 중..." : "로그인"}
+              <Button type="submit" className="w-full" disabled={login.isPending}>
+                {login.isPending ? "로그인 중..." : "로그인"}
               </Button>
             </form>
           </CardContent>

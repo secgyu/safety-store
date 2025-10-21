@@ -88,5 +88,10 @@
     "tailwindcss": "^4.1.15",
     "tw-animate-css": "1.3.3",
     "typescript": "^5"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

@@ -1,4 +1,3 @@
-import { Link } from "@/lib/next-compat";
 import {
   ArrowRight,
   BarChart3,
@@ -19,6 +18,7 @@ import { UserMenu } from "@/components/user-menu";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { hasCompletedOnboarding, markOnboardingComplete } from "@/lib/onboarding";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -48,34 +48,34 @@ export default function HomePage() {
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link
-              href="/diagnose"
+              to="/diagnose"
               data-tour="diagnose-button"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               진단하기
             </Link>
             <Link
-              href="/compare"
+              to="/compare"
               data-tour="compare-link"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               업종 비교
             </Link>
             <Link
-              href="/calculators"
+              to="/calculators"
               data-tour="calculators-link"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               재무 계산기
             </Link>
             <Link
-              href="/support"
+              to="/support"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               고객 지원
             </Link>
             <Link
-              href="/notifications"
+              to="/notifications"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative"
             >
               <Bell className="h-5 w-5" />
@@ -102,7 +102,7 @@ export default function HomePage() {
               size="lg"
               className="text-lg px-10 py-7 h-auto rounded-2xl shadow-lg hover:shadow-xl transition-all"
             >
-              <Link href="/diagnose">
+              <Link to="/diagnose">
                 지금 바로 무료 진단받기
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
@@ -113,7 +113,7 @@ export default function HomePage() {
               size="lg"
               className="text-lg px-10 py-7 h-auto rounded-2xl glass-hover bg-transparent"
             >
-              <Link href="/compare">업종별 통계 보기</Link>
+              <Link to="/compare">업종별 통계 보기</Link>
             </Button>
           </div>
 
@@ -312,7 +312,7 @@ export default function HomePage() {
           <h2 className="text-4xl md:text-5xl font-bold mb-6">지금 바로 시작하세요</h2>
           <p className="text-xl mb-10 text-muted-foreground">3분이면 우리 가게의 건강 상태를 확인할 수 있습니다</p>
           <Button asChild size="lg" className="text-lg px-10 py-7 h-auto rounded-2xl shadow-xl">
-            <Link href="/diagnose">
+            <Link to="/diagnose">
               무료 진단 시작하기
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
@@ -349,16 +349,16 @@ export default function HomePage() {
                 전화: 1588-0000
               </p>
               <div className="flex items-center gap-3">
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
                   <Facebook className="h-5 w-5" />
                 </Link>
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
                   <Twitter className="h-5 w-5" />
                 </Link>
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
                   <Instagram className="h-5 w-5" />
                 </Link>
-                <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
                   <Youtube className="h-5 w-5" />
                 </Link>
               </div>
@@ -367,22 +367,22 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">리소스</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/blog" className="hover:text-foreground transition-colors">
+                  <Link to="/blog" className="hover:text-foreground transition-colors">
                     블로그
                   </Link>
                 </li>
                 <li>
-                  <Link href="/statistics" className="hover:text-foreground transition-colors">
+                  <Link to="/statistics" className="hover:text-foreground transition-colors">
                     자영업 통계
                   </Link>
                 </li>
                 <li>
-                  <Link href="/insights" className="hover:text-foreground transition-colors">
+                  <Link to="/insights" className="hover:text-foreground transition-colors">
                     업종별 인사이트
                   </Link>
                 </li>
                 <li>
-                  <Link href="/success-stories" className="hover:text-foreground transition-colors">
+                  <Link to="/success-stories" className="hover:text-foreground transition-colors">
                     성공 사례
                   </Link>
                 </li>
@@ -392,17 +392,17 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">고객 지원</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/support" className="hover:text-foreground transition-colors">
+                  <Link to="/support" className="hover:text-foreground transition-colors">
                     문의하기
                   </Link>
                 </li>
                 <li>
-                  <Link href="/faq" className="hover:text-foreground transition-colors">
+                  <Link to="/faq" className="hover:text-foreground transition-colors">
                     자주 묻는 질문
                   </Link>
                 </li>
                 <li>
-                  <Link href="/guide" className="hover:text-foreground transition-colors">
+                  <Link to="/guide" className="hover:text-foreground transition-colors">
                     이용 가이드
                   </Link>
                 </li>
@@ -412,12 +412,12 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">약관 및 정책</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/terms" className="hover:text-foreground transition-colors">
+                  <Link to="/terms" className="hover:text-foreground transition-colors">
                     이용약관
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="hover:text-foreground transition-colors">
+                  <Link to="/privacy" className="hover:text-foreground transition-colors">
                     개인정보처리방침
                   </Link>
                 </li>

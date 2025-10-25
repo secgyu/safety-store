@@ -1,12 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "@/styles/globals.css";
 import "./index.css";
 
 import App from "./App.tsx";
 
 async function enableMocking() {
-  if (import.meta.env.NODE_ENV !== "development") {
+  if (import.meta.env.NODE_ENV === "production") {
     return;
   }
 
@@ -14,6 +13,7 @@ async function enableMocking() {
 
   // `worker.start()` returns a Promise that resolves
   // once the Service Worker is up and ready to intercept requests.
+  console.log("Starting mock server");
   return worker.start();
 }
 

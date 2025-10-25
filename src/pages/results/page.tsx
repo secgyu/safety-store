@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "@/lib/next-compat";
-import { Link } from "@/lib/next-compat";
 import { Download, TrendingUp, Lightbulb, BarChart3, AlertCircle, MessageCircle, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +9,7 @@ import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { generatePDFReport } from "@/lib/pdf-generator";
 import { useToast } from "@/hooks/use-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -30,7 +29,7 @@ type ResultData = {
 };
 
 export default function ResultsPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [resultData, setResultData] = useState<ResultData | null>(null);
@@ -40,7 +39,7 @@ export default function ResultsPage() {
     const diagnosisData = sessionStorage.getItem("diagnosisData");
 
     if (!diagnosisData) {
-      router.push("/diagnose");
+      navigate("/diagnose");
       return;
     }
 
@@ -88,7 +87,7 @@ export default function ResultsPage() {
     };
 
     fetchResults();
-  }, [router]);
+  }, [navigate]);
 
   const getAlertInfo = (alert: AlertLevel) => {
     switch (alert) {
@@ -129,7 +128,7 @@ export default function ResultsPage() {
               <h2 className="text-xl font-bold mb-2">결과를 불러올 수 없습니다</h2>
               <p className="text-muted-foreground mb-6">일시적인 오류가 발생했습니다. 다시 시도해주세요.</p>
               <Button asChild>
-                <Link href="/diagnose">다시 진단하기</Link>
+                <Link to="/diagnose">다시 진단하기</Link>
               </Button>
             </CardContent>
           </Card>
@@ -256,19 +255,19 @@ export default function ResultsPage() {
 
           <div className="flex flex-wrap gap-4 justify-center mb-10">
             <Button asChild size="lg" className="gap-2 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-              <Link href="/action-plan">
+              <Link to="/action-plan">
                 <Lightbulb className="h-5 w-5" />
                 개선 계획 수립
               </Link>
             </Button>
             <Button asChild size="lg" className="gap-2 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-              <Link href="/consultation">
+              <Link to="/consultation">
                 <MessageCircle className="h-5 w-5" />
                 AI 상담 받기
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="gap-2 glass-hover rounded-2xl bg-transparent">
-              <Link href="/notifications">
+              <Link to="/notifications">
                 <Bell className="h-5 w-5" />
                 알림 센터
               </Link>
@@ -283,13 +282,13 @@ export default function ResultsPage() {
               상세 보고서 다운로드
             </Button>
             <Button asChild size="lg" variant="outline" className="gap-2 glass-hover rounded-2xl bg-transparent">
-              <Link href="/compare">
+              <Link to="/compare">
                 <BarChart3 className="h-5 w-5" />
                 다른 업종과 비교하기
               </Link>
             </Button>
             <Button asChild size="lg" variant="secondary" className="gap-2 rounded-3xl">
-              <Link href="/dashboard">
+              <Link to="/dashboard">
                 <TrendingUp className="h-5 w-5" />
                 정기 모니터링 설정
               </Link>
@@ -306,7 +305,7 @@ export default function ResultsPage() {
                     회원가입 후 대시보드에서 과거 진단 기록을 확인하고 추세를 분석할 수 있습니다.
                   </p>
                   <Button asChild variant="default" size="sm" className="rounded-xl">
-                    <Link href="/dashboard">대시보드로 이동</Link>
+                    <Link to="/dashboard">대시보드로 이동</Link>
                   </Button>
                 </div>
               </div>

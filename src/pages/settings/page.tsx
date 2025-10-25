@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@/lib/next-compat";
+
 import { ArrowLeft, Save, Trash2, Bell, Store, Mail, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 export default function SettingsPage() {
   const { toast } = useToast();
@@ -74,7 +75,7 @@ export default function SettingsPage() {
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <Link
-            href="/dashboard"
+            to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -318,7 +319,7 @@ export default function SettingsPage() {
                   문의사항이 있으시면 언제든지 고객 지원팀에 연락해주세요.
                 </p>
                 <Button asChild variant="default" size="sm">
-                  <Link href="/support">고객 지원 센터</Link>
+                  <Link to="/support">고객 지원 센터</Link>
                 </Button>
               </div>
             </div>

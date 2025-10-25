@@ -1,8 +1,8 @@
-import { Link } from "@/lib/next-compat";
 import { ArrowLeft, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 export default function SuccessStoriesPage() {
   const stories = [
@@ -48,7 +48,7 @@ export default function SuccessStoriesPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <Button asChild variant="ghost" className="mb-6">
-          <Link href="/">
+          <Link to="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             홈으로
           </Link>
@@ -102,7 +102,7 @@ export default function SuccessStoriesPage() {
             <h2 className="text-2xl font-bold mb-4">당신의 성공 스토리를 만들어보세요</h2>
             <p className="text-muted-foreground mb-6">조기 진단과 빠른 대응으로 위기를 기회로 바꿀 수 있습니다</p>
             <Button asChild size="lg">
-              <Link href="/diagnose">무료 진단 시작하기</Link>
+              <Link to="/diagnose">무료 진단 시작하기</Link>
             </Button>
           </CardContent>
         </Card>

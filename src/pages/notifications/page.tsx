@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Link } from "@/lib/next-compat";
+
 import { AlertTriangle, TrendingDown, Bell, Calendar, Target, Info, X, Check, Filter } from "lucide-react";
+import { Link } from "react-router-dom";
 
 // Mock notification data - 실제로는 API에서 가져옴
 const mockNotifications = [
@@ -139,20 +140,20 @@ export default function NotificationsPage() {
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
+            <Link to="/" className="text-2xl font-bold text-blue-600">
               자영업 조기경보
             </Link>
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="/diagnose" className="text-gray-600 hover:text-blue-600">
+              <Link to="/diagnose" className="text-gray-600 hover:text-blue-600">
                 진단하기
               </Link>
-              <Link href="/compare" className="text-gray-600 hover:text-blue-600">
+              <Link to="/compare" className="text-gray-600 hover:text-blue-600">
                 업종 비교
               </Link>
-              <Link href="/dashboard" className="text-gray-600 hover:text-blue-600">
+              <Link to="/dashboard" className="text-gray-600 hover:text-blue-600">
                 대시보드
               </Link>
-              <Link href="/notifications" className="text-blue-600 font-medium">
+              <Link to="/notifications" className="text-blue-600 font-medium">
                 알림
               </Link>
             </nav>
@@ -238,7 +239,7 @@ export default function NotificationsPage() {
 
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">{formatTimestamp(notification.timestamp)}</span>
-                    <Link href={notification.link}>
+                    <Link to={notification.link}>
                       <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
                         자세히 보기 →
                       </Button>
@@ -256,7 +257,7 @@ export default function NotificationsPage() {
             <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">알림이 없습니다</h3>
             <p className="text-gray-600 mb-6">새로운 알림이 도착하면 여기에 표시됩니다</p>
-            <Link href="/diagnose">
+            <Link to="/diagnose">
               <Button>진단 시작하기</Button>
             </Link>
           </Card>

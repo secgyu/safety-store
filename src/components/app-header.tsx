@@ -1,17 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link } from "@/lib/next-compat";
-import { usePathname } from "@/lib/next-compat";
 import { Bell, Menu, X, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
 import { Badge } from "@/components/ui/badge";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, type User } from "@/lib/auth";
 import { resetOnboarding } from "@/lib/onboarding";
+import { Link, useLocation } from "react-router-dom";
 
 export function AppHeader() {
-  const pathname = usePathname();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [unreadCount, setUnreadCount] = useState(3);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ export function AppHeader() {
     { href: "/support", label: "고객 지원" },
   ];
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => location.pathname === href;
 
   const handleRestartTutorial = () => {
     resetOnboarding();
@@ -38,7 +37,7 @@ export function AppHeader() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link
-            href="/"
+            to="/"
             className="flex items-center gap-2 font-bold text-xl text-primary hover:opacity-80 transition-opacity"
           >
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center">
@@ -52,7 +51,7 @@ export function AppHeader() {
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                to={link.href}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive(link.href)
                     ? "bg-primary/10 text-primary"
@@ -72,7 +71,7 @@ export function AppHeader() {
 
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link href="/notifications">
+              <Link to="/notifications">
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-danger">
@@ -88,10 +87,10 @@ export function AppHeader() {
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/login">로그인</Link>
+                  <Link to="/login">로그인</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href="/signup">회원가입</Link>
+                  <Link to="/signup">회원가입</Link>
                 </Button>
               </div>
             )}
@@ -115,7 +114,7 @@ export function AppHeader() {
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                     isActive(link.href)
@@ -129,10 +128,10 @@ export function AppHeader() {
               {!user && (
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
                   <Button variant="outline" asChild>
-                    <Link href="/login">로그인</Link>
+                    <Link to="/login">로그인</Link>
                   </Button>
                   <Button asChild>
-                    <Link href="/signup">회원가입</Link>
+                    <Link to="/signup">회원가입</Link>
                   </Button>
                 </div>
               )}

@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "@/lib/next-compat";
-import { Link } from "@/lib/next-compat";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,9 +10,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { getCurrentUser, signOut, type User } from "@/lib/auth";
 import { UserIcon, Settings, LogOut, LayoutDashboard } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export function UserMenu() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -24,18 +23,17 @@ export function UserMenu() {
   const handleSignOut = () => {
     signOut();
     setUser(null);
-    router.push("/");
-    router.refresh();
+    navigate("/");
   };
 
   if (!user) {
     return (
       <div className="flex items-center gap-2">
         <Button variant="ghost" asChild>
-          <Link href="/login">로그인</Link>
+          <Link to="/login">로그인</Link>
         </Button>
         <Button asChild>
-          <Link href="/signup">회원가입</Link>
+          <Link to="/signup">회원가입</Link>
         </Button>
       </div>
     );
@@ -57,13 +55,13 @@ export function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/dashboard" className="cursor-pointer">
+          <Link to="/dashboard" className="cursor-pointer">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             대시보드
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="cursor-pointer">
+          <Link to="/settings" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             설정
           </Link>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useRouter } from "@/lib/next-compat";
+
 import { ArrowLeft, ArrowRight, Loader2, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { usePredictDiagnosis } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 type Step = {
   id: number;
@@ -61,7 +62,7 @@ const steps: Step[] = [
 ];
 
 export default function DiagnosePage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const predict = usePredictDiagnosis();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -141,7 +142,7 @@ export default function DiagnosePage() {
       sessionStorage.setItem("diagnosisResult", JSON.stringify(result));
 
       // Navigate to results page
-      router.push("/results");
+      navigate("/results");
     } catch (error) {
       console.error("Error submitting diagnosis:", error);
       setMessages((prev) => [
@@ -279,7 +280,7 @@ export default function DiagnosePage() {
               <ArrowLeft className="mr-2 h-4 w-4" />
               이전
             </Button>
-            <Button onClick={() => router.push("/")} variant="ghost" disabled={predict.isPending}>
+            <Button onClick={() => navigate("/")} variant="ghost" disabled={predict.isPending}>
               취소
             </Button>
           </div>

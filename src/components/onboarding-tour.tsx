@@ -1,14 +1,12 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { X, ArrowRight, ArrowLeft } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
 interface TourStep {
-  title: string
-  description: string
-  target?: string
-  position?: "top" | "bottom" | "left" | "right"
+  title: string;
+  description: string;
+  target?: string;
+  position?: "top" | "bottom" | "left" | "right";
 }
 
 const tourSteps: TourStep[] = [
@@ -57,66 +55,66 @@ const tourSteps: TourStep[] = [
     description:
       "이제 시작할 준비가 되었습니다. 지금 바로 무료 진단을 받아보시고, 귀하의 사업을 더 안전하게 지켜보세요!",
   },
-]
+];
 
 export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
   const [highlightPosition, setHighlightPosition] = useState<{
-    top: number
-    left: number
-    width: number
-    height: number
-  } | null>(null)
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  } | null>(null);
 
-  const currentTourStep = tourSteps[currentStep]
+  const currentTourStep = tourSteps[currentStep];
 
   useEffect(() => {
     if (currentTourStep.target) {
-      const element = document.querySelector(currentTourStep.target)
+      const element = document.querySelector(currentTourStep.target);
       if (element) {
-        const rect = element.getBoundingClientRect()
+        const rect = element.getBoundingClientRect();
         setHighlightPosition({
           top: rect.top + window.scrollY,
           left: rect.left + window.scrollX,
           width: rect.width,
           height: rect.height,
-        })
+        });
         // Scroll to element
-        element.scrollIntoView({ behavior: "smooth", block: "center" })
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       } else {
-        setHighlightPosition(null)
+        setHighlightPosition(null);
       }
     } else {
-      setHighlightPosition(null)
+      setHighlightPosition(null);
     }
-  }, [currentStep, currentTourStep.target])
+  }, [currentStep, currentTourStep.target]);
 
   const handleNext = () => {
     if (currentStep < tourSteps.length - 1) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     } else {
-      handleComplete()
+      handleComplete();
     }
-  }
+  };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleComplete = () => {
-    setIsVisible(false)
-    onComplete()
-  }
+    setIsVisible(false);
+    onComplete();
+  };
 
   const handleSkip = () => {
-    setIsVisible(false)
-    onComplete()
-  }
+    setIsVisible(false);
+    onComplete();
+  };
 
-  if (!isVisible) return null
+  if (!isVisible) return null;
 
   return (
     <>
@@ -205,5 +203,5 @@ export function OnboardingTour({ onComplete }: { onComplete: () => void }) {
         </div>
       </div>
     </>
-  )
+  );
 }

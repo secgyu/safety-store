@@ -1,4 +1,3 @@
-import { Link } from "@/lib/next-compat";
 import { Calendar, TrendingUp, AlertCircle, Eye, Download, MessageCircle, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { useDiagnosisHistory, useAuth } from "@/lib/api";
+import { Link } from "react-router-dom";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                         {getAlertBadge(record.alert)}
                       </div>
                       <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/results?id=${record.id}`}>
+                        <Link to={`/results?id=${record.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -292,32 +292,32 @@ export default function DashboardPage() {
               size="lg"
               className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
             >
-              <Link href="/action-plan">
+              <Link to="/action-plan">
                 <TrendingUp className="h-5 w-5" />
                 개선 계획 수립
               </Link>
             </Button>
             <Button asChild size="lg" className="gap-2 bg-gradient-to-r from-primary to-blue-600">
-              <Link href="/consultation">
+              <Link to="/consultation">
                 <MessageCircle className="h-5 w-5" />
                 AI 상담 받기
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent gap-2">
-              <Link href="/notifications">
+              <Link to="/notifications">
                 <Bell className="h-5 w-5" />
                 알림 센터
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent">
-              <Link href="/diagnose">새로운 진단 시작</Link>
+              <Link to="/diagnose">새로운 진단 시작</Link>
             </Button>
             <Button size="lg" variant="outline" className="gap-2 bg-transparent">
               <Download className="h-5 w-5" />
               전체 기록 다운로드
             </Button>
             <Button asChild size="lg" variant="outline" className="bg-transparent">
-              <Link href="/settings">설정</Link>
+              <Link to="/settings">설정</Link>
             </Button>
           </div>
 

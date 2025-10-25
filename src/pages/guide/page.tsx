@@ -1,14 +1,14 @@
-import { Link } from "@/lib/next-compat";
 import { ArrowLeft, CheckCircle2, AlertCircle, TrendingUp, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 export default function GuidePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <div className="container mx-auto px-4 py-8">
         <Button asChild variant="ghost" className="mb-6">
-          <Link href="/">
+          <Link to="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             홈으로 돌아가기
           </Link>
@@ -232,10 +232,10 @@ export default function GuidePage() {
                 <p className="text-muted-foreground mb-4">더 자세한 도움이 필요하신가요?</p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button asChild variant="default">
-                    <Link href="/support">고객 지원 문의</Link>
+                    <Link to="/support">고객 지원 문의</Link>
                   </Button>
                   <Button asChild variant="outline">
-                    <Link href="/faq">FAQ 보기</Link>
+                    <Link to="/faq">FAQ 보기</Link>
                   </Button>
                 </div>
               </CardContent>

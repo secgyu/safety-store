@@ -1,8 +1,8 @@
-import { Link } from "@/lib/next-compat";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStatistics } from "@/lib/api";
+import { Link } from "react-router-dom";
 
 export default function StatisticsPage() {
   const { data: stats, isLoading } = useStatistics();
@@ -26,7 +26,7 @@ export default function StatisticsPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <Button asChild variant="ghost" className="mb-6">
-          <Link href="/">
+          <Link to="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             홈으로
           </Link>

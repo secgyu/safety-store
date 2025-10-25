@@ -1,8 +1,8 @@
-import { Link } from "@/lib/next-compat";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useFAQs } from "@/lib/api";
+import { Link } from "react-router-dom";
 
 export default function FAQPage() {
   const { data: faqs, isLoading } = useFAQs();
@@ -31,7 +31,7 @@ export default function FAQPage() {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <div className="container mx-auto px-4 py-8">
         <Button asChild variant="ghost" className="mb-6">
-          <Link href="/">
+          <Link to="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             홈으로 돌아가기
           </Link>

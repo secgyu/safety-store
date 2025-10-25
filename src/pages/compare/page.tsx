@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Link } from "@/lib/next-compat";
 import { ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { Link } from "react-router-dom";
 
 const industries = [
   { value: "restaurant", label: "음식점" },
@@ -113,7 +113,7 @@ export default function ComparePage() {
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <Link
-            href="/"
+            to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -278,10 +278,10 @@ export default function ComparePage() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild size="lg">
-            <Link href="/diagnose">다시 진단하기</Link>
+            <Link to="/diagnose">다시 진단하기</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="bg-transparent">
-            <Link href="/results">내 결과 보기</Link>
+            <Link to="/results">내 결과 보기</Link>
           </Button>
         </div>
       </div>

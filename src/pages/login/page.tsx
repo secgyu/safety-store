@@ -1,8 +1,4 @@
-import type React from "react";
-
 import { useState } from "react";
-import { useRouter } from "@/lib/next-compat";
-import { Link } from "@/lib/next-compat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +6,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useLogin } from "@/lib/api";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const login = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +25,7 @@ export default function LoginPage() {
     try {
       await login.mutateAsync({ email, password });
       // Redirect to dashboard
-      router.push("/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       // Error is already handled by mutation
       console.error("Login failed:", error);
@@ -39,7 +36,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link
-          href="/"
+          to="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -92,7 +89,7 @@ export default function LoginPage() {
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-sm text-center text-muted-foreground">
               계정이 없으신가요?{" "}
-              <Link href="/signup" className="text-primary hover:underline font-medium">
+              <Link to="/signup" className="text-primary hover:underline font-medium">
                 회원가입
               </Link>
             </div>

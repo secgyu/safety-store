@@ -1,8 +1,4 @@
-import type React from "react";
-
 import { useState } from "react";
-import { useRouter } from "@/lib/next-compat";
-import { Link } from "@/lib/next-compat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSignup } from "@/lib/api";
 import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const INDUSTRIES = [
   "음식점",
@@ -25,7 +22,7 @@ const INDUSTRIES = [
 ];
 
 export default function SignupPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const signup = useSignup();
   const [formData, setFormData] = useState({
     email: "",
@@ -67,7 +64,7 @@ export default function SignupPage() {
         industry: formData.industry || undefined,
       });
       // Redirect to dashboard
-      router.push("/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Signup failed:", error);
     }
@@ -77,7 +74,7 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Link
-          href="/"
+          to="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -184,7 +181,7 @@ export default function SignupPage() {
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-sm text-center text-muted-foreground">
               이미 계정이 있으신가요?{" "}
-              <Link href="/login" className="text-primary hover:underline font-medium">
+              <Link to="/login" className="text-primary hover:underline font-medium">
                 로그인
               </Link>
             </div>

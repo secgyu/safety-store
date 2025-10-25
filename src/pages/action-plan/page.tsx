@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "@/lib/next-compat";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Target, CheckCircle2, AlertCircle, TrendingUp, Calendar, Edit3, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ActionItem {
   id: string;
@@ -27,7 +27,7 @@ interface Goal {
 }
 
 export default function ActionPlanPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [riskLevel, setRiskLevel] = useState<"RED" | "ORANGE" | "YELLOW" | "GREEN">("ORANGE");
   const [goal, setGoal] = useState<Goal>({
@@ -205,7 +205,7 @@ export default function ActionPlanPage() {
       <div className="container mx-auto px-4 py-8 max-w-5xl">
         {/* Header */}
         <div className="mb-8">
-          <Button variant="ghost" onClick={() => router.back()} className="mb-4 hover:bg-blue-100">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 hover:bg-blue-100">
             <ArrowLeft className="mr-2 h-4 w-4" />
             돌아가기
           </Button>
@@ -411,10 +411,10 @@ export default function ActionPlanPage() {
 
         {/* Action Buttons */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
-          <Button onClick={() => router.push("/consultation")} className="flex-1 bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => navigate("/consultation")} className="flex-1 bg-blue-600 hover:bg-blue-700">
             AI 상담으로 맞춤 조언 받기
           </Button>
-          <Button onClick={() => router.push("/dashboard")} variant="outline" className="flex-1">
+          <Button onClick={() => navigate("/dashboard")} variant="outline" className="flex-1">
             대시보드에서 진행 상황 확인
           </Button>
         </div>

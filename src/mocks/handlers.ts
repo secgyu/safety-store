@@ -10,11 +10,9 @@ import type {
   ChatResponse,
   FAQ,
   Insight,
-  Notification,
   Statistics,
   SuccessStory,
   ContactResponse,
-  User,
 } from '@/types/api'
 
 // Mock 데이터 저장소

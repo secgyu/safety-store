@@ -1,4 +1,3 @@
-import type React from "react";
 import { Geist, Geist_Mono } from "@/lib/next-fonts";
 import { Analytics } from "@/lib/next-analytics";
 import "./globals.css";

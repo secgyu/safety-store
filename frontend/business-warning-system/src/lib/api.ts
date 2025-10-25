@@ -83,13 +83,16 @@ function handleResponse<T extends { data?: unknown; error?: unknown }>(response:
 class ApiClient {
   // Auth
   async login(data: { username: string; password: string }): Promise<BearerResponse> {
-    const formData = new FormData()
+    const formData = new URLSearchParams()
     formData.append('username', data.username)
     formData.append('password', data.password)
 
     const response = await client.POST('/api/auth/login', {
-      // @ts-expect-error - FormData is valid for this endpoint
-      body: formData
+      // @ts-expect-error - URLSearchParams is valid for this endpoint
+      body: formData.toString(),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
     })
 
     return handleResponse(response)!

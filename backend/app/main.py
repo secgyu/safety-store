@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import time
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -63,6 +64,40 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# 디버깅용 로깅 미들웨어
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"\n{'='*50}")
+    print(f"🔵 {request.method} {request.url.path}")
+    
+    # Body 읽기 (POST, PUT, PATCH 요청만)
+    if request.method in ["POST", "PUT", "PATCH"]:
+        body = await request.body()
+        if body:
+            try:
+                body_str = body.decode('utf-8')
+                print(f"📦 Body: {body_str}")
+            except Exception as e:
+                print(f"❌ Body decode error: {e}")
+            
+            # body를 다시 사용할 수 있도록 재설정
+            async def receive():
+                return {"type": "http.request", "body": body}
+            
+            from starlette.requests import Request as StarletteRequest
+            request = StarletteRequest(request.scope, receive)
+    
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    
+    print(f"🟢 Status: {response.status_code} | Time: {process_time:.3f}s")
+    print(f"{'='*50}\n")
+    
+    return response
+
 
 # FastAPI Users 라우터 등록
 app.include_router(

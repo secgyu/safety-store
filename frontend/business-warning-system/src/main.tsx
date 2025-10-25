@@ -5,7 +5,7 @@ import "./index.css";
 import App from "./App.tsx";
 
 async function enableMocking() {
-  if (import.meta.env.NODE_ENV === "production") {
+  if (import.meta.env.NODE_ENV === "production" || true) {
     console.log("Production environment, skipping mock server");
     return;
   }

@@ -66,17 +66,15 @@ export function getAuthToken(): string | null {
 // Initialize token on load
 getAuthToken()
 
-// ========== Helper function to extract response data ==========
-type ApiResponse<T> = { data: T | undefined; error: unknown }
+// ========== Helper function to extract response data ==========.
+type NonUndefined<T> = T extends undefined ? never : T;
 
-function handleResponse<T>(response: ApiResponse<T>): T {
-  if (response.error) {
-    throw new Error(String(response.error) || 'API request failed')
-  }
-  if (!response.data) {
-    throw new Error('No data returned from API')
-  }
-  return response.data
+type ApiResponse<T> = { data?: T | undefined; error?: unknown }
+
+function handleResponse<T extends { data?: unknown; error?: unknown }>(response: T): NonUndefined<T['data']> {
+  if (response.error) throw new Error(String(response.error) || 'API request failed')
+  if (!response.data) throw new Error('No data returned from API')
+  return response.data as NonUndefined<T['data']>
 }
 
 // ========== API Client Wrapper Class ==========
@@ -92,7 +90,7 @@ class ApiClient {
       body: formData
     })
 
-    return handleResponse(response)
+    return handleResponse(response)!
   }
 
   async signup(data: SignupRequest): Promise<User> {
@@ -106,7 +104,7 @@ class ApiClient {
   async getMe(): Promise<{ user: User }> {
     const response = await client.GET('/api/auth/me')
     // The endpoint returns Record<string, never> in OpenAPI but actually returns user data
-    return handleResponse(response) as { user: User }
+    return handleResponse(response)
   }
 
   // Diagnosis

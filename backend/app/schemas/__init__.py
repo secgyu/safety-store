@@ -26,7 +26,7 @@ class CamelBaseModel(BaseModel):
 
 # ========== User Schemas ==========
 class UserRead(CamelBaseModel):
-    id: int
+    id: str
     email: EmailStr
     name: str
     business_name: Optional[str] = None
@@ -125,7 +125,7 @@ class ActionPlanRequest(CamelBaseModel):
 
 class ActionPlan(CamelBaseModel):
     id: str
-    user_id: int
+    user_id: str
     diagnosis_id: str
     items: list[ActionPlanItem]
     created_at: str
@@ -236,7 +236,7 @@ class Insight(CamelBaseModel):
 # ========== Notification Schemas ==========
 class Notification(CamelBaseModel):
     id: str
-    user_id: int
+    user_id: str
     title: str
     message: str
     type: str
@@ -245,9 +245,9 @@ class Notification(CamelBaseModel):
 
 
 class NotificationSettings(CamelBaseModel):
-    email_notifications: bool
-    push_notifications: bool
-    risk_alerts: bool
+    email_alerts: bool
+    weekly_reports: bool
+    risk_threshold: str
 
 
 # ========== Statistics Schemas ==========

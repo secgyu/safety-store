@@ -1,21 +1,32 @@
-from fastapi import APIRouter, Depends, HTTPException
-from app.schemas import (
-    LoginRequest,
-    SignupRequest,
-    AuthResponse,
-    UserRead,
-)
+from fastapi import APIRouter, Depends
 from app.core.auth import fastapi_users, auth_backend
 from app.models.user import UserTable
-from fastapi_users import schemas
+from fastapi_users import schemas as fastapi_users_schemas
+from pydantic import EmailStr
+
+
+# FastAPI Users용 스키마 정의
+class UserRead(fastapi_users_schemas.BaseUser[int]):
+    name: str
+    business_name: str | None = None
+    industry: str | None = None
+
+
+class UserCreate(fastapi_users_schemas.BaseUserCreate):
+    name: str
+    business_name: str | None = None
+    industry: str | None = None
+
+
+class UserUpdate(fastapi_users_schemas.BaseUserUpdate):
+    name: str | None = None
+    business_name: str | None = None
+    industry: str | None = None
 
 
 router = APIRouter()
 
-# FastAPI Users 기본 라우터
-auth_router = fastapi_users.get_auth_router(auth_backend)
-register_router = fastapi_users.get_register_router(schemas.UserRead, schemas.UserCreate)
-users_router = fastapi_users.get_users_router(schemas.UserRead, schemas.UserUpdate)
+# FastAPI Users 기본 라우터 (사용하지 않음 - main.py에서 직접 등록)
 
 
 # 커스텀 엔드포인트

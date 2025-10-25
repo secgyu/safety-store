@@ -36,6 +36,7 @@ export default function ActionPlanPage() {
     metric: "종합 위험도 점수",
     deadline: "3개월 후",
   });
+
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");

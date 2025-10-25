@@ -29,7 +29,7 @@ import type {
 
 // ========== API Client ==========
 class ApiClient {
-  private baseUrl = '/api'
+  private baseUrl = 'http://localhost:8000/api'
   private token: string | null = null
 
   setToken(token: string | null) {

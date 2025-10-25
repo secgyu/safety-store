@@ -27,6 +27,7 @@ export type SuccessStory = components['schemas']['SuccessStory']
 export type ContactRequest = components['schemas']['ContactRequest']
 export type ContactResponse = components['schemas']['ContactResponse']
 export type UserUpdate = components['schemas']['app__schemas__UserUpdate']
+export type BearerResponse = components['schemas']['BearerResponse']
 
 // ========== API Client ==========
 const client = createClient<paths>({
@@ -65,105 +66,109 @@ export function getAuthToken(): string | null {
 // Initialize token on load
 getAuthToken()
 
+// ========== Helper function to extract response data ==========
+type ApiResponse<T> = { data: T | undefined; error: unknown }
+
+function handleResponse<T>(response: ApiResponse<T>): T {
+  if (response.error) {
+    throw new Error(String(response.error) || 'API request failed')
+  }
+  if (!response.data) {
+    throw new Error('No data returned from API')
+  }
+  return response.data
+}
+
 // ========== API Client Wrapper Class ==========
 class ApiClient {
   // Auth
-  async login(data: { username: string; password: string }) {
+  async login(data: { username: string; password: string }): Promise<BearerResponse> {
     const formData = new FormData()
     formData.append('username', data.username)
     formData.append('password', data.password)
 
-    const { data: response, error } = await client.POST('/api/auth/login', {
+    const response = await client.POST('/api/auth/login', {
       // @ts-expect-error - FormData is valid for this endpoint
       body: formData
     })
 
-    if (error) throw new Error('Login failed')
-    return response
+    return handleResponse(response)
   }
 
-  async signup(data: SignupRequest) {
-    const { data: response, error } = await client.POST('/api/auth/register', {
+  async signup(data: SignupRequest): Promise<User> {
+    const response = await client.POST('/api/auth/register', {
       body: data
     })
 
-    if (error) throw new Error(error.detail as string || 'Signup failed')
-    return response
+    return handleResponse(response)
   }
 
-  async getMe() {
-    const { data: response, error } = await client.GET('/api/auth/me')
-
-    if (error) throw new Error('Failed to get user')
-    return response
+  async getMe(): Promise<{ user: User }> {
+    const response = await client.GET('/api/auth/me')
+    // The endpoint returns Record<string, never> in OpenAPI but actually returns user data
+    return handleResponse(response) as { user: User }
   }
 
   // Diagnosis
-  async predictDiagnosis(data: DiagnosisRequest) {
-    const { data: response, error } = await client.POST('/api/diagnose/predict', {
+  async predictDiagnosis(data: DiagnosisRequest): Promise<DiagnosisResponse> {
+    const response = await client.POST('/api/diagnose/predict', {
       body: data
     })
 
-    if (error) throw new Error('Diagnosis prediction failed')
-    return response!
+    return handleResponse(response)
   }
 
-  async getDiagnosisHistory(encodedMct: string) {
-    const { data: response, error } = await client.GET('/api/diagnose/history', {
+  async getDiagnosisHistory(encodedMct: string): Promise<DiagnosisHistory> {
+    const response = await client.GET('/api/diagnose/history', {
       params: {
         query: { encoded_mct: encodedMct }
       }
     })
 
-    if (error) throw new Error('Failed to get diagnosis history')
-    return response!
+    return handleResponse(response)
   }
 
   // Action Plan
-  async getActionPlans() {
-    const { data: response, error } = await client.GET('/api/action-plan')
+  async getActionPlans(): Promise<ActionPlan[]> {
+    const response = await client.GET('/api/action-plan')
 
-    if (error) throw new Error('Failed to get action plans')
-    return response!
+    return handleResponse(response)
   }
 
-  async createActionPlan(data: ActionPlanRequest) {
-    const { data: response, error } = await client.POST('/api/action-plan', {
+  async createActionPlan(data: ActionPlanRequest): Promise<ActionPlan> {
+    const response = await client.POST('/api/action-plan', {
       body: data
     })
 
-    if (error) throw new Error('Failed to create action plan')
-    return response!
+    return handleResponse(response)
   }
 
-  async updateActionPlan(id: string, data: Partial<ActionPlan>) {
-    const { data: response, error } = await client.PUT('/api/action-plan/{plan_id}', {
+  async updateActionPlan(id: string, data: Partial<ActionPlan>): Promise<ActionPlan> {
+    const response = await client.PUT('/api/action-plan/{plan_id}', {
       params: {
         path: { plan_id: id }
       },
-      // @ts-expect-error - Partial type mismatch
+      // @ts-expect-error - Partial type mismatch with generated schema
       body: data
     })
 
-    if (error) throw new Error('Failed to update action plan')
-    return response!
+    return handleResponse(response)
   }
 
-  async deleteActionPlanItem(id: string, itemId: string) {
-    const { data: response, error } = await client.DELETE('/api/action-plan/{plan_id}', {
+  async deleteActionPlanItem(id: string, itemId: string): Promise<{ success: boolean }> {
+    const response = await client.DELETE('/api/action-plan/{plan_id}', {
       params: {
         path: { plan_id: id },
         query: { item_id: itemId }
       }
     })
 
-    if (error) throw new Error('Failed to delete action plan item')
-    return response!
+    return handleResponse(response) as { success: boolean }
   }
 
   // Benchmark
-  async getBenchmark(industry?: string, region?: string) {
-    const { data: response, error } = await client.GET('/api/benchmark', {
+  async getBenchmark(industry?: string, region?: string): Promise<BenchmarkData> {
+    const response = await client.GET('/api/benchmark', {
       params: {
         query: {
           ...(industry && { industry }),
@@ -172,59 +177,53 @@ class ApiClient {
       }
     })
 
-    if (error) throw new Error('Failed to get benchmark')
-    return response!
+    return handleResponse(response)
   }
 
-  async compareBenchmark(data: CompareRequest) {
-    const { data: response, error } = await client.POST('/api/benchmark/compare', {
+  async compareBenchmark(data: CompareRequest): Promise<CompareResponse> {
+    const response = await client.POST('/api/benchmark/compare', {
       body: data
     })
 
-    if (error) throw new Error('Failed to compare benchmark')
-    return response!
+    return handleResponse(response)
   }
 
   // Blog
-  async getBlogPosts() {
-    const { data: response, error } = await client.GET('/api/blog')
+  async getBlogPosts(): Promise<BlogPost[]> {
+    const response = await client.GET('/api/blog')
 
-    if (error) throw new Error('Failed to get blog posts')
-    return response!
+    return handleResponse(response)
   }
 
-  async getBlogPost(id: string) {
-    const { data: response, error } = await client.GET('/api/blog/{post_id}', {
+  async getBlogPost(id: string): Promise<BlogPost> {
+    const response = await client.GET('/api/blog/{post_id}', {
       params: {
         path: { post_id: id }
       }
     })
 
-    if (error) throw new Error('Failed to get blog post')
-    return response!
+    return handleResponse(response)
   }
 
   // Chat
-  async sendChatMessage(data: ChatRequest) {
-    const { data: response, error } = await client.POST('/api/chat', {
+  async sendChatMessage(data: ChatRequest): Promise<ChatResponse> {
+    const response = await client.POST('/api/chat', {
       body: data
     })
 
-    if (error) throw new Error('Failed to send chat message')
-    return response!
+    return handleResponse(response)
   }
 
   // FAQ
-  async getFAQs() {
-    const { data: response, error } = await client.GET('/api/faq')
+  async getFAQs(): Promise<FAQ[]> {
+    const response = await client.GET('/api/faq')
 
-    if (error) throw new Error('Failed to get FAQs')
-    return response!
+    return handleResponse(response)
   }
 
   // Insights
-  async getInsights(industry?: string) {
-    const { data: response, error } = await client.GET('/api/insights', {
+  async getInsights(industry?: string): Promise<Insight[]> {
+    const response = await client.GET('/api/insights', {
       params: {
         query: {
           ...(industry && { industry })
@@ -232,90 +231,80 @@ class ApiClient {
       }
     })
 
-    if (error) throw new Error('Failed to get insights')
-    return response!
+    return handleResponse(response)
   }
 
   // Notifications
-  async getNotifications() {
-    const { data: response, error } = await client.GET('/api/notifications')
+  async getNotifications(): Promise<Notification[]> {
+    const response = await client.GET('/api/notifications')
 
-    if (error) throw new Error('Failed to get notifications')
-    return response!
+    return handleResponse(response)
   }
 
-  async deleteNotification(id: string) {
-    const { data: response, error } = await client.DELETE('/api/notifications/{notification_id}', {
+  async deleteNotification(id: string): Promise<{ success: boolean }> {
+    const response = await client.DELETE('/api/notifications/{notification_id}', {
       params: {
         path: { notification_id: id }
       }
     })
 
-    if (error) throw new Error('Failed to delete notification')
-    return response!
+    return handleResponse(response) as { success: boolean }
   }
 
-  async markNotificationAsRead(id: string) {
-    const { data: response, error } = await client.PUT('/api/notifications/{notification_id}/read', {
+  async markNotificationAsRead(id: string): Promise<{ success: boolean }> {
+    const response = await client.PUT('/api/notifications/{notification_id}/read', {
       params: {
         path: { notification_id: id }
       }
     })
 
-    if (error) throw new Error('Failed to mark notification as read')
-    return response!
+    return handleResponse(response) as { success: boolean }
   }
 
-  async updateNotificationSettings(settings: NotificationSettings) {
-    const { data: response, error } = await client.PUT('/api/notifications/settings', {
+  async updateNotificationSettings(settings: NotificationSettings): Promise<{ success: boolean; settings: NotificationSettings }> {
+    const response = await client.PUT('/api/notifications/settings', {
       body: settings
     })
 
-    if (error) throw new Error('Failed to update notification settings')
-    return response!
+    return handleResponse(response) as { success: boolean; settings: NotificationSettings }
   }
 
   // Statistics
-  async getStatistics() {
-    const { data: response, error } = await client.GET('/api/statistics')
+  async getStatistics(): Promise<Statistics> {
+    const response = await client.GET('/api/statistics')
 
-    if (error) throw new Error('Failed to get statistics')
-    return response!
+    return handleResponse(response)
   }
 
   // Success Stories
-  async getSuccessStories() {
-    const { data: response, error } = await client.GET('/api/success-stories')
+  async getSuccessStories(): Promise<SuccessStory[]> {
+    const response = await client.GET('/api/success-stories')
 
-    if (error) throw new Error('Failed to get success stories')
-    return response!
+    return handleResponse(response)
   }
 
   // Support
-  async submitContact(data: ContactRequest) {
-    const { data: response, error } = await client.POST('/api/support/contact', {
+  async submitContact(data: ContactRequest): Promise<ContactResponse> {
+    const response = await client.POST('/api/support/contact', {
       body: data
     })
 
-    if (error) throw new Error('Failed to submit contact request')
-    return response!
+    return handleResponse(response)
   }
 
   // User Profile
-  async getProfile() {
-    const { data: response, error } = await client.GET('/api/user/profile')
+  async getProfile(): Promise<{ user: User }> {
+    const response = await client.GET('/api/user/profile')
 
-    if (error) throw new Error('Failed to get profile')
-    return response!
+    return handleResponse(response) as { user: User }
   }
 
-  async updateProfile(data: UserUpdate) {
-    const { data: response, error } = await client.PUT('/api/user/profile', {
+  async updateProfile(data: UserUpdate): Promise<{ user: User }> {
+    const response = await client.PUT('/api/user/profile', {
       body: data
     })
 
-    if (error) throw new Error('Failed to update profile')
-    return response!
+    return handleResponse(response) as { user: User }
   }
 }
 
@@ -366,9 +355,9 @@ export function useLogin() {
   return useMutation({
     mutationFn: (data: { email: string; password: string }) =>
       apiClient.login({ username: data.email, password: data.password }),
-    onSuccess: (data) => {
-      if (data && 'access_token' in data) {
-        setAuthToken(data.access_token as string)
+    onSuccess: (data: BearerResponse) => {
+      if (data.access_token) {
+        setAuthToken(data.access_token)
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.me })
     },
@@ -380,10 +369,8 @@ export function useSignup() {
 
   return useMutation({
     mutationFn: (data: SignupRequest) => apiClient.signup(data),
-    onSuccess: (data) => {
-      if (data && 'access_token' in data) {
-        setAuthToken(data.access_token as string)
-      }
+    onSuccess: () => {
+      // After signup, need to login separately with fastapi-users
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.me })
     },
   })

@@ -545,7 +545,7 @@ export interface components {
             /** Id */
             id: string;
             /** Userid */
-            userId: string;
+            userId: number;
             /** Diagnosisid */
             diagnosisId: string;
             /** Items */
@@ -819,7 +819,7 @@ export interface components {
             /** Id */
             id: string;
             /** Userid */
-            userId: string;
+            userId: number;
             /** Title */
             title: string;
             /** Message */

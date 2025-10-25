@@ -1442,7 +1442,7 @@
             "title": "Id"
           },
           "userId": {
-            "type": "string",
+            "type": "integer",
             "title": "Userid"
           },
           "diagnosisId": {
@@ -2217,7 +2217,7 @@
             "title": "Id"
           },
           "userId": {
-            "type": "string",
+            "type": "integer",
             "title": "Userid"
           },
           "title": {

@@ -60,6 +60,7 @@ export const handlers = [
         token: user.id, // Mock: userId를 token으로 사용
       }
 
+
       return HttpResponse.json(response)
     } catch (error) {
       return HttpResponse.json({ error: '로그인 중 오류가 발생했습니다.' }, { status: 500 })

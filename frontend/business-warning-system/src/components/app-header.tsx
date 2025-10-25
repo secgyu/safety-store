@@ -1,21 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Bell, Menu, X, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
 import { Badge } from "@/components/ui/badge";
-import { getCurrentUser, type User } from "@/lib/auth";
+import { useAuth, useLogout } from "@/lib/api";
 import { resetOnboarding } from "@/lib/onboarding";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export function AppHeader() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const { data: authData, isLoading } = useAuth();
+  const logout = useLogout();
   const [unreadCount, setUnreadCount] = useState(3);
 
-  useEffect(() => {
-    setUser(getCurrentUser());
-  }, []);
+  const user = authData?.user;
 
   const navLinks = [
     { href: "/diagnose", label: "진단하기" },
@@ -29,6 +29,11 @@ export function AppHeader() {
   const handleRestartTutorial = () => {
     resetOnboarding();
     window.location.href = "/";
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
   };
 
   return (
@@ -81,18 +86,27 @@ export function AppHeader() {
               </Link>
             </Button>
 
-            {/* User Menu or Login */}
-            {user ? (
-              <UserMenu />
-            ) : (
-              <div className="hidden sm:flex items-center gap-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">로그인</Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link to="/signup">회원가입</Link>
-                </Button>
-              </div>
+            {/* User Menu or Login/Logout */}
+            {!isLoading && (
+              <>
+                {user ? (
+                  <div className="hidden sm:flex items-center gap-2">
+                    <UserMenu />
+                    <Button variant="ghost" size="sm" onClick={handleLogout}>
+                      로그아웃
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="hidden sm:flex items-center gap-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link to="/login">로그인</Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link to="/signup">회원가입</Link>
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Mobile Menu Toggle */}
@@ -125,14 +139,22 @@ export function AppHeader() {
                   {link.label}
                 </Link>
               ))}
-              {!user && (
+              {!isLoading && (
                 <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
-                  <Button variant="outline" asChild>
-                    <Link to="/login">로그인</Link>
-                  </Button>
-                  <Button asChild>
-                    <Link to="/signup">회원가입</Link>
-                  </Button>
+                  {user ? (
+                    <Button variant="outline" onClick={handleLogout}>
+                      로그아웃
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" asChild>
+                        <Link to="/login">로그인</Link>
+                      </Button>
+                      <Button asChild>
+                        <Link to="/signup">회원가입</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

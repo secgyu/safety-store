@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 from app.config import settings
 from app.database import engine, Base
 from app.core.auth import auth_backend, fastapi_users
@@ -22,6 +24,20 @@ from app.routers import (
 from app.routers.auth import UserRead, UserCreate, UserUpdate
 
 
+# Custom JSON Response - by_alias=True로 자동 직렬화
+class CamelCaseJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        if isinstance(content, BaseModel):
+            return super().render(
+                content.model_dump(by_alias=True, mode='json')
+            )
+        elif isinstance(content, list) and content and isinstance(content[0], BaseModel):
+            return super().render(
+                [item.model_dump(by_alias=True, mode='json') for item in content]
+            )
+        return super().render(content)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 시작 시 데이터베이스 테이블 생성
@@ -31,10 +47,12 @@ async def lifespan(app: FastAPI):
     # 종료 시 정리 작업
 
 
+# FastAPI 앱 생성 - 기본 응답 클래스를 CamelCase용으로 설정
 app = FastAPI(
     title=settings.app_name,
     debug=settings.debug,
     lifespan=lifespan,
+    default_response_class=CamelCaseJSONResponse,  # camelCase 응답
 )
 
 # CORS 설정

@@ -1,10 +1,31 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic.alias_generators import to_camel  # Pydantic 내장 함수 사용
+
+
+# 모든 스키마의 베이스 클래스 - 자동으로 camelCase 변환
+class CamelBaseModel(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+        use_enum_values=True,
+    )
+    
+    def model_dump(self, **kwargs):
+        """기본적으로 by_alias=True로 직렬화"""
+        kwargs.setdefault('by_alias', True)
+        return super().model_dump(**kwargs)
+    
+    def model_dump_json(self, **kwargs):
+        """기본적으로 by_alias=True로 JSON 직렬화"""
+        kwargs.setdefault('by_alias', True)
+        return super().model_dump_json(**kwargs)
 
 
 # ========== User Schemas ==========
-class UserRead(BaseModel):
+class UserRead(CamelBaseModel):
     id: int
     email: EmailStr
     name: str
@@ -16,7 +37,7 @@ class UserRead(BaseModel):
     is_verified: bool = False
 
 
-class UserCreate(BaseModel):
+class UserCreate(CamelBaseModel):
     email: EmailStr
     password: str
     name: str
@@ -24,7 +45,7 @@ class UserCreate(BaseModel):
     industry: Optional[str] = None
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(CamelBaseModel):
     name: Optional[str] = None
     business_name: Optional[str] = None
     industry: Optional[str] = None
@@ -32,12 +53,12 @@ class UserUpdate(BaseModel):
 
 
 # ========== Auth Schemas ==========
-class LoginRequest(BaseModel):
+class LoginRequest(CamelBaseModel):
     email: EmailStr
     password: str
 
 
-class SignupRequest(BaseModel):
+class SignupRequest(CamelBaseModel):
     email: EmailStr
     password: str
     name: str
@@ -45,34 +66,34 @@ class SignupRequest(BaseModel):
     industry: Optional[str] = None
 
 
-class AuthResponse(BaseModel):
+class AuthResponse(CamelBaseModel):
     user: UserRead
     token: str
 
 
 # ========== Diagnosis Schemas ==========
-class DiagnosisRequest(BaseModel):
+class DiagnosisRequest(CamelBaseModel):
     encoded_mct: str
 
 
-class DiagnosisComponentScore(BaseModel):
+class DiagnosisComponentScore(CamelBaseModel):
     score: float
     trend: str
 
 
-class DiagnosisComponents(BaseModel):
+class DiagnosisComponents(CamelBaseModel):
     sales: DiagnosisComponentScore
     customer: DiagnosisComponentScore
     market: DiagnosisComponentScore
 
 
-class Recommendation(BaseModel):
+class Recommendation(CamelBaseModel):
     title: str
     description: str
     priority: str
 
 
-class DiagnosisResponse(BaseModel):
+class DiagnosisResponse(CamelBaseModel):
     id: str
     overall_score: float
     risk_level: str
@@ -83,12 +104,12 @@ class DiagnosisResponse(BaseModel):
     ta_ym: Optional[str] = None
 
 
-class DiagnosisHistory(BaseModel):
+class DiagnosisHistory(CamelBaseModel):
     diagnoses: list[DiagnosisResponse]
 
 
 # ========== Action Plan Schemas ==========
-class ActionPlanItem(BaseModel):
+class ActionPlanItem(CamelBaseModel):
     id: str
     title: str
     description: str
@@ -97,12 +118,12 @@ class ActionPlanItem(BaseModel):
     due_date: Optional[str] = None
 
 
-class ActionPlanRequest(BaseModel):
+class ActionPlanRequest(CamelBaseModel):
     diagnosis_id: str
     items: list[ActionPlanItem]
 
 
-class ActionPlan(BaseModel):
+class ActionPlan(CamelBaseModel):
     id: str
     user_id: int
     diagnosis_id: str
@@ -112,26 +133,26 @@ class ActionPlan(BaseModel):
 
 
 # ========== Benchmark Schemas ==========
-class MetricValue(BaseModel):
+class MetricValue(CamelBaseModel):
     average: float
     median: float
 
 
-class BenchmarkMetrics(BaseModel):
+class BenchmarkMetrics(CamelBaseModel):
     revenue: MetricValue
     expenses: MetricValue
     customers: MetricValue
     profit_margin: MetricValue
 
 
-class RiskDistribution(BaseModel):
+class RiskDistribution(CamelBaseModel):
     GREEN: int
     YELLOW: int
     ORANGE: int
     RED: int
 
 
-class BenchmarkData(BaseModel):
+class BenchmarkData(CamelBaseModel):
     industry: str
     region: str
     average_risk_score: float
@@ -139,7 +160,7 @@ class BenchmarkData(BaseModel):
     risk_distribution: RiskDistribution
 
 
-class CompareRequest(BaseModel):
+class CompareRequest(CamelBaseModel):
     industry: str
     revenue: float
     expenses: float
@@ -147,19 +168,19 @@ class CompareRequest(BaseModel):
     risk_score: float
 
 
-class ComparisonMetric(BaseModel):
+class ComparisonMetric(CamelBaseModel):
     user: float
     average: float
     difference: float
 
 
-class ComparisonMetrics(BaseModel):
+class ComparisonMetrics(CamelBaseModel):
     revenue: ComparisonMetric
     expenses: ComparisonMetric
     customers: ComparisonMetric
 
 
-class CompareResponse(BaseModel):
+class CompareResponse(CamelBaseModel):
     user_score: float
     industry_average: float
     percentile: int
@@ -168,7 +189,7 @@ class CompareResponse(BaseModel):
 
 
 # ========== Blog Schemas ==========
-class BlogPost(BaseModel):
+class BlogPost(CamelBaseModel):
     id: str
     title: str
     content: str
@@ -180,22 +201,22 @@ class BlogPost(BaseModel):
 
 
 # ========== Chat Schemas ==========
-class ChatMessage(BaseModel):
+class ChatMessage(CamelBaseModel):
     role: str
     content: str
 
 
-class ChatRequest(BaseModel):
+class ChatRequest(CamelBaseModel):
     messages: list[ChatMessage]
     context: Optional[dict] = None
 
 
-class ChatResponse(BaseModel):
+class ChatResponse(CamelBaseModel):
     message: str
 
 
 # ========== FAQ Schemas ==========
-class FAQ(BaseModel):
+class FAQ(CamelBaseModel):
     id: str
     category: str
     question: str
@@ -203,7 +224,7 @@ class FAQ(BaseModel):
 
 
 # ========== Insight Schemas ==========
-class Insight(BaseModel):
+class Insight(CamelBaseModel):
     id: str
     industry: str
     title: str
@@ -213,7 +234,7 @@ class Insight(BaseModel):
 
 
 # ========== Notification Schemas ==========
-class Notification(BaseModel):
+class Notification(CamelBaseModel):
     id: str
     user_id: int
     title: str
@@ -223,26 +244,26 @@ class Notification(BaseModel):
     created_at: str
 
 
-class NotificationSettings(BaseModel):
+class NotificationSettings(CamelBaseModel):
     email_notifications: bool
     push_notifications: bool
     risk_alerts: bool
 
 
 # ========== Statistics Schemas ==========
-class IndustryStatistic(BaseModel):
+class IndustryStatistic(CamelBaseModel):
     industry: str
     count: int
     closure_rate: float
 
 
-class TrendsData(BaseModel):
+class TrendsData(CamelBaseModel):
     labels: list[str]
     openings: list[int]
     closures: list[int]
 
 
-class Statistics(BaseModel):
+class Statistics(CamelBaseModel):
     total_businesses: int
     closure_rate: float
     average_survival_years: float
@@ -251,7 +272,7 @@ class Statistics(BaseModel):
 
 
 # ========== Success Story Schemas ==========
-class SuccessStory(BaseModel):
+class SuccessStory(CamelBaseModel):
     id: str
     business_name: str
     industry: str
@@ -265,19 +286,19 @@ class SuccessStory(BaseModel):
 
 
 # ========== Support Schemas ==========
-class ContactRequest(BaseModel):
+class ContactRequest(CamelBaseModel):
     name: str
     email: EmailStr
     subject: str
     message: str
 
 
-class ContactResponse(BaseModel):
+class ContactResponse(CamelBaseModel):
     success: bool
     id: str
 
 
 # ========== Error Response ==========
-class ErrorResponse(BaseModel):
+class ErrorResponse(CamelBaseModel):
     error: str
 

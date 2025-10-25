@@ -1,227 +1,321 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type {
-  LoginRequest,
-  SignupRequest,
-  AuthResponse,
-  User,
-  DiagnosisRequest,
-  DiagnosisResponse,
-  DiagnosisHistory,
-  ActionPlanRequest,
-  ActionPlan,
-  BenchmarkData,
-  CompareRequest,
-  CompareResponse,
-  BlogPost,
-  ChatRequest,
-  ChatResponse,
-  FAQ,
-  Insight,
-  Notification,
-  NotificationSettings,
-  Statistics,
-  SuccessStory,
-  ContactRequest,
-  ContactResponse,
-  ProfileUpdateRequest,
-  ErrorResponse,
-} from '@/types/api'
+import createClient from 'openapi-fetch'
+import type { paths, components } from '@/types/api-generated'
+
+// ========== Type Exports (from generated types) ==========
+export type LoginRequest = components['schemas']['Body_auth_jwt_login_api_auth_login_post']
+export type SignupRequest = components['schemas']['UserCreate']
+export type User = components['schemas']['UserRead']
+export type DiagnosisRequest = components['schemas']['DiagnosisRequest']
+export type DiagnosisResponse = components['schemas']['DiagnosisResponse']
+export type DiagnosisHistory = components['schemas']['DiagnosisHistory']
+export type ActionPlanRequest = components['schemas']['ActionPlanRequest']
+export type ActionPlan = components['schemas']['ActionPlan']
+export type ActionPlanItem = components['schemas']['ActionPlanItem']
+export type BenchmarkData = components['schemas']['BenchmarkData']
+export type CompareRequest = components['schemas']['CompareRequest']
+export type CompareResponse = components['schemas']['CompareResponse']
+export type BlogPost = components['schemas']['BlogPost']
+export type ChatRequest = components['schemas']['ChatRequest']
+export type ChatResponse = components['schemas']['ChatResponse']
+export type FAQ = components['schemas']['FAQ']
+export type Insight = components['schemas']['Insight']
+export type Notification = components['schemas']['Notification']
+export type NotificationSettings = components['schemas']['NotificationSettings']
+export type Statistics = components['schemas']['Statistics']
+export type SuccessStory = components['schemas']['SuccessStory']
+export type ContactRequest = components['schemas']['ContactRequest']
+export type ContactResponse = components['schemas']['ContactResponse']
+export type UserUpdate = components['schemas']['app__schemas__UserUpdate']
 
 // ========== API Client ==========
+const client = createClient<paths>({
+  baseUrl: 'http://localhost:8000'
+})
+
+// Token Management
+let authToken: string | null = null
+
+export function setAuthToken(token: string | null) {
+  authToken = token
+  if (token) {
+    localStorage.setItem('auth_token', token)
+    // Set Authorization header for all future requests
+    client.use({
+      onRequest({ request }) {
+        request.headers.set('Authorization', `Bearer ${token}`)
+        return request
+      }
+    })
+  } else {
+    localStorage.removeItem('auth_token')
+  }
+}
+
+export function getAuthToken(): string | null {
+  if (!authToken) {
+    authToken = localStorage.getItem('auth_token')
+    if (authToken) {
+      setAuthToken(authToken) // Re-initialize middleware
+    }
+  }
+  return authToken
+}
+
+// Initialize token on load
+getAuthToken()
+
+// ========== API Client Wrapper Class ==========
 class ApiClient {
-  private baseUrl = 'http://localhost:8000/api'
-  private token: string | null = null
-
-  setToken(token: string | null) {
-    this.token = token
-    if (token) {
-      localStorage.setItem('auth_token', token)
-    } else {
-      localStorage.removeItem('auth_token')
-    }
-  }
-
-  getToken(): string | null {
-    if (!this.token) {
-      this.token = localStorage.getItem('auth_token')
-    }
-    return this.token
-  }
-
-  private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const token = this.getToken()
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options?.headers,
-    }
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers,
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error((data as ErrorResponse).error || 'API 요청 실패')
-    }
-
-    return data
-  }
-
   // Auth
-  async login(data: LoginRequest): Promise<AuthResponse> {
-    return this.request<AuthResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async login(data: { username: string; password: string }) {
+    const formData = new FormData()
+    formData.append('username', data.username)
+    formData.append('password', data.password)
+
+    const { data: response, error } = await client.POST('/api/auth/login', {
+      // @ts-expect-error - FormData is valid for this endpoint
+      body: formData
     })
+
+    if (error) throw new Error('Login failed')
+    return response
   }
 
-  async signup(data: SignupRequest): Promise<AuthResponse> {
-    return this.request<AuthResponse>('/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async signup(data: SignupRequest) {
+    const { data: response, error } = await client.POST('/api/auth/register', {
+      body: data
     })
+
+    if (error) throw new Error(error.detail as string || 'Signup failed')
+    return response
   }
 
-  async getMe(): Promise<{ user: User }> {
-    return this.request<{ user: User }>('/auth/me')
+  async getMe() {
+    const { data: response, error } = await client.GET('/api/auth/me')
+
+    if (error) throw new Error('Failed to get user')
+    return response
   }
 
   // Diagnosis
-  async predictDiagnosis(data: DiagnosisRequest): Promise<DiagnosisResponse> {
-    return this.request<DiagnosisResponse>('/diagnose/predict', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async predictDiagnosis(data: DiagnosisRequest) {
+    const { data: response, error } = await client.POST('/api/diagnose/predict', {
+      body: data
     })
+
+    if (error) throw new Error('Diagnosis prediction failed')
+    return response!
   }
 
-  async getDiagnosisHistory(): Promise<DiagnosisHistory> {
-    return this.request<DiagnosisHistory>('/diagnose/history')
+  async getDiagnosisHistory(encodedMct: string) {
+    const { data: response, error } = await client.GET('/api/diagnose/history', {
+      params: {
+        query: { encoded_mct: encodedMct }
+      }
+    })
+
+    if (error) throw new Error('Failed to get diagnosis history')
+    return response!
   }
 
   // Action Plan
-  async getActionPlans(): Promise<ActionPlan[]> {
-    return this.request<ActionPlan[]>('/action-plan')
+  async getActionPlans() {
+    const { data: response, error } = await client.GET('/api/action-plan')
+
+    if (error) throw new Error('Failed to get action plans')
+    return response!
   }
 
-  async createActionPlan(data: ActionPlanRequest): Promise<ActionPlan> {
-    return this.request<ActionPlan>('/action-plan', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async createActionPlan(data: ActionPlanRequest) {
+    const { data: response, error } = await client.POST('/api/action-plan', {
+      body: data
     })
+
+    if (error) throw new Error('Failed to create action plan')
+    return response!
   }
 
-  async updateActionPlan(id: string, data: Partial<ActionPlan>): Promise<ActionPlan> {
-    return this.request<ActionPlan>(`/action-plan/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
+  async updateActionPlan(id: string, data: Partial<ActionPlan>) {
+    const { data: response, error } = await client.PUT('/api/action-plan/{plan_id}', {
+      params: {
+        path: { plan_id: id }
+      },
+      // @ts-expect-error - Partial type mismatch
+      body: data
     })
+
+    if (error) throw new Error('Failed to update action plan')
+    return response!
   }
 
-  async deleteActionPlanItem(id: string, itemId: string): Promise<{ success: boolean }> {
-    return this.request<{ success: boolean }>(`/action-plan/${id}?itemId=${itemId}`, {
-      method: 'DELETE',
+  async deleteActionPlanItem(id: string, itemId: string) {
+    const { data: response, error } = await client.DELETE('/api/action-plan/{plan_id}', {
+      params: {
+        path: { plan_id: id },
+        query: { item_id: itemId }
+      }
     })
+
+    if (error) throw new Error('Failed to delete action plan item')
+    return response!
   }
 
   // Benchmark
-  async getBenchmark(industry?: string, region?: string): Promise<BenchmarkData> {
-    const params = new URLSearchParams()
-    if (industry) params.append('industry', industry)
-    if (region) params.append('region', region)
-    const query = params.toString() ? `?${params.toString()}` : ''
-    return this.request<BenchmarkData>(`/benchmark${query}`)
+  async getBenchmark(industry?: string, region?: string) {
+    const { data: response, error } = await client.GET('/api/benchmark', {
+      params: {
+        query: {
+          ...(industry && { industry }),
+          ...(region && { region })
+        }
+      }
+    })
+
+    if (error) throw new Error('Failed to get benchmark')
+    return response!
   }
 
-  async compareBenchmark(data: CompareRequest): Promise<CompareResponse> {
-    return this.request<CompareResponse>('/benchmark/compare', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async compareBenchmark(data: CompareRequest) {
+    const { data: response, error } = await client.POST('/api/benchmark/compare', {
+      body: data
     })
+
+    if (error) throw new Error('Failed to compare benchmark')
+    return response!
   }
 
   // Blog
-  async getBlogPosts(): Promise<BlogPost[]> {
-    return this.request<BlogPost[]>('/blog')
+  async getBlogPosts() {
+    const { data: response, error } = await client.GET('/api/blog')
+
+    if (error) throw new Error('Failed to get blog posts')
+    return response!
   }
 
-  async getBlogPost(id: string): Promise<BlogPost> {
-    return this.request<BlogPost>(`/blog/${id}`)
+  async getBlogPost(id: string) {
+    const { data: response, error } = await client.GET('/api/blog/{post_id}', {
+      params: {
+        path: { post_id: id }
+      }
+    })
+
+    if (error) throw new Error('Failed to get blog post')
+    return response!
   }
 
   // Chat
-  async sendChatMessage(data: ChatRequest): Promise<ChatResponse> {
-    return this.request<ChatResponse>('/chat', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async sendChatMessage(data: ChatRequest) {
+    const { data: response, error } = await client.POST('/api/chat', {
+      body: data
     })
+
+    if (error) throw new Error('Failed to send chat message')
+    return response!
   }
 
   // FAQ
-  async getFAQs(): Promise<FAQ[]> {
-    return this.request<FAQ[]>('/faq')
+  async getFAQs() {
+    const { data: response, error } = await client.GET('/api/faq')
+
+    if (error) throw new Error('Failed to get FAQs')
+    return response!
   }
 
   // Insights
-  async getInsights(industry?: string): Promise<Insight[]> {
-    const query = industry ? `?industry=${industry}` : ''
-    return this.request<Insight[]>(`/insights${query}`)
+  async getInsights(industry?: string) {
+    const { data: response, error } = await client.GET('/api/insights', {
+      params: {
+        query: {
+          ...(industry && { industry })
+        }
+      }
+    })
+
+    if (error) throw new Error('Failed to get insights')
+    return response!
   }
 
   // Notifications
-  async getNotifications(): Promise<Notification[]> {
-    return this.request<Notification[]>('/notifications')
+  async getNotifications() {
+    const { data: response, error } = await client.GET('/api/notifications')
+
+    if (error) throw new Error('Failed to get notifications')
+    return response!
   }
 
-  async deleteNotification(id: string): Promise<{ success: boolean }> {
-    return this.request<{ success: boolean }>(`/notifications/${id}`, {
-      method: 'DELETE',
+  async deleteNotification(id: string) {
+    const { data: response, error } = await client.DELETE('/api/notifications/{notification_id}', {
+      params: {
+        path: { notification_id: id }
+      }
     })
+
+    if (error) throw new Error('Failed to delete notification')
+    return response!
   }
 
-  async markNotificationAsRead(id: string): Promise<{ success: boolean }> {
-    return this.request<{ success: boolean }>(`/notifications/${id}/read`, {
-      method: 'PUT',
+  async markNotificationAsRead(id: string) {
+    const { data: response, error } = await client.PUT('/api/notifications/{notification_id}/read', {
+      params: {
+        path: { notification_id: id }
+      }
     })
+
+    if (error) throw new Error('Failed to mark notification as read')
+    return response!
   }
 
-  async updateNotificationSettings(settings: NotificationSettings): Promise<{ success: boolean; settings: NotificationSettings }> {
-    return this.request<{ success: boolean; settings: NotificationSettings }>('/notifications/settings', {
-      method: 'PUT',
-      body: JSON.stringify(settings),
+  async updateNotificationSettings(settings: NotificationSettings) {
+    const { data: response, error } = await client.PUT('/api/notifications/settings', {
+      body: settings
     })
+
+    if (error) throw new Error('Failed to update notification settings')
+    return response!
   }
 
   // Statistics
-  async getStatistics(): Promise<Statistics> {
-    return this.request<Statistics>('/statistics')
+  async getStatistics() {
+    const { data: response, error } = await client.GET('/api/statistics')
+
+    if (error) throw new Error('Failed to get statistics')
+    return response!
   }
 
   // Success Stories
-  async getSuccessStories(): Promise<SuccessStory[]> {
-    return this.request<SuccessStory[]>('/success-stories')
+  async getSuccessStories() {
+    const { data: response, error } = await client.GET('/api/success-stories')
+
+    if (error) throw new Error('Failed to get success stories')
+    return response!
   }
 
   // Support
-  async submitContact(data: ContactRequest): Promise<ContactResponse> {
-    return this.request<ContactResponse>('/support/contact', {
-      method: 'POST',
-      body: JSON.stringify(data),
+  async submitContact(data: ContactRequest) {
+    const { data: response, error } = await client.POST('/api/support/contact', {
+      body: data
     })
+
+    if (error) throw new Error('Failed to submit contact request')
+    return response!
   }
 
   // User Profile
-  async getProfile(): Promise<{ user: User }> {
-    return this.request<{ user: User }>('/user/profile')
+  async getProfile() {
+    const { data: response, error } = await client.GET('/api/user/profile')
+
+    if (error) throw new Error('Failed to get profile')
+    return response!
   }
 
-  async updateProfile(data: ProfileUpdateRequest): Promise<{ user: User }> {
-    return this.request<{ user: User }>('/user/profile', {
-      method: 'PUT',
-      body: JSON.stringify(data),
+  async updateProfile(data: UserUpdate) {
+    const { data: response, error } = await client.PUT('/api/user/profile', {
+      body: data
     })
+
+    if (error) throw new Error('Failed to update profile')
+    return response!
   }
 }
 
@@ -233,7 +327,7 @@ export const queryKeys = {
     me: ['auth', 'me'] as const,
   },
   diagnosis: {
-    history: ['diagnosis', 'history'] as const,
+    history: (encodedMct: string) => ['diagnosis', 'history', encodedMct] as const,
   },
   actionPlan: {
     all: ['action-plan'] as const,
@@ -270,10 +364,13 @@ export function useLogin() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: LoginRequest) => apiClient.login(data),
+    mutationFn: (data: { email: string; password: string }) =>
+      apiClient.login({ username: data.email, password: data.password }),
     onSuccess: (data) => {
-      apiClient.setToken(data.token)
-      queryClient.setQueryData(queryKeys.auth.me, { user: data.user })
+      if (data && 'access_token' in data) {
+        setAuthToken(data.access_token as string)
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.me })
     },
   })
 }
@@ -284,8 +381,10 @@ export function useSignup() {
   return useMutation({
     mutationFn: (data: SignupRequest) => apiClient.signup(data),
     onSuccess: (data) => {
-      apiClient.setToken(data.token)
-      queryClient.setQueryData(queryKeys.auth.me, { user: data.user })
+      if (data && 'access_token' in data) {
+        setAuthToken(data.access_token as string)
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.me })
     },
   })
 }
@@ -303,27 +402,23 @@ export function useLogout() {
   const queryClient = useQueryClient()
 
   return () => {
-    apiClient.setToken(null)
+    setAuthToken(null)
     queryClient.clear()
   }
 }
 
 // ========== Diagnosis Hooks ==========
 export function usePredictDiagnosis() {
-  const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: (data: DiagnosisRequest) => apiClient.predictDiagnosis(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.diagnosis.history })
-    },
   })
 }
 
-export function useDiagnosisHistory() {
+export function useDiagnosisHistory(encodedMct: string) {
   return useQuery({
-    queryKey: queryKeys.diagnosis.history,
-    queryFn: () => apiClient.getDiagnosisHistory(),
+    queryKey: queryKeys.diagnosis.history(encodedMct),
+    queryFn: () => apiClient.getDiagnosisHistory(encodedMct),
+    enabled: !!encodedMct,
   })
 }
 
@@ -492,11 +587,10 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: ProfileUpdateRequest) => apiClient.updateProfile(data),
+    mutationFn: (data: UserUpdate) => apiClient.updateProfile(data),
     onSuccess: (data) => {
       queryClient.setQueryData(queryKeys.profile.me, data)
       queryClient.setQueryData(queryKeys.auth.me, data)
     },
   })
 }
-

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional
 from app.schemas import (
     ActionPlan,
     ActionPlanRequest,
+    SuccessResponse,
 )
 from app.core.auth import current_active_user
 from app.models.user import UserTable
@@ -61,7 +62,7 @@ async def update_action_plan(
     raise HTTPException(status_code=404, detail="개선 계획을 찾을 수 없습니다")
 
 
-@router.delete("/{plan_id}")
+@router.delete("/{plan_id}", response_model=SuccessResponse)
 async def delete_action_plan_item(
     plan_id: str,
     item_id: str,
@@ -77,7 +78,4 @@ async def delete_action_plan_item(
             return {"success": True}
     
     raise HTTPException(status_code=404, detail="개선 계획을 찾을 수 없습니다")
-
-
-from fastapi import HTTPException
 

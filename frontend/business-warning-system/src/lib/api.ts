@@ -5,7 +5,8 @@ import type { paths, components } from '@/types/api-generated'
 // ========== Type Exports (from generated types) ==========
 export type LoginRequest = components['schemas']['Body_auth_jwt_login_api_auth_login_post']
 export type SignupRequest = components['schemas']['UserCreate']
-export type User = components['schemas']['UserRead']
+export type User = components['schemas']['app__schemas__UserRead']
+export type FastAPIUser = components['schemas']['app__routers__auth__UserRead']  // FastAPI Users response type
 export type DiagnosisRequest = components['schemas']['DiagnosisRequest']
 export type DiagnosisResponse = components['schemas']['DiagnosisResponse']
 export type DiagnosisHistory = components['schemas']['DiagnosisHistory']
@@ -28,6 +29,9 @@ export type ContactRequest = components['schemas']['ContactRequest']
 export type ContactResponse = components['schemas']['ContactResponse']
 export type UserUpdate = components['schemas']['app__schemas__UserUpdate']
 export type BearerResponse = components['schemas']['BearerResponse']
+export type SuccessResponse = components['schemas']['SuccessResponse']
+export type UserResponse = components['schemas']['UserResponse']
+export type NotificationSettingsResponse = components['schemas']['NotificationSettingsResponse']
 
 // ========== API Client ==========
 const client = createClient<paths>({
@@ -66,10 +70,8 @@ export function getAuthToken(): string | null {
 // Initialize token on load
 getAuthToken()
 
-// ========== Helper function to extract response data ==========.
+// ========== Helper function to extract response data ==========
 type NonUndefined<T> = T extends undefined ? never : T;
-
-type ApiResponse<T> = { data?: T | undefined; error?: unknown }
 
 function handleResponse<T extends { data?: unknown; error?: unknown }>(response: T): NonUndefined<T['data']> {
   if (response.error) throw new Error(String(response.error) || 'API request failed')
@@ -93,7 +95,7 @@ class ApiClient {
     return handleResponse(response)!
   }
 
-  async signup(data: SignupRequest): Promise<User> {
+  async signup(data: SignupRequest): Promise<FastAPIUser> {
     const response = await client.POST('/api/auth/register', {
       body: data
     })
@@ -101,9 +103,8 @@ class ApiClient {
     return handleResponse(response)
   }
 
-  async getMe(): Promise<{ user: User }> {
+  async getMe(): Promise<UserResponse> {
     const response = await client.GET('/api/auth/me')
-    // The endpoint returns Record<string, never> in OpenAPI but actually returns user data
     return handleResponse(response)
   }
 
@@ -153,7 +154,7 @@ class ApiClient {
     return handleResponse(response)
   }
 
-  async deleteActionPlanItem(id: string, itemId: string): Promise<{ success: boolean }> {
+  async deleteActionPlanItem(id: string, itemId: string): Promise<SuccessResponse> {
     const response = await client.DELETE('/api/action-plan/{plan_id}', {
       params: {
         path: { plan_id: id },
@@ -161,7 +162,7 @@ class ApiClient {
       }
     })
 
-    return handleResponse(response) as { success: boolean }
+    return handleResponse(response)
   }
 
   // Benchmark
@@ -239,32 +240,32 @@ class ApiClient {
     return handleResponse(response)
   }
 
-  async deleteNotification(id: string): Promise<{ success: boolean }> {
+  async deleteNotification(id: string): Promise<SuccessResponse> {
     const response = await client.DELETE('/api/notifications/{notification_id}', {
       params: {
         path: { notification_id: id }
       }
     })
 
-    return handleResponse(response) as { success: boolean }
+    return handleResponse(response)
   }
 
-  async markNotificationAsRead(id: string): Promise<{ success: boolean }> {
+  async markNotificationAsRead(id: string): Promise<SuccessResponse> {
     const response = await client.PUT('/api/notifications/{notification_id}/read', {
       params: {
         path: { notification_id: id }
       }
     })
 
-    return handleResponse(response) as { success: boolean }
+    return handleResponse(response)
   }
 
-  async updateNotificationSettings(settings: NotificationSettings): Promise<{ success: boolean; settings: NotificationSettings }> {
+  async updateNotificationSettings(settings: NotificationSettings): Promise<NotificationSettingsResponse> {
     const response = await client.PUT('/api/notifications/settings', {
       body: settings
     })
 
-    return handleResponse(response) as { success: boolean; settings: NotificationSettings }
+    return handleResponse(response)
   }
 
   // Statistics
@@ -291,18 +292,18 @@ class ApiClient {
   }
 
   // User Profile
-  async getProfile(): Promise<{ user: User }> {
+  async getProfile(): Promise<UserResponse> {
     const response = await client.GET('/api/user/profile')
 
-    return handleResponse(response) as { user: User }
+    return handleResponse(response)
   }
 
-  async updateProfile(data: UserUpdate): Promise<{ user: User }> {
+  async updateProfile(data: UserUpdate): Promise<UserResponse> {
     const response = await client.PUT('/api/user/profile', {
       body: data
     })
 
-    return handleResponse(response) as { user: User }
+    return handleResponse(response)
   }
 }
 

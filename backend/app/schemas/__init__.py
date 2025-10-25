@@ -298,6 +298,20 @@ class ContactResponse(CamelBaseModel):
     id: str
 
 
+# ========== Common Response Schemas ==========
+class SuccessResponse(CamelBaseModel):
+    success: bool
+
+
+class UserResponse(CamelBaseModel):
+    user: UserRead
+
+
+class NotificationSettingsResponse(CamelBaseModel):
+    success: bool
+    settings: NotificationSettings
+
+
 # ========== Error Response ==========
 class ErrorResponse(CamelBaseModel):
     error: str

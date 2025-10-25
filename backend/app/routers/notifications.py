@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.schemas import Notification, NotificationSettings
+from app.schemas import Notification, NotificationSettings, SuccessResponse, NotificationSettingsResponse
 from app.core.auth import current_active_user
 from app.models.user import UserTable
 
@@ -17,7 +17,7 @@ async def get_notifications(user: UserTable = Depends(current_active_user)):
     return mock_notifications.get(user.id, [])
 
 
-@router.delete("/{notification_id}")
+@router.delete("/{notification_id}", response_model=SuccessResponse)
 async def delete_notification(
     notification_id: str,
     user: UserTable = Depends(current_active_user)
@@ -28,7 +28,7 @@ async def delete_notification(
     return {"success": True}
 
 
-@router.put("/{notification_id}/read")
+@router.put("/{notification_id}/read", response_model=SuccessResponse)
 async def mark_notification_as_read(
     notification_id: str,
     user: UserTable = Depends(current_active_user)
@@ -42,7 +42,7 @@ async def mark_notification_as_read(
     raise HTTPException(status_code=404, detail="알림을 찾을 수 없습니다")
 
 
-@router.put("/settings")
+@router.put("/settings", response_model=NotificationSettingsResponse)
 async def update_notification_settings(
     settings: NotificationSettings,
     user: UserTable = Depends(current_active_user)

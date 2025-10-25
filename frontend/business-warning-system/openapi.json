@@ -124,7 +124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
                 }
               }
             }
@@ -182,7 +182,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
                 }
               }
             }
@@ -219,7 +219,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
                 }
               }
             }
@@ -301,7 +301,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
                 }
               }
             }
@@ -365,7 +365,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserRead"
+                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
                 }
               }
             }
@@ -479,8 +479,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "title": "Response Get Me Api Auth Me Get"
+                  "$ref": "#/components/schemas/UserResponse"
                 }
               }
             }
@@ -758,7 +757,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
               }
             }
           },
@@ -1134,7 +1135,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
               }
             }
           },
@@ -1180,7 +1183,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
               }
             }
           },
@@ -1220,7 +1225,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsResponse"
+                }
               }
             }
           },
@@ -1345,7 +1352,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
               }
             }
           }
@@ -1378,7 +1387,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
               }
             }
           },
@@ -2276,6 +2287,23 @@
         ],
         "title": "NotificationSettings"
       },
+      "NotificationSettingsResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/NotificationSettings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "settings"
+        ],
+        "title": "NotificationSettingsResponse"
+      },
       "Recommendation": {
         "properties": {
           "title": {
@@ -2361,6 +2389,19 @@
           "trends"
         ],
         "title": "Statistics"
+      },
+      "SuccessResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "title": "SuccessResponse"
       },
       "SuccessStory": {
         "properties": {
@@ -2537,7 +2578,52 @@
         ],
         "title": "UserCreate"
       },
-      "UserRead": {
+      "UserResponse": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/app__schemas__UserRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "app__routers__auth__UserRead": {
         "properties": {
           "id": {
             "type": "integer",
@@ -2597,39 +2683,6 @@
           "name"
         ],
         "title": "UserRead"
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          }
-        },
-        "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError"
       },
       "app__routers__auth__UserUpdate": {
         "properties": {
@@ -2725,6 +2778,73 @@
         },
         "type": "object",
         "title": "UserUpdate"
+      },
+      "app__schemas__UserRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "businessName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Businessname"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "isActive": {
+            "type": "boolean",
+            "title": "Isactive",
+            "default": true
+          },
+          "isSuperuser": {
+            "type": "boolean",
+            "title": "Issuperuser",
+            "default": false
+          },
+          "isVerified": {
+            "type": "boolean",
+            "title": "Isverified",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "name",
+          "createdAt"
+        ],
+        "title": "UserRead"
       },
       "app__schemas__UserUpdate": {
         "properties": {

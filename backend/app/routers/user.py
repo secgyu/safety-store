@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.schemas import UserRead, UserUpdate
+from app.schemas import UserRead, UserUpdate, UserResponse
 from app.core.auth import current_active_user
 from app.models.user import UserTable
 
@@ -7,7 +7,7 @@ from app.models.user import UserTable
 router = APIRouter()
 
 
-@router.get("/profile")
+@router.get("/profile", response_model=UserResponse)
 async def get_profile(user: UserTable = Depends(current_active_user)):
     """프로필 조회"""
     return {
@@ -25,7 +25,7 @@ async def get_profile(user: UserTable = Depends(current_active_user)):
     }
 
 
-@router.put("/profile")
+@router.put("/profile", response_model=UserResponse)
 async def update_profile(
     update_data: UserUpdate,
     user: UserTable = Depends(current_active_user)

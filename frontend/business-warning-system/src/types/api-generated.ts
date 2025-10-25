@@ -840,6 +840,12 @@ export interface components {
             /** Riskthreshold */
             riskThreshold: string;
         };
+        /** NotificationSettingsResponse */
+        NotificationSettingsResponse: {
+            /** Success */
+            success: boolean;
+            settings: components["schemas"]["NotificationSettings"];
+        };
         /** Recommendation */
         Recommendation: {
             /** Title */
@@ -871,6 +877,11 @@ export interface components {
             /** Byindustry */
             byIndustry: components["schemas"]["IndustryStatistic"][];
             trends: components["schemas"]["TrendsData"];
+        };
+        /** SuccessResponse */
+        SuccessResponse: {
+            /** Success */
+            success: boolean;
         };
         /** SuccessStory */
         SuccessStory: {
@@ -935,8 +946,21 @@ export interface components {
             /** Industry */
             industry?: string | null;
         };
+        /** UserResponse */
+        UserResponse: {
+            user: components["schemas"]["app__schemas__UserRead"];
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
         /** UserRead */
-        UserRead: {
+        app__routers__auth__UserRead: {
             /** Id */
             id: number;
             /**
@@ -966,15 +990,6 @@ export interface components {
             /** Industry */
             industry?: string | null;
         };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-        };
         /** UserUpdate */
         app__routers__auth__UserUpdate: {
             /** Password */
@@ -993,6 +1008,42 @@ export interface components {
             business_name?: string | null;
             /** Industry */
             industry?: string | null;
+        };
+        /** UserRead */
+        app__schemas__UserRead: {
+            /** Id */
+            id: number;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Name */
+            name: string;
+            /** Businessname */
+            businessName?: string | null;
+            /** Industry */
+            industry?: string | null;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Isactive
+             * @default true
+             */
+            isActive: boolean;
+            /**
+             * Issuperuser
+             * @default false
+             */
+            isSuperuser: boolean;
+            /**
+             * Isverified
+             * @default false
+             */
+            isVerified: boolean;
         };
         /** UserUpdate */
         app__schemas__UserUpdate: {
@@ -1108,7 +1159,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRead"];
+                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
                 };
             };
             /** @description Bad Request */
@@ -1146,7 +1197,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRead"];
+                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
                 };
             };
             /** @description Missing token or inactive user. */
@@ -1177,7 +1228,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRead"];
+                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
                 };
             };
             /** @description Bad Request */
@@ -1224,7 +1275,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRead"];
+                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
                 };
             };
             /** @description Missing token or inactive user. */
@@ -1330,7 +1381,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserRead"];
+                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
                 };
             };
             /** @description Bad Request */
@@ -1389,7 +1440,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
         };
@@ -1565,7 +1616,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SuccessResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1816,7 +1867,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SuccessResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1847,7 +1898,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SuccessResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1880,7 +1931,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["NotificationSettingsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1982,7 +2033,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
         };
@@ -2006,7 +2057,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
             /** @description Validation Error */

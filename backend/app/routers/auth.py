@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from app.core.auth import fastapi_users, auth_backend
 from app.models.user import UserTable
+from app.schemas import UserResponse
 from fastapi_users import schemas as fastapi_users_schemas
 from pydantic import EmailStr
 
@@ -30,7 +31,7 @@ router = APIRouter()
 
 
 # 커스텀 엔드포인트
-@router.get("/me", response_model=dict)
+@router.get("/me", response_model=UserResponse)
 async def get_me(user: UserTable = Depends(fastapi_users.current_user(active=True))):
     return {
         "user": {

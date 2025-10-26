@@ -1,11 +1,11 @@
-import { Bell, HelpCircle,Menu, X } from "lucide-react";
+import { Bell, HelpCircle, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
-import { useAuth, useLogout } from "@/lib/api";
+import { useLogout } from "@/lib/api";
 import { resetOnboarding } from "@/lib/onboarding";
 
 export function AppHeader() {
@@ -14,9 +14,6 @@ export function AppHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const logout = useLogout();
   const [unreadCount, setUnreadCount] = useState(3);
-
-  const { data: authData, isLoading } = useAuth();
-  const user = authData?.user;
 
   const navLinks = [
     { href: "/diagnose", label: "진단하기" },
@@ -88,11 +85,7 @@ export function AppHeader() {
             </Button>
 
             {/* User Menu or Login/Logout */}
-            {!isLoading && (
-              <>
-                <UserMenu />
-              </>
-            )}
+            <UserMenu />
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -124,24 +117,6 @@ export function AppHeader() {
                   {link.label}
                 </Link>
               ))}
-              {!isLoading && (
-                <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
-                  {user ? (
-                    <Button variant="outline" onClick={handleLogout}>
-                      로그아웃
-                    </Button>
-                  ) : (
-                    <>
-                      <Button variant="outline" asChild>
-                        <Link to="/login">로그인</Link>
-                      </Button>
-                      <Button asChild>
-                        <Link to="/signup">회원가입</Link>
-                      </Button>
-                    </>
-                  )}
-                </div>
-              )}
             </div>
           </nav>
         )}

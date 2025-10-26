@@ -31,10 +31,7 @@ export function saveUser(user: User): void {
   localStorage.setItem("currentUser", JSON.stringify(user))
 }
 
-// Remove user from localStorage
-export function removeUser(): void {
-  localStorage.removeItem("currentUser")
-}
+
 
 // Sign up new user
 export function signUp(
@@ -96,10 +93,6 @@ export function signIn(email: string, password: string): { success: boolean; err
   return { success: true, user }
 }
 
-// Sign out user
-export function signOut(): void {
-  removeUser()
-}
 
 // Helper functions
 function getAllUsers(): User[] {

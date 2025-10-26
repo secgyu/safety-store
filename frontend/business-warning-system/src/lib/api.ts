@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import createClient from 'openapi-fetch'
+import { create } from 'zustand'
 
-import type { components,paths } from '@/types/api-generated'
+import type { components, paths } from '@/types/api-generated'
 
 // ========== Type Exports (from generated types) ==========
 export type LoginRequest = components['schemas']['Body_auth_jwt_login_api_auth_login_post']
@@ -38,37 +39,33 @@ const client = createClient<paths>({
   baseUrl: 'http://localhost:8000'
 })
 
-// Token Management
-let authToken: string | null = null
-
-export function setAuthToken(token: string | null) {
-  authToken = token
-  if (token) {
-    localStorage.setItem('auth_token', token)
-    // Set Authorization header for all future requests
-    client.use({
-      onRequest({ request }) {
-        request.headers.set('Authorization', `Bearer ${token}`)
-        return request
-      }
-    })
-  } else {
-    localStorage.removeItem('auth_token')
-  }
-}
-
-export function getAuthToken(): string | null {
-  if (!authToken) {
-    authToken = localStorage.getItem('auth_token')
+client.use({
+  onRequest: ({ request }) => {
+    const authToken = useAuthStore.getState().authToken
     if (authToken) {
-      setAuthToken(authToken) // Re-initialize middleware
+      request.headers.set('Authorization', `Bearer ${authToken}`)
     }
+    return request
   }
-  return authToken
-}
+})
 
-// Initialize token on load
-getAuthToken()
+export const useAuthStore = create<{
+  authToken: string | null
+  setAuthToken: (token: string) => void
+  resetAuthToken: () => void;
+}>((set) => ({
+  authToken: null,
+  resetAuthToken: () => {
+
+    set({ authToken: null })
+  },
+  setAuthToken: (token: string) => {
+
+    set({ authToken: token })
+  }
+}));
+
+
 
 // ========== Helper function to extract response data ==========
 type NonUndefined<T> = T extends undefined ? never : T;
@@ -300,6 +297,7 @@ export const apiClient = new ApiClient()
 export const queryKeys = {
   auth: {
     me: ['auth', 'me'] as const,
+    all: ['auth'] as const,
   },
   diagnosis: {
     history: (encodedMct: string) => ['diagnosis', 'history', encodedMct] as const,
@@ -334,6 +332,7 @@ export const queryKeys = {
 // ========== Auth Hooks ==========
 export function useLogin() {
   const queryClient = useQueryClient()
+  const { setAuthToken } = useAuthStore()
 
   return useMutation({
     mutationFn: (data: { email: string; password: string }) =>
@@ -362,18 +361,28 @@ export function useSignup() {
 export function useAuth() {
   return useQuery({
     queryKey: queryKeys.auth.me,
-    queryFn: () => apiClient.getMe(),
+    queryFn: async () => {
+      try {
+        return await apiClient.getMe()
+      }
+      catch (er) { // 401 에러라면 null 반환
+        return null;
+      }
+    },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5분
+
   })
 }
 
 export function useLogout() {
   const queryClient = useQueryClient()
+  const { resetAuthToken } = useAuthStore()
 
   return () => {
-    setAuthToken(null)
-    queryClient.clear()
+    resetAuthToken()
+    queryClient.invalidateQueries({ queryKey: queryKeys.auth.all })
+    console.log('logout')
   }
 }
 

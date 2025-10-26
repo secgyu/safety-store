@@ -14,7 +14,7 @@ import { useAuth, useLogout } from "@/lib/api";
 
 export function UserMenu() {
   const navigate = useNavigate();
-  const { data: authData, isLoading } = useAuth();
+  const { data: authData, isPending } = useAuth();
   const logout = useLogout();
   const user = authData?.user;
   // const logout = useLogout();

@@ -19,7 +19,6 @@ import SettingsPage from "./pages/settings/page";
 import SupportPage from "./pages/support/page";
 import FaqPage from "./pages/faq/page";
 import GuidePage from "./pages/guide/page";
-import BlogPage from "./pages/blog/page";
 import StatisticsPage from "./pages/statistics/page";
 import InsightsPage from "./pages/insights/page";
 import SuccessStoriesPage from "./pages/success-stories/page";
@@ -56,7 +55,6 @@ function App() {
           <Route path="/support" element={<SupportPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/guide" element={<GuidePage />} />
-          <Route path="/blog" element={<BlogPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/insights" element={<InsightsPage />} />
           <Route path="/success-stories" element={<SuccessStoriesPage />} />

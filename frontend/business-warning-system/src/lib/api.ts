@@ -16,7 +16,6 @@ export type ActionPlanItem = components['schemas']['ActionPlanItem']
 export type BenchmarkData = components['schemas']['BenchmarkData']
 export type CompareRequest = components['schemas']['CompareRequest']
 export type CompareResponse = components['schemas']['CompareResponse']
-export type BlogPost = components['schemas']['BlogPost']
 export type ChatRequest = components['schemas']['ChatRequest']
 export type ChatResponse = components['schemas']['ChatResponse']
 export type FAQ = components['schemas']['FAQ']
@@ -190,22 +189,6 @@ class ApiClient {
     return handleResponse(response)
   }
 
-  // Blog
-  async getBlogPosts(): Promise<BlogPost[]> {
-    const response = await client.GET('/api/blog')
-
-    return handleResponse(response)
-  }
-
-  async getBlogPost(id: string): Promise<BlogPost> {
-    const response = await client.GET('/api/blog/{post_id}', {
-      params: {
-        path: { post_id: id }
-      }
-    })
-
-    return handleResponse(response)
-  }
 
   // Chat
   async sendChatMessage(data: ChatRequest): Promise<ChatResponse> {
@@ -326,10 +309,7 @@ export const queryKeys = {
   benchmark: {
     data: (industry?: string, region?: string) => ['benchmark', industry, region] as const,
   },
-  blog: {
-    all: ['blog'] as const,
-    detail: (id: string) => ['blog', id] as const,
-  },
+
   faq: {
     all: ['faq'] as const,
   },
@@ -465,23 +445,6 @@ export function useCompareBenchmark() {
     mutationFn: (data: CompareRequest) => apiClient.compareBenchmark(data),
   })
 }
-
-// ========== Blog Hooks ==========
-export function useBlogPosts() {
-  return useQuery({
-    queryKey: queryKeys.blog.all,
-    queryFn: () => apiClient.getBlogPosts(),
-  })
-}
-
-export function useBlogPost(id: string) {
-  return useQuery({
-    queryKey: queryKeys.blog.detail(id),
-    queryFn: () => apiClient.getBlogPost(id),
-    enabled: !!id,
-  })
-}
-
 // ========== Chat Hooks ==========
 export function useSendChatMessage() {
   return useMutation({

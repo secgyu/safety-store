@@ -12,7 +12,6 @@ from app.routers import (
     diagnosis,
     action_plan,
     benchmark,
-    blog,
     chat,
     faq,
     insights,
@@ -125,7 +124,6 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(diagnosis.router, prefix="/api/diagnose", tags=["diagnosis"])
 app.include_router(action_plan.router, prefix="/api/action-plan", tags=["action-plan"])
 app.include_router(benchmark.router, prefix="/api/benchmark", tags=["benchmark"])
-app.include_router(blog.router, prefix="/api/blog", tags=["blog"])
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(faq.router, prefix="/api/faq", tags=["faq"])
 app.include_router(insights.router, prefix="/api/insights", tags=["insights"])

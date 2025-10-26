@@ -188,18 +188,6 @@ class CompareResponse(CamelBaseModel):
     insights: list[str]
 
 
-# ========== Blog Schemas ==========
-class BlogPost(CamelBaseModel):
-    id: str
-    title: str
-    content: str
-    excerpt: str
-    author: str
-    published_at: str
-    tags: list[str]
-    image_url: str
-
-
 # ========== Chat Schemas ==========
 class ChatMessage(CamelBaseModel):
     role: str

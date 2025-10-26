@@ -1,4 +1,4 @@
-import { ChevronRight,Lightbulb } from "lucide-react";
+import { ChevronRight, Lightbulb } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,29 +7,30 @@ import { cn } from "@/lib/utils";
 interface ActionCardProps {
   title: string;
   description: string;
-  priority: "high" | "medium" | "low";
+  priority: "HIGH" | "MEDIUM" | "LOW";
   onLearnMore: () => void;
 }
 
 export function ActionCard({ title, description, priority, onLearnMore }: ActionCardProps) {
   const getPriorityBadge = () => {
     switch (priority) {
-      case "high":
+      case "HIGH":
         return { label: "높음", color: "bg-red-100 text-red-700" };
-      case "medium":
+      case "MEDIUM":
         return { label: "보통", color: "bg-amber-100 text-amber-700" };
-      case "low":
+      case "LOW":
         return { label: "낮음", color: "bg-blue-100 text-blue-700" };
     }
   };
 
   const badge = getPriorityBadge();
+  console.log(priority);
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardContent className="pt-6 pb-6">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
             <Lightbulb className="h-5 w-5 text-amber-600" />
           </div>
           <div className="flex-1">

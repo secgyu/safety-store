@@ -1,7 +1,7 @@
-import { Minus,TrendingDown, TrendingUp } from "lucide-react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Bar, BarChart, CartesianGrid, Cell,ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";

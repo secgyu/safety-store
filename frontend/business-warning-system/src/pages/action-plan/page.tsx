@@ -1,5 +1,5 @@
-import { AlertCircle, ArrowLeft, Calendar, CheckCircle2, Edit3, Target, Trash2,TrendingUp } from "lucide-react";
-import { useEffect,useState } from "react";
+import { AlertCircle, ArrowLeft, Calendar, CheckCircle2, Edit3, Target, Trash2, TrendingUp } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,17 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-
-interface ActionItem {
-  id: string;
-  title: string;
-  description: string;
-  priority: "high" | "medium" | "low";
-  category: string;
-  completed: boolean;
-  deadline?: string;
-  notes?: string;
-}
+import { type ActionPlanItem, useActionPlans, useDeleteActionPlanItem, useUpdateActionPlan } from "@/lib/api";
 
 interface Goal {
   current: number;
@@ -29,125 +19,72 @@ interface Goal {
 
 export default function ActionPlanPage() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [riskLevel, setRiskLevel] = useState<"RED" | "ORANGE" | "YELLOW" | "GREEN">("ORANGE");
-  const [goal, setGoal] = useState<Goal>({
+  const { data: actionPlans, isPending: loading, error } = useActionPlans();
+
+  const updatePlanMutation = useUpdateActionPlan();
+  const deleteMutation = useDeleteActionPlanItem();
+
+  const riskLevel: "RED" | "ORANGE" | "YELLOW" | "GREEN" = "ORANGE";
+  const goal: Goal = {
     current: 65,
     target: 85,
     metric: "종합 위험도 점수",
     deadline: "3개월 후",
-  });
+  };
 
-  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
 
-  useEffect(() => {
-    // Simulate loading diagnosis data
-    setTimeout(() => {
-      // Generate action items based on risk level
-      const items: ActionItem[] = [
-        {
-          id: "1",
-          title: "매출 증대 전략 수립",
-          description: "신규 고객 유치를 위한 마케팅 캠페인 기획 및 실행",
-          priority: "high",
-          category: "매출 개선",
-          completed: false,
-          deadline: "2주 후",
-        },
-        {
-          id: "2",
-          title: "고정비용 절감 방안 마련",
-          description: "불필요한 지출 항목 검토 및 협상을 통한 비용 절감",
-          priority: "high",
-          category: "비용 관리",
-          completed: false,
-          deadline: "1주 후",
-        },
-        {
-          id: "3",
-          title: "재고 관리 시스템 개선",
-          description: "재고 회전율 향상을 위한 발주 시스템 최적화",
-          priority: "medium",
-          category: "운영 효율화",
-          completed: false,
-          deadline: "1개월 후",
-        },
-        {
-          id: "4",
-          title: "고객 만족도 조사 실시",
-          description: "기존 고객 피드백 수집 및 서비스 개선점 파악",
-          priority: "medium",
-          category: "고객 관리",
-          completed: true,
-          deadline: "완료",
-        },
-        {
-          id: "5",
-          title: "직원 교육 프로그램 운영",
-          description: "서비스 품질 향상을 위한 직원 역량 강화",
-          priority: "low",
-          category: "인력 관리",
-          completed: false,
-          deadline: "2개월 후",
-        },
-        {
-          id: "6",
-          title: "온라인 채널 확대",
-          description: "SNS 및 온라인 플랫폼을 통한 판매 채널 다각화",
-          priority: "high",
-          category: "매출 개선",
-          completed: false,
-          deadline: "3주 후",
-        },
-        {
-          id: "7",
-          title: "현금흐름 모니터링 강화",
-          description: "주간 단위 현금흐름 점검 및 예측 시스템 구축",
-          priority: "medium",
-          category: "재무 관리",
-          completed: false,
-          deadline: "2주 후",
-        },
-        {
-          id: "8",
-          title: "경쟁사 분석 및 차별화 전략",
-          description: "주변 경쟁 업체 분석 및 우리만의 강점 부각",
-          priority: "low",
-          category: "전략 수립",
-          completed: false,
-          deadline: "1개월 후",
-        },
-      ];
-      setActionItems(items);
-      setLoading(false);
-    }, 800);
-  }, []);
+  // API에서 받은 ActionPlan의 items
+  const actionItems: ActionPlanItem[] = actionPlans?.[0]?.items || [];
+  const currentPlanId = actionPlans?.[0]?.id;
 
-  const completedCount = actionItems.filter((item) => item.completed).length;
+  const completedCount = actionItems.filter((item) => item.status === "completed").length;
   const totalCount = actionItems.length;
-  const completionRate = Math.round((completedCount / totalCount) * 100);
+  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  const highPriorityCount = actionItems.filter((item) => item.priority === "high" && !item.completed).length;
+  const highPriorityCount = actionItems.filter(
+    (item) => item.priority === "high" && item.status !== "completed"
+  ).length;
 
-  const toggleComplete = (id: string) => {
-    setActionItems((items) => items.map((item) => (item.id === id ? { ...item, completed: !item.completed } : item)));
+  const toggleComplete = async (id: string) => {
+    if (!currentPlanId) return;
+
+    const updatedItems = actionItems.map((item) =>
+      item.id === id ? { ...item, status: item.status === "completed" ? "pending" : "completed" } : item
+    );
+
+    await updatePlanMutation.mutateAsync({
+      id: currentPlanId,
+      data: { items: updatedItems },
+    });
   };
 
-  const deleteItem = (id: string) => {
-    setActionItems((items) => items.filter((item) => item.id !== id));
+  const deleteItem = async (itemId: string) => {
+    if (!currentPlanId) return;
+
+    await deleteMutation.mutateAsync({ id: currentPlanId, itemId });
   };
 
-  const saveNote = (id: string) => {
-    setActionItems((items) => items.map((item) => (item.id === id ? { ...item, notes: noteText } : item)));
+  const saveNote = async (id: string) => {
+    if (!currentPlanId) return;
+
+    const updatedItems = actionItems.map((item) =>
+      item.id === id ? { ...item, description: `${item.description}\n\n메모: ${noteText}` } : item
+    );
+
+    await updatePlanMutation.mutateAsync({
+      id: currentPlanId,
+      data: { items: updatedItems },
+    });
+
     setEditingNote(null);
     setNoteText("");
   };
 
-  const startEditNote = (id: string, currentNote?: string) => {
+  const startEditNote = (id: string, _currentNote?: string) => {
     setEditingNote(id);
-    setNoteText(currentNote || "");
+    setNoteText("");
   };
 
   const getPriorityColor = (priority: string) => {
@@ -197,6 +134,46 @@ export default function ActionPlanPage() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">개선 계획을 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="text-center">
+            <AlertCircle className="h-12 w-12 text-red-600 mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">데이터를 불러올 수 없습니다</h2>
+            <p className="text-gray-600 mb-4">로그인이 필요하거나 일시적인 오류가 발생했습니다.</p>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => navigate("/login")}>로그인</Button>
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                돌아가기
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // 데이터가 없는 경우
+  if (!actionPlans || actionPlans.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            돌아가기
+          </Button>
+          <Card className="p-12 text-center">
+            <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">개선 계획이 없습니다</h2>
+            <p className="text-gray-600 mb-6">진단을 완료한 후 AI가 맞춤 개선 계획을 생성해드립니다.</p>
+            <Button onClick={() => navigate("/diagnose")}>진단 시작하기</Button>
+          </Card>
         </div>
       </div>
     );
@@ -298,7 +275,7 @@ export default function ActionPlanPage() {
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                   <Badge className={getPriorityColor(priority)}>{getPriorityLabel(priority)} 우선순위</Badge>
                   <span className="text-sm font-normal text-gray-600">
-                    ({items.filter((i) => !i.completed).length}개 남음)
+                    ({items.filter((i) => i.status !== "completed").length}개 남음)
                   </span>
                 </h3>
 
@@ -307,12 +284,12 @@ export default function ActionPlanPage() {
                     <Card
                       key={item.id}
                       className={`p-5 transition-all ${
-                        item.completed ? "bg-gray-50 opacity-75" : "bg-white hover:shadow-md"
+                        item.status === "completed" ? "bg-gray-50 opacity-75" : "bg-white hover:shadow-md"
                       }`}
                     >
                       <div className="flex items-start gap-4">
                         <Checkbox
-                          checked={item.completed}
+                          checked={item.status === "completed"}
                           onCheckedChange={() => toggleComplete(item.id)}
                           className="mt-1"
                         />
@@ -322,12 +299,14 @@ export default function ActionPlanPage() {
                             <div className="flex-1">
                               <h4
                                 className={`font-semibold mb-1 ${
-                                  item.completed ? "line-through text-gray-500" : "text-gray-900"
+                                  item.status === "completed" ? "line-through text-gray-500" : "text-gray-900"
                                 }`}
                               >
                                 {item.title}
                               </h4>
-                              <p className={`text-sm ${item.completed ? "text-gray-400" : "text-gray-600"}`}>
+                              <p
+                                className={`text-sm ${item.status === "completed" ? "text-gray-400" : "text-gray-600"}`}
+                              >
                                 {item.description}
                               </p>
                             </div>
@@ -344,12 +323,12 @@ export default function ActionPlanPage() {
 
                           <div className="flex flex-wrap items-center gap-3 mb-3">
                             <Badge variant="outline" className="text-xs">
-                              {item.category}
+                              우선순위: {getPriorityLabel(item.priority)}
                             </Badge>
-                            {item.deadline && (
+                            {item.dueDate && (
                               <div className="flex items-center gap-1 text-xs text-gray-600">
                                 <Calendar className="h-3 w-3" />
-                                {item.deadline}
+                                {item.dueDate}
                               </div>
                             )}
                           </div>
@@ -374,31 +353,15 @@ export default function ActionPlanPage() {
                             </div>
                           ) : (
                             <div>
-                              {item.notes ? (
-                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-gray-700">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <p className="flex-1">{item.notes}</p>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => startEditNote(item.id, item.notes)}
-                                      className="h-6 w-6 p-0"
-                                    >
-                                      <Edit3 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => startEditNote(item.id)}
-                                  className="text-gray-500 hover:text-gray-700 h-8 px-2"
-                                >
-                                  <Edit3 className="h-3 w-3 mr-1" />
-                                  메모 추가
-                                </Button>
-                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => startEditNote(item.id)}
+                                className="text-gray-500 hover:text-gray-700 h-8 px-2"
+                              >
+                                <Edit3 className="h-3 w-3 mr-1" />
+                                메모 추가
+                              </Button>
                             </div>
                           )}
                         </div>

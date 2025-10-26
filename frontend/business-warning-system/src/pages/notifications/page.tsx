@@ -1,73 +1,10 @@
-import { AlertTriangle, Bell, Calendar, Check, Filter,Info, Target, TrendingDown, X } from "lucide-react";
+import { AlertTriangle, Bell, Calendar, Check, Filter, Info, Target, TrendingDown, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
-// Mock notification data - 실제로는 API에서 가져옴
-const mockNotifications = [
-  {
-    id: "1",
-    type: "risk_change",
-    title: "위험도 등급 변경",
-    message: "귀하의 위험도가 YELLOW에서 ORANGE로 상승했습니다. 즉시 확인이 필요합니다.",
-    timestamp: "2024-01-15T10:30:00",
-    read: false,
-    priority: "high",
-    link: "/results",
-  },
-  {
-    id: "2",
-    type: "benchmark",
-    title: "업종 평균 대비 변화",
-    message: "귀하의 매출이 업종 평균 대비 15% 감소했습니다.",
-    timestamp: "2024-01-14T15:20:00",
-    read: false,
-    priority: "medium",
-    link: "/compare",
-  },
-  {
-    id: "3",
-    type: "reminder",
-    title: "정기 진단 리마인더",
-    message: "마지막 진단 후 30일이 경과했습니다. 재진단을 권장합니다.",
-    timestamp: "2024-01-14T09:00:00",
-    read: true,
-    priority: "low",
-    link: "/diagnose",
-  },
-  {
-    id: "4",
-    type: "action_plan",
-    title: "개선 계획 진행 상황",
-    message: "10개의 액션 아이템 중 5개를 완료했습니다. 50% 달성!",
-    timestamp: "2024-01-13T14:45:00",
-    read: true,
-    priority: "low",
-    link: "/action-plan",
-  },
-  {
-    id: "5",
-    type: "insight",
-    title: "새로운 인사이트",
-    message: "귀하의 업종에서 고객 유지율이 중요한 지표로 부상하고 있습니다.",
-    timestamp: "2024-01-12T11:00:00",
-    read: true,
-    priority: "low",
-    link: "/insights",
-  },
-  {
-    id: "6",
-    type: "risk_change",
-    title: "긍정적 변화 감지",
-    message: "지난 달 대비 매출이 12% 증가했습니다. 좋은 흐름입니다!",
-    timestamp: "2024-01-10T16:30:00",
-    read: true,
-    priority: "medium",
-    link: "/dashboard",
-  },
-];
+import { useDeleteNotification, useMarkNotificationAsRead, useNotifications } from "@/lib/api";
 
 const notificationTypes = [
   { value: "all", label: "전체" },
@@ -132,7 +69,70 @@ function formatTimestamp(timestamp: string) {
 }
 
 export default function NotificationsPage() {
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
+  const { data: notifications, isLoading, error } = useNotifications();
+  const deleteMutation = useDeleteNotification();
+  const markAsReadMutation = useMarkNotificationAsRead();
+
+  const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
+
+  const handleDelete = async (id: string) => {
+    await deleteMutation.mutateAsync(id);
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    await markAsReadMutation.mutateAsync(id);
+  };
+
+  const handleMarkAllAsRead = async () => {
+    if (!notifications) return;
+
+    const unreadNotifications = notifications.filter((n) => !n.isRead);
+    await Promise.all(unreadNotifications.map((n) => markAsReadMutation.mutateAsync(n.id)));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+        <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <Link to="/" className="text-2xl font-bold text-blue-600">
+                자영업 조기경보
+              </Link>
+            </div>
+          </div>
+        </header>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">알림을 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !notifications) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="text-center">
+            <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">데이터를 불러올 수 없습니다</h2>
+            <p className="text-muted-foreground mb-4">로그인이 필요하거나 일시적인 오류가 발생했습니다.</p>
+            <div className="flex gap-2 justify-center">
+              <Button asChild>
+                <Link to="/login">로그인</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link to="/">홈으로</Link>
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
@@ -177,7 +177,7 @@ export default function NotificationsPage() {
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={unreadCount === 0}>
               <Check className="h-4 w-4 mr-2" />
               모두 읽음 표시
             </Button>
@@ -204,18 +204,18 @@ export default function NotificationsPage() {
 
         {/* Notifications List */}
         <div className="space-y-3">
-          {mockNotifications.map((notification) => (
+          {notifications.map((notification) => (
             <Card
               key={notification.id}
               className={`p-4 transition-all hover:shadow-md ${
-                !notification.read ? "bg-blue-50/50 border-blue-200" : "bg-white"
+                !notification.isRead ? "bg-blue-50/50 border-blue-200" : "bg-white"
               }`}
             >
               <div className="flex gap-4">
                 {/* Icon */}
                 <div
                   className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getPriorityColor(
-                    notification.priority
+                    notification.type
                   )}`}
                 >
                   {getNotificationIcon(notification.type)}
@@ -224,12 +224,26 @@ export default function NotificationsPage() {
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className={`font-semibold ${!notification.read ? "text-gray-900" : "text-gray-700"}`}>
+                    <h3 className={`font-semibold ${!notification.isRead ? "text-gray-900" : "text-gray-700"}`}>
                       {notification.title}
                     </h3>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      {!notification.read && <div className="w-2 h-2 bg-blue-600 rounded-full" />}
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      {!notification.isRead && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          onClick={() => handleMarkAsRead(notification.id)}
+                        >
+                          <Check className="h-4 w-4 text-blue-600" />
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleDelete(notification.id)}
+                      >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -238,8 +252,8 @@ export default function NotificationsPage() {
                   <p className="text-sm text-gray-600 mb-2">{notification.message}</p>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">{formatTimestamp(notification.timestamp)}</span>
-                    <Link to={notification.link}>
+                    <span className="text-xs text-gray-500">{formatTimestamp(notification.createdAt)}</span>
+                    <Link to={"/dashboard"}>
                       <Button variant="link" size="sm" className="h-auto p-0 text-blue-600">
                         자세히 보기 →
                       </Button>
@@ -252,7 +266,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Empty State (if no notifications) */}
-        {mockNotifications.length === 0 && (
+        {notifications.length === 0 && (
           <Card className="p-12 text-center">
             <Bell className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">알림이 없습니다</h3>

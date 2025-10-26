@@ -1,4 +1,4 @@
-import { AlertCircle, BarChart3, Bell,Download, Lightbulb, MessageCircle, TrendingUp } from "lucide-react";
+import { AlertCircle, BarChart3, Bell, Download, Lightbulb, MessageCircle, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -37,57 +37,39 @@ export default function ResultsPage() {
   const [diagnosisInfo, setDiagnosisInfo] = useState<any>(null);
 
   useEffect(() => {
-    const diagnosisData = sessionStorage.getItem("diagnosisData");
+    const diagnosisDataStr = sessionStorage.getItem("diagnosisData");
+    const diagnosisResultStr = sessionStorage.getItem("diagnosisResult");
 
-    if (!diagnosisData) {
+    if (!diagnosisDataStr || !diagnosisResultStr) {
       navigate("/diagnose");
       return;
     }
 
-    const parsedData = JSON.parse(diagnosisData);
-    setDiagnosisInfo(parsedData);
+    try {
+      const parsedInfo = JSON.parse(diagnosisDataStr);
+      const parsedResult = JSON.parse(diagnosisResultStr);
 
-    const fetchResults = async () => {
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+      setDiagnosisInfo(parsedInfo);
 
-        const mockResult: ResultData = {
-          p_final: 25,
-          alert: "YELLOW",
-          risk_components: {
-            sales_risk: 30,
-            customer_risk: 25,
-            market_risk: 20,
-          },
-          recommendations: [
-            {
-              title: "배달 서비스 확대를 고려해보세요",
-              description:
-                "배달 매출 비중이 낮습니다. 배달 앱 입점을 통해 추가 수익원을 확보하고 고객 접점을 늘릴 수 있습니다.",
-              priority: "high",
-            },
-            {
-              title: "단골 고객 관리 프로그램 도입",
-              description: "고객 재방문율이 평균보다 낮습니다. 멤버십이나 포인트 제도를 통해 단골 고객을 확보하세요.",
-              priority: "medium",
-            },
-            {
-              title: "SNS 마케팅 강화",
-              description: "온라인 홍보가 부족합니다. 인스타그램이나 네이버 블로그를 활용하여 신규 고객을 유치하세요.",
-              priority: "medium",
-            },
-          ],
-        };
+      // API 응답을 ResultData 형식으로 매핑
+      const mappedResult: ResultData = {
+        p_final: parsedResult.overallScore || parsedResult.p_final || 0,
+        alert: parsedResult.riskLevel || parsedResult.alert || "GREEN",
+        risk_components: {
+          sales_risk: parsedResult.components?.sales?.score || parsedResult.risk_components?.sales_risk || 0,
+          customer_risk: parsedResult.components?.customer?.score || parsedResult.risk_components?.customer_risk || 0,
+          market_risk: parsedResult.components?.market?.score || parsedResult.risk_components?.market_risk || 0,
+        },
+        recommendations: parsedResult.recommendations || [],
+      };
 
-        setResultData(mockResult);
-        setLoading(false);
-      } catch (error) {
-        console.error("[v0] Error fetching results:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
+      setResultData(mappedResult);
+      setLoading(false);
+    } catch (error) {
+      console.error("[v0] Error parsing diagnosis data:", error);
+      setLoading(false);
+      navigate("/diagnose");
+    }
   }, [navigate]);
 
   const getAlertInfo = (alert: AlertLevel) => {
@@ -245,7 +227,7 @@ export default function ResultsPage() {
                   key={index}
                   title={rec.title}
                   description={rec.description}
-                  priority={rec.priority}
+                  priority={rec.priority.toUpperCase() as "HIGH" | "MEDIUM" | "LOW"}
                   onLearnMore={() => {
                     console.log("[v0] Learn more clicked:", rec.title);
                   }}

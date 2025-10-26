@@ -1,22 +1,18 @@
-import { ArrowLeft, Mail, Phone, MessageCircle, Clock, MapPin } from "lucide-react";
+import { Clock, Mail, MapPin,MessageCircle, Phone } from "lucide-react";
+
+import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Link } from "react-router-dom";
 
 export default function SupportPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <div className="container mx-auto px-4 py-8">
-        <Button asChild variant="ghost" className="mb-6">
-          <Link to="/">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            홈으로 돌아가기
-          </Link>
-        </Button>
+      <AppHeader />
 
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-4">고객 지원</h1>
           <p className="text-lg text-muted-foreground mb-12">

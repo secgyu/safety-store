@@ -1,7 +1,8 @@
-import { ArrowLeft, CheckCircle2, AlertCircle, TrendingUp, BarChart3 } from "lucide-react";
+import { AlertCircle, ArrowLeft, BarChart3,CheckCircle2, TrendingUp } from "lucide-react";
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 
 export default function GuidePage() {
   return (

@@ -1,13 +1,14 @@
-import { Calendar, TrendingUp, AlertCircle, Eye, Download, MessageCircle, Bell } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { RiskGauge } from "@/components/risk-gauge";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { Badge } from "@/components/ui/badge";
+import { AlertCircle, Bell,Calendar, Download, Eye, MessageCircle, TrendingUp } from "lucide-react";
+import { Link } from "react-router-dom";
+import { CartesianGrid, Line, LineChart, ReferenceLine,ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+
 import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { useDiagnosisHistory, useAuth } from "@/lib/api";
-import { Link } from "react-router-dom";
+import { RiskGauge } from "@/components/risk-gauge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth,useDiagnosisHistory } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 

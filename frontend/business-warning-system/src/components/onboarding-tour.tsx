@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { ArrowLeft,ArrowRight, X } from "lucide-react";
+import { useEffect,useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { X, ArrowRight, ArrowLeft } from "lucide-react";
 
 interface TourStep {
   title: string;

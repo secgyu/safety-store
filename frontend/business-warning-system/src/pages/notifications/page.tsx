@@ -1,9 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-
-import { AlertTriangle, TrendingDown, Bell, Calendar, Target, Info, X, Check, Filter } from "lucide-react";
+import { AlertTriangle, Bell, Calendar, Check, Filter,Info, Target, TrendingDown, X } from "lucide-react";
 import { Link } from "react-router-dom";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 // Mock notification data - 실제로는 API에서 가져옴
 const mockNotifications = [

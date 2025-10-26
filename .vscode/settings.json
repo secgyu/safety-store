@@ -6,5 +6,12 @@
   "python.analysis.autoImportCompletions": true,
   "python.analysis.diagnosticSeverityOverrides": {
     "reportGeneralTypeIssues": "warning"
-  }
+  },
+  // .vscode/settings.json
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  // .vscode/settings.json
+  "editor.formatOnSave": true
 }

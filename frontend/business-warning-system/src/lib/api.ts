@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import createClient from 'openapi-fetch'
-import type { paths, components } from '@/types/api-generated'
+
+import type { components,paths } from '@/types/api-generated'
 
 // ========== Type Exports (from generated types) ==========
 export type LoginRequest = components['schemas']['Body_auth_jwt_login_api_auth_login_post']

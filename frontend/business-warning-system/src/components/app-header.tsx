@@ -1,20 +1,21 @@
+import { Bell, HelpCircle,Menu, X } from "lucide-react";
 import { useState } from "react";
-import { Bell, Menu, X, HelpCircle } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
-import { Badge } from "@/components/ui/badge";
 import { useAuth, useLogout } from "@/lib/api";
 import { resetOnboarding } from "@/lib/onboarding";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: authData, isLoading } = useAuth();
   const logout = useLogout();
   const [unreadCount, setUnreadCount] = useState(3);
 
+  const { data: authData, isLoading } = useAuth();
   const user = authData?.user;
 
   const navLinks = [
@@ -89,23 +90,7 @@ export function AppHeader() {
             {/* User Menu or Login/Logout */}
             {!isLoading && (
               <>
-                {user ? (
-                  <div className="hidden sm:flex items-center gap-2">
-                    <UserMenu />
-                    <Button variant="ghost" size="sm" onClick={handleLogout}>
-                      로그아웃
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="hidden sm:flex items-center gap-2">
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to="/login">로그인</Link>
-                    </Button>
-                    <Button size="sm" asChild>
-                      <Link to="/signup">회원가입</Link>
-                    </Button>
-                  </div>
-                )}
+                <UserMenu />
               </>
             )}
 

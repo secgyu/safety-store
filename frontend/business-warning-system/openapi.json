@@ -884,75 +884,6 @@
         }
       }
     },
-    "/api/blog": {
-      "get": {
-        "tags": [
-          "blog"
-        ],
-        "summary": "Get Blog Posts",
-        "description": "블로그 포스트 목록 조회",
-        "operationId": "get_blog_posts_api_blog_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/BlogPost"
-                  },
-                  "type": "array",
-                  "title": "Response Get Blog Posts Api Blog Get"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/blog/{post_id}": {
-      "get": {
-        "tags": [
-          "blog"
-        ],
-        "summary": "Get Blog Post",
-        "description": "특정 블로그 포스트 조회",
-        "operationId": "get_blog_post_api_blog__post_id__get",
-        "parameters": [
-          {
-            "name": "post_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Post Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BlogPost"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/chat": {
       "post": {
         "tags": [
@@ -1624,57 +1555,6 @@
           "profitMargin"
         ],
         "title": "BenchmarkMetrics"
-      },
-      "BlogPost": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "content": {
-            "type": "string",
-            "title": "Content"
-          },
-          "excerpt": {
-            "type": "string",
-            "title": "Excerpt"
-          },
-          "author": {
-            "type": "string",
-            "title": "Author"
-          },
-          "publishedAt": {
-            "type": "string",
-            "title": "Publishedat"
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tags"
-          },
-          "imageUrl": {
-            "type": "string",
-            "title": "Imageurl"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "title",
-          "content",
-          "excerpt",
-          "author",
-          "publishedAt",
-          "tags",
-          "imageUrl"
-        ],
-        "title": "BlogPost"
       },
       "Body_auth_jwt_login_api_auth_login_post": {
         "properties": {

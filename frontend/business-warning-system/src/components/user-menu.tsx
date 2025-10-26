@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { LayoutDashboard, LogOut, Settings, UserIcon } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,21 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getCurrentUser, signOut, type User } from "@/lib/auth";
-import { UserIcon, Settings, LogOut, LayoutDashboard } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/api";
+import { signOut } from "@/lib/auth";
 
 export function UserMenu() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    setUser(getCurrentUser());
-  }, []);
+  const { data: authData, isLoading } = useAuth();
+  const user = authData?.user;
+  // const logout = useLogout();
 
   const handleSignOut = () => {
     signOut();
-    setUser(null);
+
     navigate("/");
   };
 

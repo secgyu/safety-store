@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { AlertCircle, ArrowLeft, Calendar, CheckCircle2, Edit3, Target, Trash2,TrendingUp } from "lucide-react";
+import { useEffect,useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Target, CheckCircle2, AlertCircle, TrendingUp, Calendar, Edit3, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface ActionItem {
   id: string;

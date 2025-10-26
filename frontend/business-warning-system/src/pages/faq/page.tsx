@@ -1,8 +1,9 @@
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { useFAQs } from "@/lib/api";
 import { Link } from "react-router-dom";
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { useFAQs } from "@/lib/api";
 
 export default function FAQPage() {
   const { data: faqs, isLoading } = useFAQs();

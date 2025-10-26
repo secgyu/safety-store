@@ -1,29 +1,30 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { BrowserRouter, Navigate,Route, Routes } from "react-router-dom";
+
 import { Toaster } from "@/components/ui/toaster";
 
-// Pages
-import HomePage from "./pages/page";
-import LoginPage from "./pages/login/page";
-import SignupPage from "./pages/signup/page";
+import ActionPlanPage from "./pages/action-plan/page";
+import CalculatorsPage from "./pages/calculators/page";
+import ComparePage from "./pages/compare/page";
+import ConsultationPage from "./pages/consultation/page";
 import DashboardPage from "./pages/dashboard/page";
 import DiagnosePage from "./pages/diagnose/page";
-import ResultsPage from "./pages/results/page";
-import ActionPlanPage from "./pages/action-plan/page";
-import ComparePage from "./pages/compare/page";
-import CalculatorsPage from "./pages/calculators/page";
-import ConsultationPage from "./pages/consultation/page";
-import NotificationsPage from "./pages/notifications/page";
-import SettingsPage from "./pages/settings/page";
-import SupportPage from "./pages/support/page";
 import FaqPage from "./pages/faq/page";
 import GuidePage from "./pages/guide/page";
-import StatisticsPage from "./pages/statistics/page";
 import InsightsPage from "./pages/insights/page";
-import SuccessStoriesPage from "./pages/success-stories/page";
-import TermsPage from "./pages/terms/page";
+import LoginPage from "./pages/login/page";
+import NotificationsPage from "./pages/notifications/page";
+// Pages
+import HomePage from "./pages/page";
 import PrivacyPage from "./pages/privacy/page";
+import ResultsPage from "./pages/results/page";
+import SettingsPage from "./pages/settings/page";
+import SignupPage from "./pages/signup/page";
+import StatisticsPage from "./pages/statistics/page";
+import SuccessStoriesPage from "./pages/success-stories/page";
+import SupportPage from "./pages/support/page";
+import TermsPage from "./pages/terms/page";
 
 const queryClient = new QueryClient({
   defaultOptions: {

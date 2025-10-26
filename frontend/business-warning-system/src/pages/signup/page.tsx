@@ -1,13 +1,14 @@
+import { AlertCircle, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSignup } from "@/lib/api";
-import { AlertCircle, ArrowLeft } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
 
 const INDUSTRIES = [
   "음식점",

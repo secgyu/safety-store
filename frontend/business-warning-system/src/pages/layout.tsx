@@ -1,5 +1,5 @@
-import { Analytics } from "@/lib/next-analytics";
 import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@/lib/next-analytics";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

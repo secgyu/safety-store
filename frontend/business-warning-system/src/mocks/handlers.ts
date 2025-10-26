@@ -1,17 +1,18 @@
 import { http, HttpResponse } from 'msw'
+
 import type {
-  AuthResponse,
-  DiagnosisResponse,
-  DiagnosisHistory,
   ActionPlan,
+  AuthResponse,
   BenchmarkData,
-  CompareResponse,
   ChatResponse,
+  CompareResponse,
+  ContactResponse,
+  DiagnosisHistory,
+  DiagnosisResponse,
   FAQ,
   Insight,
   Statistics,
   SuccessStory,
-  ContactResponse,
 } from '@/types/api'
 
 // Mock 데이터 저장소

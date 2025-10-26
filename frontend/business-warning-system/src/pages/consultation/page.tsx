@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Send, Bot, User, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Send, Sparkles,User } from "lucide-react";
+import { useEffect,useRef, useState } from "react";
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Link } from "react-router-dom";
 
 type Message = {
   role: "user" | "assistant";

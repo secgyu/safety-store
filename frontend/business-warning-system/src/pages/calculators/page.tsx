@@ -1,11 +1,11 @@
+import { Calculator, DollarSign, Home,TrendingUp } from "lucide-react";
 import { useState } from "react";
-import { ArrowLeft, Calculator, TrendingUp, DollarSign, Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { AppHeader } from "@/components/app-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
 
 export default function CalculatorsPage() {
   // Break-even calculator state
@@ -113,16 +113,7 @@ export default function CalculatorsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              홈으로
-            </Link>
-          </Button>
-        </div>
-      </header>
+      <AppHeader />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Page Header */}

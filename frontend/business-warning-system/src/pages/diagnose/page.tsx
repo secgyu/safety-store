@@ -1,14 +1,14 @@
+import { ArrowLeft, ArrowRight, Bot,Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { ArrowLeft, ArrowRight, Loader2, Bot } from "lucide-react";
+import { AppHeader } from "@/components/app-header";
+import { Breadcrumb } from "@/components/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { AppHeader } from "@/components/app-header";
-import { Breadcrumb } from "@/components/breadcrumb";
 import { usePredictDiagnosis } from "@/lib/api";
-import { useNavigate } from "react-router-dom";
 
 type Step = {
   id: number;

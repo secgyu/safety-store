@@ -1,7 +1,8 @@
-import { ArrowLeft, Lightbulb, TrendingUp, Users, DollarSign } from "lucide-react";
+import { ArrowLeft, DollarSign,Lightbulb, TrendingUp, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 
 export default function InsightsPage() {
   const insights = [

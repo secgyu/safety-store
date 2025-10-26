@@ -1,15 +1,16 @@
+import { AlertCircle, BarChart3, Bell,Download, Lightbulb, MessageCircle, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Download, TrendingUp, Lightbulb, BarChart3, AlertCircle, MessageCircle, Bell } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { RiskGauge } from "@/components/risk-gauge";
-import { RiskCard } from "@/components/risk-card";
+import { Link, useNavigate } from "react-router-dom";
+
 import { ActionCard } from "@/components/action-card";
 import { AppHeader } from "@/components/app-header";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { generatePDFReport } from "@/lib/pdf-generator";
+import { RiskCard } from "@/components/risk-card";
+import { RiskGauge } from "@/components/risk-gauge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { generatePDFReport } from "@/lib/pdf-generator";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 

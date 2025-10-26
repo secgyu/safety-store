@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Bot,Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bot, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -13,51 +13,18 @@ import { usePredictDiagnosis } from "@/lib/api";
 type Step = {
   id: number;
   question: string;
-  field: "industry" | "region" | "sales_1m" | "sales_3m_avg" | "cust_1m";
-  type: "select" | "number";
-  options?: string[];
+  field: "encoded_mct";
+  type: "text";
   placeholder?: string;
-  unit?: string;
 };
 
 const steps: Step[] = [
   {
     id: 1,
-    question: "안녕하세요! 어떤 업종을 운영하시나요?",
-    field: "industry",
-    type: "select",
-    options: ["음식점", "카페", "소매업", "서비스업", "미용업", "학원", "기타"],
-  },
-  {
-    id: 2,
-    question: "어느 지역에서 영업하시나요?",
-    field: "region",
-    type: "select",
-    options: ["강남구", "서초구", "송파구", "강동구", "마포구", "용산구", "종로구", "중구", "기타"],
-  },
-  {
-    id: 3,
-    question: "최근 1개월 매출은 얼마였나요?",
-    field: "sales_1m",
-    type: "number",
-    placeholder: "5000000",
-    unit: "원",
-  },
-  {
-    id: 4,
-    question: "최근 3개월 평균 매출은 얼마였나요?",
-    field: "sales_3m_avg",
-    type: "number",
-    placeholder: "4500000",
-    unit: "원",
-  },
-  {
-    id: 5,
-    question: "최근 1개월 고객 수는 얼마나 되나요?",
-    field: "cust_1m",
-    type: "number",
-    placeholder: "300",
-    unit: "명",
+    question: "안녕하세요! 사업체 코드(ENCODED_MCT)를 입력해주세요.",
+    field: "encoded_mct",
+    type: "text",
+    placeholder: "사업체 코드를 입력하세요",
   },
 ];
 
@@ -66,11 +33,7 @@ export default function DiagnosePage() {
   const predict = usePredictDiagnosis();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
-    industry: "",
-    region: "",
-    sales_1m: "",
-    sales_3m_avg: "",
-    cust_1m: "",
+    encoded_mct: "",
   });
   const [messages, setMessages] = useState<Array<{ role: "assistant" | "user"; content: string }>>([
     { role: "assistant", content: steps[0].question },
@@ -79,46 +42,17 @@ export default function DiagnosePage() {
   const currentStepData = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
 
-  const formatNumber = (value: string) => {
-    const number = value.replace(/[^\d]/g, "");
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  const handleSelectOption = (value: string) => {
-    const field = currentStepData.field;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setMessages((prev) => [...prev, { role: "user", content: value }]);
-
-    if (currentStep < steps.length - 1) {
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "assistant", content: steps[currentStep + 1].question }]);
-        setCurrentStep((prev) => prev + 1);
-      }, 500);
-    } else {
-      handleSubmit(value);
-    }
-  };
-
-  const handleNumberInput = (value: string) => {
+  const handleTextInput = (value: string) => {
     const field = currentStepData.field;
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleNumberSubmit = () => {
+  const handleTextSubmit = () => {
     const value = formData[currentStepData.field];
     if (!value) return;
 
-    const displayValue = formatNumber(value) + (currentStepData.unit || "");
-    setMessages((prev) => [...prev, { role: "user", content: displayValue }]);
-
-    if (currentStep < steps.length - 1) {
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { role: "assistant", content: steps[currentStep + 1].question }]);
-        setCurrentStep((prev) => prev + 1);
-      }, 500);
-    } else {
-      handleSubmit(value);
-    }
+    setMessages((prev) => [...prev, { role: "user", content: value }]);
+    handleSubmit(value);
   };
 
   const handleSubmit = async (lastValue?: string) => {
@@ -128,13 +62,9 @@ export default function DiagnosePage() {
     const finalData = lastValue ? { ...formData, [currentStepData.field]: lastValue } : formData;
 
     try {
-      // API call - convert form data to diagnosis request
+      // API call - send encoded_mct to /predict endpoint
       const result = await predict.mutateAsync({
-        industry: finalData.industry,
-        yearsInBusiness: 3, // Mock value - could be added to form
-        monthlyRevenue: Number(finalData.sales_1m),
-        monthlyExpenses: Number(finalData.sales_1m) * 0.8, // Mock calculation
-        customerCount: Number(finalData.cust_1m),
+        encodedMct: finalData.encoded_mct,
       });
 
       // Store result in sessionStorage for results page
@@ -230,45 +160,26 @@ export default function DiagnosePage() {
               {/* Input Area */}
               {!predict.isPending && (
                 <div className="border-t pt-6">
-                  {currentStepData.type === "select" ? (
-                    <div className="flex flex-wrap gap-2">
-                      {currentStepData.options?.map((option) => (
-                        <Button
-                          key={option}
-                          onClick={() => handleSelectOption(option)}
-                          variant="outline"
-                          size="lg"
-                          className="text-base"
-                        >
-                          {option}
-                        </Button>
-                      ))}
+                  <div className="space-y-4">
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        value={formData[currentStepData.field]}
+                        onChange={(e) => handleTextInput(e.target.value)}
+                        placeholder={currentStepData.placeholder}
+                        className="text-lg h-12"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleTextSubmit();
+                          }
+                        }}
+                      />
+                      <Button onClick={handleTextSubmit} size="lg" className="px-8">
+                        진단하기
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          value={formatNumber(formData[currentStepData.field])}
-                          onChange={(e) => handleNumberInput(e.target.value.replace(/[^\d]/g, ""))}
-                          placeholder={currentStepData.placeholder}
-                          className="text-lg h-12"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleNumberSubmit();
-                            }
-                          }}
-                        />
-                        <Button onClick={handleNumberSubmit} size="lg" className="px-8">
-                          다음
-                          <ArrowRight className="ml-2 h-5 w-5" />
-                        </Button>
-                      </div>
-                      {currentStepData.unit && (
-                        <p className="text-sm text-muted-foreground">단위: {currentStepData.unit}</p>
-                      )}
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
             </CardContent>

@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { ActionCard } from "@/components/action-card";
 import { AppHeader } from "@/components/app-header";
-import { Breadcrumb } from "@/components/breadcrumb";
 import { RiskCard } from "@/components/risk-card";
 import { RiskGauge } from "@/components/risk-gauge";
 import { Button } from "@/components/ui/button";
@@ -226,8 +225,6 @@ export default function ResultsPage() {
       <AppHeader />
       <div className="min-h-screen bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <Breadcrumb items={[{ label: "진단하기", href: "/diagnose" }, { label: "진단 결과" }]} />
-
           <Card className="mb-10 glass-card rounded-3xl">
             <CardContent className="pt-10 pb-10">
               <div className="flex flex-col md:flex-row items-center gap-10">

@@ -1,8 +1,7 @@
-import { Bell, HelpCircle, Menu, X } from "lucide-react";
+import { HelpCircle, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/user-menu";
 import { useLogout } from "@/lib/api";
@@ -70,18 +69,6 @@ export function AppHeader() {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" onClick={handleRestartTutorial} title="튜토리얼 다시보기">
               <HelpCircle className="h-5 w-5" />
-            </Button>
-
-            {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link to="/notifications">
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-danger">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </Link>
             </Button>
 
             {/* User Menu or Login/Logout */}

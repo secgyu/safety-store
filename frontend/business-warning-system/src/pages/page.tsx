@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   BarChart3,
-  Bell,
   CheckCircle2,
   Clock,
   Facebook,
@@ -15,10 +14,10 @@ import {
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { AppHeader } from "@/components/app-header";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserMenu } from "@/components/user-menu";
 import { getCurrentUser } from "@/lib/auth";
 import { hasCompletedOnboarding, markOnboardingComplete } from "@/lib/onboarding";
 
@@ -44,64 +43,7 @@ export default function HomePage() {
       {showOnboarding && <OnboardingTour onComplete={handleOnboardingComplete} />}
 
       {/* Header */}
-      <header className="glass sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold text-foreground">사업 안전 진단</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              to="/diagnose"
-              data-tour="diagnose-button"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              진단하기
-            </Link>
-            <Link
-              to="/compare"
-              data-tour="compare-link"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              업종 비교
-            </Link>
-            <Link
-              to="/calculators"
-              data-tour="calculators-link"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              재무 계산기
-            </Link>
-            <Link
-              to="/support"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              고객 지원
-            </Link>
-            <Link
-              to="/notifications"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative"
-            >
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </Link>
-            {user ? (
-              <UserMenu />
-            ) : (
-              <>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/login">로그인</Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link to="/signup">회원가입</Link>
-                  </Button>
-                </div>
-              </>
-            )}
-          </nav>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 md:py-32">

@@ -1,14 +1,13 @@
-import { AlertCircle, Bell,Calendar, Download, Eye, MessageCircle, TrendingUp } from "lucide-react";
+import { AlertCircle, Bell, Calendar, Download, Eye, MessageCircle, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import { CartesianGrid, Line, LineChart, ReferenceLine,ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { AppHeader } from "@/components/app-header";
-import { Breadcrumb } from "@/components/breadcrumb";
 import { RiskGauge } from "@/components/risk-gauge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth,useDiagnosisHistory } from "@/lib/api";
+import { useAuth, useDiagnosisHistory } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -125,7 +124,6 @@ export default function DashboardPage() {
     <>
       <AppHeader />
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-        <Breadcrumb items={[{ label: "대시보드" }]} />
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           {/* Page Header */}
           <div className="mb-8">

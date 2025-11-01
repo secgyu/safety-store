@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AppHeader } from "@/components/app-header";
-import { Breadcrumb } from "@/components/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -95,8 +94,6 @@ export default function DiagnosePage() {
       <AppHeader />
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <Breadcrumb items={[{ label: "진단하기" }]} />
-
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">

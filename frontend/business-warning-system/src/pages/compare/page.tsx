@@ -1,6 +1,21 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ZAxis,
+} from "recharts";
 
 import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
@@ -88,8 +103,158 @@ export default function ComparePage() {
   // 실제 조회할 업종: 세부업종이 선택되면 그것을, 아니면 대분류 사용
   const actualIndustry = selectedSubIndustry === "__all__" ? selectedCategory : selectedSubIndustry;
 
-  // API 호출 - 벤치마크 데이터 (지역은 성동구로 고정)
+  // API 호출 - 현재 선택된 업종의 벤치마크 데이터
   const { data: benchmarkData, isLoading: isBenchmarkLoading } = useBenchmark(actualIndustry, undefined);
+
+  // 모든 대분류 업종의 벤치마크 데이터 가져오기 (다중 업종 비교용)
+  const { data: restaurantData } = useBenchmark("restaurant", undefined);
+  const { data: cafeData } = useBenchmark("cafe", undefined);
+  const { data: fastfoodData } = useBenchmark("fastfood", undefined);
+  const { data: pubData } = useBenchmark("pub", undefined);
+  const { data: retailData } = useBenchmark("retail", undefined);
+  const { data: _otherData } = useBenchmark("other", undefined);
+
+  // 다중 업종 비교 차트 데이터 준비
+  const multiIndustryChartData = useMemo(() => {
+    return [
+      {
+        name: "음식점",
+        위험도: restaurantData?.averageRiskScore || 0,
+        매출: Math.round((restaurantData?.metrics?.revenue?.average || 0) / 10000), // 만원 단위
+        고객수: restaurantData?.metrics?.customers?.average || 0,
+        비용: Math.round((restaurantData?.metrics?.expenses?.average || 0) / 10000),
+      },
+      {
+        name: "카페",
+        위험도: cafeData?.averageRiskScore || 0,
+        매출: Math.round((cafeData?.metrics?.revenue?.average || 0) / 10000),
+        고객수: cafeData?.metrics?.customers?.average || 0,
+        비용: Math.round((cafeData?.metrics?.expenses?.average || 0) / 10000),
+      },
+      {
+        name: "패스트푸드",
+        위험도: fastfoodData?.averageRiskScore || 0,
+        매출: Math.round((fastfoodData?.metrics?.revenue?.average || 0) / 10000),
+        고객수: fastfoodData?.metrics?.customers?.average || 0,
+        비용: Math.round((fastfoodData?.metrics?.expenses?.average || 0) / 10000),
+      },
+      {
+        name: "주점",
+        위험도: pubData?.averageRiskScore || 0,
+        매출: Math.round((pubData?.metrics?.revenue?.average || 0) / 10000),
+        고객수: pubData?.metrics?.customers?.average || 0,
+        비용: Math.round((pubData?.metrics?.expenses?.average || 0) / 10000),
+      },
+      {
+        name: "소매",
+        위험도: retailData?.averageRiskScore || 0,
+        매출: Math.round((retailData?.metrics?.revenue?.average || 0) / 10000),
+        고객수: retailData?.metrics?.customers?.average || 0,
+        비용: Math.round((retailData?.metrics?.expenses?.average || 0) / 10000),
+      },
+    ];
+  }, [restaurantData, cafeData, fastfoodData, pubData, retailData]);
+
+  // 매출/고객 트렌드 데이터 (월별) - 샘플 데이터 생성
+  const trendData = useMemo(() => {
+    const baseRevenue = benchmarkData?.metrics?.revenue?.average || 45000000;
+    const baseCustomers = benchmarkData?.metrics?.customers?.average || 850;
+
+    return [
+      {
+        월: "23년 12월",
+        내가게_매출: Math.round((baseRevenue * 0.85) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 0.88) / 10000),
+        내가게_고객: Math.round(baseCustomers * 0.82),
+        업종평균_고객: Math.round(baseCustomers * 0.85),
+      },
+      {
+        월: "24년 1월",
+        내가게_매출: Math.round((baseRevenue * 0.8) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 0.83) / 10000),
+        내가게_고객: Math.round(baseCustomers * 0.78),
+        업종평균_고객: Math.round(baseCustomers * 0.81),
+      },
+      {
+        월: "24년 2월",
+        내가게_매출: Math.round((baseRevenue * 0.78) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 0.81) / 10000),
+        내가게_고객: Math.round(baseCustomers * 0.75),
+        업종평균_고객: Math.round(baseCustomers * 0.78),
+      },
+      {
+        월: "24년 3월",
+        내가게_매출: Math.round((baseRevenue * 0.88) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 0.9) / 10000),
+        내가게_고객: Math.round(baseCustomers * 0.85),
+        업종평균_고객: Math.round(baseCustomers * 0.87),
+      },
+      {
+        월: "24년 4월",
+        내가게_매출: Math.round((baseRevenue * 0.92) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 0.94) / 10000),
+        내가게_고객: Math.round(baseCustomers * 0.9),
+        업종평균_고객: Math.round(baseCustomers * 0.92),
+      },
+      {
+        월: "24년 5월",
+        내가게_매출: Math.round((baseRevenue * 0.98) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 0.98) / 10000),
+        내가게_고객: Math.round(baseCustomers * 0.96),
+        업종평균_고객: Math.round(baseCustomers * 0.96),
+      },
+      {
+        월: "24년 6월",
+        내가게_매출: Math.round((baseRevenue * 1.05) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 1.0) / 10000),
+        내가게_고객: Math.round(baseCustomers * 1.02),
+        업종평균_고객: Math.round(baseCustomers * 0.98),
+      },
+      {
+        월: "24년 7월",
+        내가게_매출: Math.round((baseRevenue * 1.1) / 10000),
+        업종평균_매출: Math.round((baseRevenue * 1.02) / 10000),
+        내가게_고객: Math.round(baseCustomers * 1.08),
+        업종평균_고객: Math.round(baseCustomers * 1.0),
+      },
+    ];
+  }, [benchmarkData]);
+
+  // 산점도 데이터 (매출 vs 위험도)
+  const scatterData = useMemo(() => {
+    return [
+      {
+        name: "음식점",
+        매출: Math.round((restaurantData?.metrics?.revenue?.average || 0) / 10000),
+        위험도: restaurantData?.averageRiskScore || 0,
+        고객수: restaurantData?.metrics?.customers?.average || 0,
+      },
+      {
+        name: "카페",
+        매출: Math.round((cafeData?.metrics?.revenue?.average || 0) / 10000),
+        위험도: cafeData?.averageRiskScore || 0,
+        고객수: cafeData?.metrics?.customers?.average || 0,
+      },
+      {
+        name: "패스트푸드",
+        매출: Math.round((fastfoodData?.metrics?.revenue?.average || 0) / 10000),
+        위험도: fastfoodData?.averageRiskScore || 0,
+        고객수: fastfoodData?.metrics?.customers?.average || 0,
+      },
+      {
+        name: "주점",
+        매출: Math.round((pubData?.metrics?.revenue?.average || 0) / 10000),
+        위험도: pubData?.averageRiskScore || 0,
+        고객수: pubData?.metrics?.customers?.average || 0,
+      },
+      {
+        name: "소매",
+        매출: Math.round((retailData?.metrics?.revenue?.average || 0) / 10000),
+        위험도: retailData?.averageRiskScore || 0,
+        고객수: retailData?.metrics?.customers?.average || 0,
+      },
+    ];
+  }, [restaurantData, cafeData, fastfoodData, pubData, retailData]);
 
   // 대분류 변경 시 세부업종 초기화
   const handleCategoryChange = (value: string) => {
@@ -101,9 +266,61 @@ export default function ComparePage() {
     return value.toLocaleString("ko-KR");
   };
 
+  // 차트 Tooltip 커스텀
+  const CustomTooltip = ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean;
+    payload?: Array<{ name: string; value: number; color: string }>;
+    label?: string;
+  }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-bold mb-2">{label}</p>
+          {payload.map((entry: { name: string; value: number; color: string }, index: number) => (
+            <p key={index} style={{ color: entry.color }} className="text-sm">
+              {entry.name}:{" "}
+              {entry.name === "매출" || entry.name === "비용"
+                ? `${entry.value.toLocaleString()}만원`
+                : entry.name === "위험도"
+                ? `${entry.value}%`
+                : `${entry.value.toLocaleString()}명`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // 산점도 커스텀 Tooltip
+  const ScatterTooltip = ({
+    active,
+    payload,
+  }: {
+    active?: boolean;
+    payload?: Array<{ payload: { name: string; 매출: number; 위험도: number; 고객수: number } }>;
+  }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-bold mb-2">{data.name}</p>
+          <p className="text-sm">매출: {data.매출.toLocaleString()}만원</p>
+          <p className="text-sm">위험도: {data.위험도}%</p>
+          <p className="text-sm">고객 수: {data.고객수.toLocaleString()}명</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   if (isBenchmarkLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <div className="min-h-screen bg-linear-to-b from-blue-50 to-white">
         <AppHeader />
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <div className="text-center py-12">데이터 로딩 중...</div>
@@ -113,7 +330,7 @@ export default function ComparePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white">
       <AppHeader />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -167,6 +384,402 @@ export default function ComparePage() {
           </CardContent>
         </Card>
 
+        {/* 매출/고객 트렌드 라인 차트 */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span>⭐</span>
+              <span>매출/고객 트렌드 비교</span>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">내 가게와 업종 평균의 월별 추이를 비교해보세요</p>
+          </CardHeader>
+          <CardContent>
+            {/* 매출 트렌드 */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">💰 월별 매출 추이 비교</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="월" />
+                  <YAxis label={{ value: "매출 (만원)", angle: -90, position: "insideLeft" }} />
+                  <Tooltip
+                    formatter={(value: number) => `${value.toLocaleString()}만원`}
+                    contentStyle={{ backgroundColor: "white", border: "1px solid #ccc", borderRadius: "8px" }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="내가게_매출"
+                    stroke="#3b82f6"
+                    strokeWidth={3}
+                    name="내 가게 매출"
+                    dot={{ r: 5 }}
+                    activeDot={{ r: 7 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="업종평균_매출"
+                    stroke="#94a3b8"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    name="업종 평균 매출"
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+
+              {/* 매출 트렌드 인사이트 */}
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1 text-blue-900">매출 트렌드 분석</h4>
+                    <p className="text-sm text-blue-800">
+                      최근 2개월간 내 가게의 매출이 업종 평균을 상회하며 성장세를 보이고 있습니다. 6월과 7월에는 업종
+                      평균 대비 각각 5%, 8% 높은 매출을 기록했습니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 고객 수 트렌드 */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">👥 월별 고객 수 추이 비교</h3>
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="월" />
+                  <YAxis label={{ value: "고객 수 (명)", angle: -90, position: "insideLeft" }} />
+                  <Tooltip
+                    formatter={(value: number) => `${value.toLocaleString()}명`}
+                    contentStyle={{ backgroundColor: "white", border: "1px solid #ccc", borderRadius: "8px" }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="내가게_고객"
+                    stroke="#8b5cf6"
+                    strokeWidth={3}
+                    name="내 가게 고객"
+                    dot={{ r: 5 }}
+                    activeDot={{ r: 7 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="업종평균_고객"
+                    stroke="#94a3b8"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    name="업종 평균 고객"
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+
+              {/* 고객 수 트렌드 인사이트 */}
+              <div className="mt-4 p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <TrendingUp className="h-5 w-5 text-purple-600 mt-0.5 shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1 text-purple-900">고객 수 트렌드 분석</h4>
+                    <p className="text-sm text-purple-800">
+                      1-2월 비수기를 거쳐 3월부터 꾸준한 회복세를 보이고 있습니다. 7월 현재 고객 수는 업종 평균 대비 8%
+                      높은 수준으로, 고객 유치 전략이 효과적으로 작동하고 있습니다.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 종합 인사이트 */}
+            <div className="mt-8 p-6 bg-linear-to-r from-green-50 to-blue-50 rounded-lg">
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <span>💡</span>
+                <span>종합 트렌드 인사이트</span>
+              </h3>
+              <div className="space-y-2 text-sm">
+                <p className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>
+                    <span className="font-semibold text-foreground">성장 추세:</span> 매출과 고객 수 모두 업종 평균을
+                    상회하며 상승 곡선을 그리고 있습니다.
+                  </span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">✓</span>
+                  <span>
+                    <span className="font-semibold text-foreground">계절성 대응:</span> 1-2월 비수기에도 업종 평균과
+                    유사한 하락폭을 보여 안정적인 운영을 하고 있습니다.
+                  </span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold">→</span>
+                  <span>
+                    <span className="font-semibold text-foreground">권장사항:</span> 현재의 성장세를 유지하되,
+                    재방문율을 높이는 로열티 프로그램 도입을 고려해보세요.
+                  </span>
+                </p>
+                <p className="mt-4 text-xs text-muted-foreground">
+                  * 내 가게 데이터는 시뮬레이션 데이터입니다. 실제 데이터 연동을 위해서는 진단 페이지에서 정보를
+                  입력해주세요.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 산점도 - 매출 vs 위험도 관계 */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span>⭐</span>
+              <span>산점도 - 매출과 위험도 관계 분석</span>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              업종별 매출과 위험도의 상관관계를 한눈에 파악하세요. 버블 크기는 고객 수를 나타냅니다.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={500}>
+              <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  type="number"
+                  dataKey="매출"
+                  name="매출"
+                  unit="만원"
+                  label={{ value: "매출 (만원)", position: "bottom" }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="위험도"
+                  name="위험도"
+                  unit="%"
+                  label={{ value: "위험도 (%)", angle: -90, position: "insideLeft" }}
+                />
+                <ZAxis type="number" dataKey="고객수" range={[100, 1000]} name="고객수" />
+                <Tooltip content={<ScatterTooltip />} cursor={{ strokeDasharray: "3 3" }} />
+                <Legend />
+                <Scatter name="음식점" data={[scatterData[0]]} fill="#f59e0b" />
+                <Scatter name="카페" data={[scatterData[1]]} fill="#06b6d4" />
+                <Scatter name="패스트푸드" data={[scatterData[2]]} fill="#ec4899" />
+                <Scatter name="주점" data={[scatterData[3]]} fill="#8b5cf6" />
+                <Scatter name="소매" data={[scatterData[4]]} fill="#10b981" />
+              </ScatterChart>
+            </ResponsiveContainer>
+
+            {/* 산점도 해석 가이드 */}
+            <div className="mt-6 grid md:grid-cols-2 gap-4">
+              {/* 좌측: 사분면 설명 */}
+              <div className="p-5 bg-linear-to-br from-green-50 to-blue-50 rounded-lg border border-green-200">
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                  <span>📍</span>
+                  <span>최적 구간 (고매출 저위험)</span>
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  오른쪽 아래 영역에 위치한 업종이 가장 이상적입니다. 높은 매출과 낮은 위험도를 동시에 달성한
+                  업종입니다.
+                </p>
+                <div className="space-y-2 text-sm">
+                  {scatterData
+                    .filter((d) => d.매출 > 4000 && d.위험도 < 60)
+                    .map((d, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <span className="text-green-600">✓</span>
+                        <span className="font-semibold">{d.name}</span>
+                        <span className="text-muted-foreground text-xs">
+                          (매출 {d.매출.toLocaleString()}만원, 위험도 {d.위험도}%)
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              {/* 우측: 주의 구간 */}
+              <div className="p-5 bg-linear-to-br from-red-50 to-orange-50 rounded-lg border border-red-200">
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>주의 구간 (저매출 고위험)</span>
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  왼쪽 위 영역에 위치한 업종은 매출 대비 위험도가 높습니다. 특별한 관리와 개선이 필요한 업종입니다.
+                </p>
+                <div className="space-y-2 text-sm">
+                  {scatterData
+                    .filter((d) => d.매출 < 4000 && d.위험도 > 60)
+                    .map((d, idx) => (
+                      <div key={idx} className="flex items-center gap-2">
+                        <span className="text-red-600">!</span>
+                        <span className="font-semibold">{d.name}</span>
+                        <span className="text-muted-foreground text-xs">
+                          (매출 {d.매출.toLocaleString()}만원, 위험도 {d.위험도}%)
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 종합 분석 */}
+            <div className="mt-6 p-6 bg-linear-to-r from-indigo-50 to-purple-50 rounded-lg">
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <span>💡</span>
+                <span>산점도 분석 인사이트</span>
+              </h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p className="flex items-start gap-2">
+                  <span className="text-indigo-600 font-bold">•</span>
+                  <span>
+                    <span className="font-semibold text-foreground">버블 크기:</span> 고객 수를 나타냅니다. 큰
+                    버블일수록 더 많은 고객이 방문합니다.
+                  </span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-indigo-600 font-bold">•</span>
+                  <span>
+                    <span className="font-semibold text-foreground">X축 (매출):</span> 오른쪽으로 갈수록 매출이 높은
+                    업종입니다.
+                  </span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-indigo-600 font-bold">•</span>
+                  <span>
+                    <span className="font-semibold text-foreground">Y축 (위험도):</span> 위로 갈수록 폐업 위험도가 높은
+                    업종입니다.
+                  </span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <span className="text-indigo-600 font-bold">•</span>
+                  <span>
+                    <span className="font-semibold text-foreground">창업 추천:</span> 오른쪽 아래 영역의 업종들이
+                    상대적으로 안정적이고 수익성이 높습니다.
+                  </span>
+                </p>
+                <p className="mt-4 text-xs">
+                  * 데이터는 성동구 최근 6개월 실제 데이터를 기반으로 합니다. 개별 매장의 성과는 위치, 운영 방식에 따라
+                  다를 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 다중 업종 비교 막대 차트 */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span>⭐</span>
+              <span>다중 업종 비교 - 업종별 주요 지표</span>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              성동구 내 주요 업종들의 위험도, 매출, 고객 수, 비용을 한눈에 비교해보세요
+            </p>
+          </CardHeader>
+          <CardContent>
+            {/* 위험도 비교 차트 */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">📊 업종별 평균 위험도</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={multiIndustryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis label={{ value: "위험도 (%)", angle: -90, position: "insideLeft" }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Bar dataKey="위험도" fill="#ef4444" name="위험도" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 매출 비교 차트 */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">💰 업종별 월 평균 매출</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={multiIndustryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis label={{ value: "매출 (만원)", angle: -90, position: "insideLeft" }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Bar dataKey="매출" fill="#10b981" name="매출" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 고객 수 비교 차트 */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold mb-4">👥 업종별 월 평균 고객 수</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={multiIndustryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis label={{ value: "고객 수 (명)", angle: -90, position: "insideLeft" }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Bar dataKey="고객수" fill="#8b5cf6" name="고객수" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 비용 비교 차트 */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">💸 업종별 월 평균 비용</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={multiIndustryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis label={{ value: "비용 (만원)", angle: -90, position: "insideLeft" }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
+                  <Bar dataKey="비용" fill="#f97316" name="비용" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* 인사이트 요약 */}
+            <div className="mt-8 p-6 bg-linear-to-r from-blue-50 to-purple-50 rounded-lg">
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <span>💡</span>
+                <span>업종 비교 인사이트</span>
+              </h3>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  • <span className="font-semibold text-foreground">매출이 가장 높은 업종:</span>{" "}
+                  {
+                    multiIndustryChartData.reduce(
+                      (max, item) => (item.매출 > max.매출 ? item : max),
+                      multiIndustryChartData[0]
+                    )?.name
+                  }
+                </p>
+                <p>
+                  • <span className="font-semibold text-foreground">위험도가 가장 높은 업종:</span>{" "}
+                  {
+                    multiIndustryChartData.reduce(
+                      (max, item) => (item.위험도 > max.위험도 ? item : max),
+                      multiIndustryChartData[0]
+                    )?.name
+                  }
+                </p>
+                <p>
+                  • <span className="font-semibold text-foreground">고객 수가 가장 많은 업종:</span>{" "}
+                  {
+                    multiIndustryChartData.reduce(
+                      (max, item) => (item.고객수 > max.고객수 ? item : max),
+                      multiIndustryChartData[0]
+                    )?.name
+                  }
+                </p>
+                <p className="mt-4 text-xs">
+                  * 데이터는 성동구 내 각 업종의 평균값을 기준으로 합니다. 실제 매장의 성과는 위치, 규모, 운영 방식에
+                  따라 달라질 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* 벤치마크 정보 표시 */}
         {benchmarkData && (
           <Card className="mb-8">
@@ -212,7 +825,7 @@ export default function ComparePage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <TrendingUp className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
                       <div>
                         <h4 className="font-semibold mb-1">매출 추세</h4>
                         <p className="text-sm text-muted-foreground">
@@ -227,7 +840,7 @@ export default function ComparePage() {
                   </div>
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-start gap-3">
-                      <TrendingDown className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <TrendingDown className="h-5 w-5 text-purple-600 mt-0.5 shrink-0" />
                       <div>
                         <h4 className="font-semibold mb-1">고객 현황</h4>
                         <p className="text-sm text-muted-foreground">

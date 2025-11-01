@@ -328,11 +328,6 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">리소스</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link to="/blog" className="hover:text-foreground transition-colors">
-                    블로그
-                  </Link>
-                </li>
-                <li>
                   <Link to="/statistics" className="hover:text-foreground transition-colors">
                     자영업 통계
                   </Link>

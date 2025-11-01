@@ -36,9 +36,46 @@ export type NotificationSettingsResponse = components['schemas']['NotificationSe
 
 // ========== API Client ==========
 const client = createClient<paths>({
-  baseUrl: 'http://localhost:8000'
+  baseUrl: 'http://localhost:8000',
+  credentials: 'include', // 쿠키 자동 전송
 })
 
+// ========== Zustand Store (메모리만, localStorage 없음) ==========
+export const useAuthStore = create<{
+  authToken: string | null
+  setAuthToken: (token: string) => void
+  resetAuthToken: () => void
+  isInitialized: boolean
+  setInitialized: (value: boolean) => void
+}>((set) => ({
+  authToken: null,
+  isInitialized: false,
+  setInitialized: (value: boolean) => set({ isInitialized: value }),
+  resetAuthToken: () => set({ authToken: null }),
+  setAuthToken: (token: string) => set({ authToken: token }),
+}))
+
+// ========== Refresh Token으로 Access Token 갱신 ==========
+async function refreshAccessToken(): Promise<string | null> {
+  try {
+    const response = await fetch('http://localhost:8000/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include', // 쿠키 포함
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = await response.json()
+    return data.access_token
+  } catch (error) {
+    console.error('Token refresh failed:', error)
+    return null
+  }
+}
+
+// ========== API Client Middleware ==========
 client.use({
   onRequest: ({ request }) => {
     const authToken = useAuthStore.getState().authToken
@@ -46,24 +83,26 @@ client.use({
       request.headers.set('Authorization', `Bearer ${authToken}`)
     }
     return request
+  },
+  onResponse: async ({ response }) => {
+    // 401 에러 시 Refresh Token으로 재시도
+    if (response.status === 401) {
+      const newToken = await refreshAccessToken()
+      
+      if (newToken) {
+        useAuthStore.getState().setAuthToken(newToken)
+        // 재시도는 React Query에서 자동 처리
+      } else {
+        // Refresh 실패 시 로그아웃
+        useAuthStore.getState().resetAuthToken()
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login'
+        }
+      }
+    }
+    return response
   }
 })
-
-export const useAuthStore = create<{
-  authToken: string | null
-  setAuthToken: (token: string) => void
-  resetAuthToken: () => void;
-}>((set) => ({
-  authToken: null,
-  resetAuthToken: () => {
-
-    set({ authToken: null })
-  },
-  setAuthToken: (token: string) => {
-
-    set({ authToken: token })
-  }
-}));
 
 
 
@@ -78,21 +117,25 @@ function handleResponse<T extends { data?: unknown; error?: unknown }>(response:
 
 // ========== API Client Wrapper Class ==========
 class ApiClient {
-  // Auth
+  // Auth - 커스텀 로그인 사용
   async login(data: { username: string; password: string }): Promise<BearerResponse> {
-    const formData = new URLSearchParams()
-    formData.append('username', data.username)
-    formData.append('password', data.password)
-
-    const response = await client.POST('/api/auth/login', {
-      // @ts-expect-error - URLSearchParams is valid for this endpoint
-      body: formData.toString(),
+    const response = await fetch('http://localhost:8000/api/auth/login-custom', {
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
+      credentials: 'include', // 쿠키 포함
+      body: JSON.stringify({
+        email: data.username,
+        password: data.password
+      })
     })
 
-    return handleResponse(response)!
+    if (!response.ok) {
+      throw new Error('Login failed')
+    }
+
+    return response.json()
   }
 
   async signup(data: SignupRequest): Promise<FastAPIUser> {
@@ -106,6 +149,13 @@ class ApiClient {
   async getMe(): Promise<UserResponse> {
     const response = await client.GET('/api/auth/me')
     return handleResponse(response)
+  }
+
+  async logout(): Promise<void> {
+    await fetch('http://localhost:8000/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    })
   }
 
   // Diagnosis
@@ -372,6 +422,8 @@ export function useSignup() {
 }
 
 export function useAuth() {
+  const { authToken } = useAuthStore()
+  
   return useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: async () => {
@@ -382,6 +434,7 @@ export function useAuth() {
         return null;
       }
     },
+    enabled: !!authToken, // 토큰이 있을 때만 실행
     retry: false,
     staleTime: 5 * 60 * 1000, // 5분
 
@@ -392,11 +445,14 @@ export function useLogout() {
   const queryClient = useQueryClient()
   const { resetAuthToken } = useAuthStore()
 
-  return () => {
-    resetAuthToken()
-    queryClient.invalidateQueries({ queryKey: queryKeys.auth.all })
-    console.log('logout')
-  }
+  return useMutation({
+    mutationFn: () => apiClient.logout(),
+    onSuccess: () => {
+      resetAuthToken()
+      queryClient.clear()
+      window.location.href = '/login'
+    }
+  })
 }
 
 // ========== Diagnosis Hooks ==========

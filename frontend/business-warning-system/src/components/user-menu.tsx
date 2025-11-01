@@ -1,5 +1,5 @@
 import { Bell, LayoutDashboard, LogOut, Settings, UserIcon } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,13 @@ import {
 import { useAuth, useLogout } from "@/lib/api";
 
 export function UserMenu() {
-  const navigate = useNavigate();
-  const { data: authData, isPending } = useAuth();
+  const { data: authData } = useAuth();
   const logout = useLogout();
   const user = authData?.user;
-  const unreadCount = 2;
+  const unreadCount = 0;
 
   const handleSignOut = () => {
-    logout();
-
-    navigate("/");
+    logout.mutate();
   };
 
   if (!user) {

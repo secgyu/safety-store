@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useBenchmark, useCompareBenchmark } from "@/lib/api";
 
 const industries = [
   { value: "restaurant", label: "음식점" },
@@ -26,62 +27,57 @@ const regions = [
   { value: "geumho", label: "금호동" },
   { value: "oksu", label: "옥수동" },
 ];
+
 export default function ComparePage() {
   const [selectedIndustry, setSelectedIndustry] = useState("restaurant");
   const [selectedRegion, setSelectedRegion] = useState("seongsu1");
 
-  // Mock data - replace with actual API call
-  const comparisonData = [
-    { name: "내 가게", value: 25, isUser: true },
-    { name: "업종 평균", value: 20, isUser: false },
-    { name: "지역 평균", value: 22, isUser: false },
-    { name: "전국 평균", value: 18, isUser: false },
-  ];
+  // API 호출 - 벤치마크 데이터
+  const { data: benchmarkData, isLoading: isBenchmarkLoading } = useBenchmark(selectedIndustry, selectedRegion);
 
-  const detailedMetrics = [
-    {
-      metric: "매출 증가율",
-      userValue: -5,
-      industryAvg: -3,
-      unit: "%",
-    },
-    {
-      metric: "고객 유지율",
-      userValue: 65,
-      industryAvg: 70,
-      unit: "%",
-    },
-    {
-      metric: "월 평균 매출",
-      userValue: 5000000,
-      industryAvg: 5500000,
-      unit: "원",
-    },
-    {
-      metric: "월 평균 고객 수",
-      userValue: 300,
-      industryAvg: 350,
-      unit: "명",
-    },
-  ];
+  // API 호출 - 비교 분석 (사용자 데이터가 있을 경우)
+  const { data: compareData } = useCompareBenchmark();
 
-  const insights = [
-    {
-      title: "매출 추세",
-      description: "같은 지역 음식점 평균보다 5% 낮습니다",
-      trend: "down" as const,
-    },
-    {
-      title: "고객 유지율",
-      description: "업종 평균보다 5%p 낮아 개선이 필요합니다",
-      trend: "down" as const,
-    },
-    {
-      title: "시장 위치",
-      description: "상위 55% 수준으로 평균보다 약간 높습니다",
+  // 차트 데이터 생성
+  const comparisonData = compareData
+    ? [
+        { name: "내 가게", value: compareData.userScore, isUser: true },
+        { name: "업종 평균", value: compareData.industryAverage, isUser: false },
+        { name: "지역 평균", value: benchmarkData?.averageRiskScore || 0, isUser: false },
+      ]
+    : [];
+
+  // 상세 지표
+  const detailedMetrics = compareData
+    ? [
+        {
+          metric: "월 평균 매출",
+          userValue: compareData.comparison.revenue.user,
+          industryAvg: compareData.comparison.revenue.average,
+          unit: "원",
+        },
+        {
+          metric: "월 평균 지출",
+          userValue: compareData.comparison.expenses.user,
+          industryAvg: compareData.comparison.expenses.average,
+          unit: "원",
+        },
+        {
+          metric: "월 평균 고객 수",
+          userValue: compareData.comparison.customers.user,
+          industryAvg: compareData.comparison.customers.average,
+          unit: "명",
+        },
+      ]
+    : [];
+
+  // 인사이트 매핑
+  const insights =
+    compareData?.insights.map((insight, index) => ({
+      title: `인사이트 ${index + 1}`,
+      description: insight,
       trend: "neutral" as const,
-    },
-  ];
+    })) || [];
 
   const formatNumber = (value: number) => {
     return value.toLocaleString("ko-KR");
@@ -109,9 +105,19 @@ export default function ComparePage() {
     return { text: "동일", color: "text-muted-foreground" };
   };
 
+  if (isBenchmarkLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+        <AppHeader />
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <div className="text-center py-12">데이터 로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Header */}
       <AppHeader />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -159,113 +165,171 @@ export default function ComparePage() {
           </CardContent>
         </Card>
 
-        {/* Comparison Chart */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>위험도 비교</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={comparisonData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" tick={{ fill: "#6b7280" }} />
-                <YAxis tick={{ fill: "#6b7280" }} label={{ value: "위험도 (%)", angle: -90, position: "insideLeft" }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                  }}
-                  formatter={(value: number) => [`${value}%`, "위험도"]}
-                />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                  {comparisonData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.isUser ? "#3b82f6" : "#94a3b8"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">내 가게</span>는 성동구 업종 평균보다{" "}
-                <span className="font-semibold text-warning">5%p 높은</span> 위험도를 보이고 있습니다.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Detailed Metrics */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>상세 지표 비교</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {detailedMetrics.map((metric, index) => {
-                const comparison = getComparison(metric.userValue, metric.industryAvg);
-                return (
-                  <div key={index} className="border-b last:border-0 pb-6 last:pb-0">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">{metric.metric}</h3>
-                      <span className={`text-sm font-medium ${comparison.color}`}>{comparison.text}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <p className="text-sm text-muted-foreground mb-1">내 가게</p>
-                        <p className="text-2xl font-bold text-primary">
-                          {metric.unit === "원"
-                            ? `₩${formatNumber(metric.userValue)}`
-                            : `${metric.userValue}${metric.unit}`}
-                        </p>
-                      </div>
-                      <div className="bg-muted rounded-lg p-4">
-                        <p className="text-sm text-muted-foreground mb-1">업종 평균</p>
-                        <p className="text-2xl font-bold text-foreground">
-                          {metric.unit === "원"
-                            ? `₩${formatNumber(metric.industryAvg)}`
-                            : `${metric.industryAvg}${metric.unit}`}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Insights */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>인사이트</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {insights.map((insight, index) => (
-                <div key={index} className="flex gap-4 p-4 bg-muted/50 rounded-lg">
-                  <div className="flex-shrink-0 mt-1">{getTrendIcon(insight.trend)}</div>
-                  <div>
-                    <h4 className="font-semibold mb-1">{insight.title}</h4>
-                    <p className="text-sm text-muted-foreground">{insight.description}</p>
-                  </div>
+        {/* 벤치마크 정보 표시 */}
+        {benchmarkData && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>업종 벤치마크 정보</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">평균 위험도</p>
+                  <p className="text-2xl font-bold">{benchmarkData.averageRiskScore}%</p>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">평균 매출</p>
+                  <p className="text-2xl font-bold">₩{formatNumber(benchmarkData.metrics.revenue.average)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">평균 지출</p>
+                  <p className="text-2xl font-bold">₩{formatNumber(benchmarkData.metrics.expenses.average)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">평균 고객 수</p>
+                  <p className="text-2xl font-bold">{formatNumber(benchmarkData.metrics.customers.average)}명</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Percentile Info */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-          <CardContent className="pt-6 pb-6">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">전체 순위</p>
-              <p className="text-4xl font-bold text-primary mb-2">상위 55%</p>
-              <p className="text-muted-foreground">
-                성동구 같은 업종 중 <span className="font-semibold">평균보다 약간 높은</span> 위험도입니다
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Comparison Chart */}
+        {compareData && (
+          <>
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>위험도 비교</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={comparisonData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fill: "#6b7280" }} />
+                    <YAxis
+                      tick={{ fill: "#6b7280" }}
+                      label={{ value: "위험도 (%)", angle: -90, position: "insideLeft" }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                      }}
+                      formatter={(value: number) => [`${value}%`, "위험도"]}
+                    />
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                      {comparisonData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.isUser ? "#3b82f6" : "#94a3b8"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">내 가게</span>는 업종 평균보다{" "}
+                    <span className="font-semibold text-warning">
+                      {Math.abs(compareData.userScore - compareData.industryAverage).toFixed(1)}%p{" "}
+                      {compareData.userScore > compareData.industryAverage ? "높은" : "낮은"}
+                    </span>{" "}
+                    위험도를 보이고 있습니다.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Detailed Metrics */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>상세 지표 비교</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {detailedMetrics.map((metric, index) => {
+                    const comparison = getComparison(metric.userValue, metric.industryAvg);
+                    return (
+                      <div key={index} className="border-b last:border-0 pb-6 last:pb-0">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold text-lg">{metric.metric}</h3>
+                          <span className={`text-sm font-medium ${comparison.color}`}>{comparison.text}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-blue-50 rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">내 가게</p>
+                            <p className="text-2xl font-bold text-primary">
+                              {metric.unit === "원"
+                                ? `₩${formatNumber(metric.userValue)}`
+                                : `${metric.userValue}${metric.unit}`}
+                            </p>
+                          </div>
+                          <div className="bg-muted rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">업종 평균</p>
+                            <p className="text-2xl font-bold text-foreground">
+                              {metric.unit === "원"
+                                ? `₩${formatNumber(metric.industryAvg)}`
+                                : `${metric.industryAvg}${metric.unit}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Insights */}
+            {insights.length > 0 && (
+              <Card className="mb-8">
+                <CardHeader>
+                  <CardTitle>인사이트</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {insights.map((insight, index) => (
+                      <div key={index} className="flex gap-4 p-4 bg-muted/50 rounded-lg">
+                        <div className="flex-shrink-0 mt-1">{getTrendIcon(insight.trend)}</div>
+                        <div>
+                          <h4 className="font-semibold mb-1">{insight.title}</h4>
+                          <p className="text-sm text-muted-foreground">{insight.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Percentile Info */}
+            <Card className="mb-8 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
+              <CardContent className="pt-6 pb-6">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">전체 순위</p>
+                  <p className="text-4xl font-bold text-primary mb-2">상위 {compareData.percentile.toFixed(0)}%</p>
+                  <p className="text-muted-foreground">
+                    {selectedRegion} 같은 업종 중{" "}
+                    <span className="font-semibold">
+                      {compareData.percentile < 50 ? "평균보다 낮은" : "평균보다 높은"}
+                    </span>{" "}
+                    위험도입니다
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* 데이터가 없을 경우 안내 메시지 */}
+        {!compareData && (
+          <Card className="mb-8">
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground mb-4">비교 분석을 위해서는 먼저 진단을 완료해주세요.</p>
+              <Button asChild>
+                <Link to="/diagnose">진단 시작하기</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">

@@ -3,20 +3,61 @@ import numpy as np
 from typing import Dict, Optional
 import os
 
-# 프론트엔드 업종 코드 -> 실제 데이터 업종명 매핑
+# 프론트엔드 카테고리 -> 실제 데이터 업종명 매핑 (6개 대분류)
+CATEGORY_MAPPING = {
+    # 1. 음식점 (한식/양식/일식/중식 등)
+    "restaurant": [
+        # 한식 전체
+        "한식-육류/고기", "백반/가정식", "한식-단품요리일반", "한식-해물/생선",
+        "한식-국수/만두", "한식-국밥/설렁탕", "한식-찌개/전골", "한식-냉면",
+        "한식뷔페", "한식-감자탕", "한식-죽", "한식-두부요리", "한정식",
+        # 양식/일식/중식
+        "양식", "일식당", "일식-덮밥/돈가스", "일식-우동/소바/라면",
+        "일식-초밥/롤", "일식-샤브샤브", "일식-참치회",
+        "중식당", "중식-훠궈/마라탕", "중식-딤섬/중식만두",
+        "동남아/인도음식", "기타세계요리", "스테이크",
+        # 분식/간편식
+        "분식", "도시락", "기사식당", "구내식당/푸드코트"
+    ],
+    
+    # 2. 카페/베이커리
+    "cafe": [
+        "카페", "커피전문점", "베이커리", "아이스크림/빙수", "도너츠",
+        "마카롱", "테마카페", "테이크아웃커피", "와플/크로플", "탕후루"
+    ],
+    
+    # 3. 패스트푸드/치킨
+    "fastfood": [
+        "치킨", "피자", "햄버거", "샌드위치/토스트", "꼬치구이"
+    ],
+    
+    # 4. 주점/술집
+    "pub": [
+        "호프/맥주", "요리주점", "일반 유흥주점", "이자카야", "와인바",
+        "룸살롱/단란주점", "민속주점", "포장마차"
+    ],
+    
+    # 5. 식자재/편의점
+    "retail": [
+        "축산물", "식료품", "농산물", "청과물", "수산물", "주류",
+        "반찬", "떡/한과", "떡/한과 제조", "미곡상", "담배", "건어물", "유제품",
+        "인삼제품", "건강식품", "건강원", "차", "와인샵", "주스"
+    ],
+    
+    # 6. 기타
+    "other": [
+        "식품 제조"
+    ]
+}
+
+# 하위호환성을 위한 단일 매핑 (대표 업종)
 INDUSTRY_MAPPING = {
-    "restaurant": "한식-육류/고기",  # 가장 많은 음식점 업종
+    "restaurant": "한식-육류/고기",
     "cafe": "카페",
-    "retail": "편의점/슈퍼마켓",
-    "service": "일반 서비스업",
-    "beauty": "미용/미용실",
-    "academy": "학원",
-    # 추가 매핑
-    "chicken": "치킨",
-    "coffee": "커피전문점",
-    "pub": "호프/간이주점",
-    "bakery": "제과점",
-    "fastfood": "패스트푸드",
+    "fastfood": "치킨",
+    "pub": "호프/맥주",
+    "retail": "식료품",
+    "other": "식품 제조"
 }
 
 # 편의 함수로 export
@@ -195,7 +236,7 @@ class BenchmarkCalculator:
         특정 업종의 벤치마크 데이터 반환
         
         Args:
-            industry_code: 업종 코드 (영문 또는 한글)
+            industry_code: 업종 코드 (영문 카테고리 또는 한글 업종명)
             base_revenue: 기준 매출 (백분위를 실제 금액으로 변환할 때 사용)
             base_customers: 기준 고객 수
         
@@ -205,7 +246,12 @@ class BenchmarkCalculator:
         if self.industry_stats is None:
             self.calculate_industry_benchmarks()
         
-        # 프론트엔드 코드를 실제 업종명으로 매핑
+        # 프론트엔드 카테고리인지 확인
+        if industry_code in CATEGORY_MAPPING:
+            # 카테고리에 속한 모든 업종의 평균 계산
+            return self._get_category_average(industry_code, base_revenue, base_customers)
+        
+        # 단일 업종명으로 처리
         mapped_industry = self.map_industry_code(industry_code)
         
         # 업종 코드가 없으면 전체 평균 반환
@@ -241,6 +287,82 @@ class BenchmarkCalculator:
             "median_risk_score": round(median_risk, 2),
             "merchant_count": int(stats.get('merchant_count', 0)),
             "sample_size": int(stats.get('sales_count', 0))
+        }
+    
+    def _get_category_average(self, category_code: str, 
+                             base_revenue: int = 50000000,
+                             base_customers: int = 1000) -> Dict:
+        """
+        카테고리에 속한 모든 업종의 가중 평균 계산
+        
+        Args:
+            category_code: 카테고리 코드 (예: "restaurant", "cafe")
+            base_revenue: 기준 매출
+            base_customers: 기준 고객 수
+        
+        Returns:
+            카테고리 평균 벤치마크
+        """
+        if self.industry_stats is None:
+            self.calculate_industry_benchmarks()
+        
+        # 카테고리에 속한 업종 목록
+        industries_in_category = CATEGORY_MAPPING.get(category_code, [])
+        
+        if not industries_in_category:
+            print(f"[WARN] 카테고리 '{category_code}'에 업종이 없습니다.")
+            return self._get_default_benchmark()
+        
+        # 해당 업종들의 통계만 필터링
+        valid_industries = [ind for ind in industries_in_category if ind in self.industry_stats.index]
+        
+        if not valid_industries:
+            print(f"[WARN] 카테고리 '{category_code}'에 유효한 업종 데이터가 없습니다.")
+            return self._get_default_benchmark()
+        
+        category_stats = self.industry_stats.loc[valid_industries]
+        
+        # 가맹점 수 기반 가중 평균 계산
+        total_merchants = category_stats['merchant_count'].sum()
+        
+        if total_merchants == 0:
+            return self._get_default_benchmark()
+        
+        # 가중 평균
+        weighted_sales_mean = (category_stats['sales_mean'] * category_stats['merchant_count']).sum() / total_merchants
+        weighted_customers_mean = (category_stats['customers_mean'] * category_stats['merchant_count']).sum() / total_merchants
+        weighted_risk_mean = (category_stats['risk_mean'] * category_stats['risk_merchant_count']).sum() / category_stats['risk_merchant_count'].sum()
+        
+        # 중앙값은 단순 평균
+        sales_median = category_stats['sales_median'].mean()
+        customers_median = category_stats['customers_median'].mean()
+        risk_median = category_stats['risk_median'].mean()
+        
+        # 백분위를 실제 값으로 변환
+        avg_revenue = int(weighted_sales_mean * base_revenue / 100)
+        median_revenue = int(sales_median * base_revenue / 100)
+        avg_customers = int(weighted_customers_mean * base_customers / 100)
+        median_customers = int(customers_median * base_customers / 100)
+        
+        # 위험도 (0~1 스케일을 0~100 스케일로 변환)
+        avg_risk = float(weighted_risk_mean * 100)
+        median_risk = float(risk_median * 100)
+        
+        print(f"[INFO] 카테고리 '{category_code}': {len(valid_industries)}개 업종, 총 {int(total_merchants)}개 가맹점")
+        
+        return {
+            "industry": f"{category_code}_category",
+            "industry_code": category_code,
+            "category_name": category_code,
+            "industries_count": len(valid_industries),
+            "average_revenue": avg_revenue,
+            "median_revenue": median_revenue,
+            "average_customers": avg_customers,
+            "median_customers": median_customers,
+            "average_risk_score": round(avg_risk, 2),
+            "median_risk_score": round(median_risk, 2),
+            "merchant_count": int(total_merchants),
+            "sample_size": int(category_stats['sales_count'].sum())
         }
     
     def _get_default_benchmark(self) -> Dict:

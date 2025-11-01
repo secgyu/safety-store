@@ -21,7 +21,7 @@ type Step = {
 const steps: Step[] = [
   {
     id: 1,
-    question: "안녕하세요! 사업체 코드(ENCODED_MCT)를 입력해주세요.",
+    question: "안녕하세요! 성동구에 있는 사업체 코드(ENCODED_MCT)를 입력해주세요.",
     field: "encoded_mct",
     type: "text",
     placeholder: "사업체 코드를 입력하세요",

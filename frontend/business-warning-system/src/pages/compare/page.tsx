@@ -18,17 +18,17 @@ const industries = [
 ];
 
 const regions = [
-  { value: "gangnam", label: "강남구" },
-  { value: "seocho", label: "서초구" },
-  { value: "songpa", label: "송파구" },
-  { value: "gangdong", label: "강동구" },
-  { value: "mapo", label: "마포구" },
-  { value: "yongsan", label: "용산구" },
+  { value: "seongsu1", label: "성수1가" },
+  { value: "seongsu2", label: "성수2가" },
+  { value: "wangsimni", label: "왕십리" },
+  { value: "haengdang", label: "행당동" },
+  { value: "eungbong", label: "응봉동" },
+  { value: "geumho", label: "금호동" },
+  { value: "oksu", label: "옥수동" },
 ];
-
 export default function ComparePage() {
   const [selectedIndustry, setSelectedIndustry] = useState("restaurant");
-  const [selectedRegion, setSelectedRegion] = useState("gangnam");
+  const [selectedRegion, setSelectedRegion] = useState("seongsu1");
 
   // Mock data - replace with actual API call
   const comparisonData = [
@@ -187,7 +187,7 @@ export default function ComparePage() {
             </ResponsiveContainer>
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">내 가게</span>는 업종 평균보다{" "}
+                <span className="font-semibold text-foreground">내 가게</span>는 성동구 업종 평균보다{" "}
                 <span className="font-semibold text-warning">5%p 높은</span> 위험도를 보이고 있습니다.
               </p>
             </div>
@@ -261,7 +261,7 @@ export default function ComparePage() {
               <p className="text-sm text-muted-foreground mb-2">전체 순위</p>
               <p className="text-4xl font-bold text-primary mb-2">상위 55%</p>
               <p className="text-muted-foreground">
-                같은 업종 중 <span className="font-semibold">평균보다 약간 높은</span> 위험도입니다
+                성동구 같은 업종 중 <span className="font-semibold">평균보다 약간 높은</span> 위험도입니다
               </p>
             </div>
           </CardContent>

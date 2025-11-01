@@ -10,7 +10,7 @@
   // .vscode/settings.json
 
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   // .vscode/settings.json
   "editor.formatOnSave": true

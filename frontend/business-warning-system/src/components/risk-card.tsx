@@ -1,4 +1,4 @@
-import { MapPin,TrendingDown, Users } from "lucide-react";
+import { MapPin, TrendingDown, Users } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -16,21 +16,21 @@ export function RiskCard({ type, value, description }: RiskCardProps) {
       case "sales":
         return {
           icon: TrendingDown,
-          title: "매출 위험도",
+          title: "매출 점수",
           color: "text-blue-600",
           bgColor: "bg-blue-100",
         };
       case "customer":
         return {
           icon: Users,
-          title: "고객 위험도",
+          title: "고객 점수",
           color: "text-green-600",
           bgColor: "bg-green-100",
         };
       case "market":
         return {
           icon: MapPin,
-          title: "시장 위험도",
+          title: "시장 점수",
           color: "text-purple-600",
           bgColor: "bg-purple-100",
         };

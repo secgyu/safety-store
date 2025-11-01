@@ -6,6 +6,8 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Line,
+  LineChart,
   PolarAngleAxis,
   PolarGrid,
   PolarRadiusAxis,
@@ -26,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { generatePDFReport } from "@/lib/pdf-generator";
-import { useBenchmark } from "@/lib/api";
+import { useBenchmark, useDiagnosisHistory } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -52,9 +54,13 @@ export default function ResultsPage() {
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [diagnosisInfo, setDiagnosisInfo] = useState<any>(null);
   const [industryCode, setIndustryCode] = useState<string>("restaurant");
+  const [encodedMct, setEncodedMct] = useState<string>("");
 
   // 업종 평균 데이터 가져오기
   const { data: benchmarkData } = useBenchmark(industryCode, undefined);
+
+  // 진단 이력 데이터 가져오기 (시계열 차트용)
+  const { data: historyData } = useDiagnosisHistory(encodedMct);
 
   useEffect(() => {
     const diagnosisDataStr = sessionStorage.getItem("diagnosisData");
@@ -70,6 +76,11 @@ export default function ResultsPage() {
       const parsedResult = JSON.parse(diagnosisResultStr);
 
       setDiagnosisInfo(parsedInfo);
+      
+      // encoded_mct 설정 (이력 조회용)
+      if (parsedInfo.encoded_mct) {
+        setEncodedMct(parsedInfo.encoded_mct);
+      }
 
       // API 응답을 ResultData 형식으로 매핑
       const mappedResult: ResultData = {
@@ -447,6 +458,250 @@ export default function ResultsPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* 시계열 라인 차트 - 월별 위험도 추세 */}
+          {historyData && historyData.diagnoses && historyData.diagnoses.length > 1 && (
+            <div className="mb-10">
+              <h2 className="text-3xl font-bold mb-8">월별 위험도 추세</h2>
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>시간에 따른 위험도 변화</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    최근 {historyData.diagnoses.length}개월간의 위험도 추세를 확인하세요
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={350}>
+                    <LineChart
+                      data={historyData.diagnoses
+                        .slice()
+                        .reverse()
+                        .map((d) => ({
+                          month: d.taYm ? d.taYm.substring(0, 7) : "",
+                          overall: d.overallScore,
+                          sales: d.components.sales.score,
+                          customer: d.components.customer.score,
+                          market: d.components.market.score,
+                        }))}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="month" tick={{ fill: "#6b7280", fontSize: 12 }} />
+                      <YAxis
+                        tick={{ fill: "#6b7280", fontSize: 12 }}
+                        label={{ value: "점수", angle: -90, position: "insideLeft" }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                        }}
+                        formatter={(value: number) => value.toFixed(1)}
+                      />
+                      <Legend wrapperStyle={{ paddingTop: "20px" }} />
+                      <Line
+                        type="monotone"
+                        dataKey="overall"
+                        stroke="#8b5cf6"
+                        strokeWidth={3}
+                        name="전체 위험도"
+                        dot={{ r: 5 }}
+                        activeDot={{ r: 7 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="sales"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        name="매출 안정성"
+                        dot={{ r: 4 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="customer"
+                        stroke="#ec4899"
+                        strokeWidth={2}
+                        name="고객 유지력"
+                        dot={{ r: 4 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="market"
+                        stroke="#10b981"
+                        strokeWidth={2}
+                        name="시장 경쟁력"
+                        dot={{ r: 4 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+
+                  {/* 추세 분석 */}
+                  <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                    <div className="flex gap-3">
+                      <TrendingUp className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-purple-900 mb-1">📈 추세 분석</h4>
+                        <p className="text-sm text-purple-800">
+                          {(() => {
+                            const firstScore = historyData.diagnoses[historyData.diagnoses.length - 1].overallScore;
+                            const lastScore = historyData.diagnoses[0].overallScore;
+                            const trend = lastScore - firstScore;
+
+                            if (trend > 5) {
+                              return "위험도가 지속적으로 개선되고 있습니다! 현재의 전략을 유지하세요. 🎉";
+                            } else if (trend > 0) {
+                              return "위험도가 소폭 개선되고 있습니다. 꾸준히 관리하면 더 나아질 것입니다.";
+                            } else if (trend > -5) {
+                              return "위험도가 소폭 악화되고 있습니다. 개선 방안을 검토해보세요.";
+                            } else {
+                              return "위험도가 크게 악화되고 있습니다. 즉시 개선 조치가 필요합니다. ⚠️";
+                            }
+                          })()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* 백분위 게이지 - 업종 내 내 위치 */}
+          {benchmarkData && (
+            <div className="mb-10">
+              <h2 className="text-3xl font-bold mb-8">업종 내 내 위치</h2>
+              <Card className="glass-card bg-gradient-to-br from-indigo-50 to-purple-50">
+                <CardContent className="pt-8 pb-8">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-2">같은 업종 내 상대적 순위</p>
+                    <div className="relative">
+                      {/* 백분위 게이지 */}
+                      <div className="flex justify-center items-center mb-6">
+                        <div className="relative w-64 h-64">
+                          <svg viewBox="0 0 200 120" className="w-full h-full">
+                            {/* 배경 호 */}
+                            <path
+                              d="M 20 100 A 80 80 0 0 1 180 100"
+                              fill="none"
+                              stroke="#e5e7eb"
+                              strokeWidth="20"
+                              strokeLinecap="round"
+                            />
+                            {/* 진행 호 - 백분위 기반 */}
+                            <path
+                              d="M 20 100 A 80 80 0 0 1 180 100"
+                              fill="none"
+                              stroke={
+                                (() => {
+                                  const myRisk = resultData.p_final;
+                                  const avgRisk = benchmarkData.averageRiskScore;
+                                  
+                                  // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
+                                  const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
+                                  
+                                  if (relativePosition >= 70) return "#10b981"; // 초록 - 매우 안전
+                                  if (relativePosition >= 55) return "#3b82f6"; // 파랑 - 안전
+                                  if (relativePosition >= 45) return "#f59e0b"; // 주황 - 평균 근처
+                                  if (relativePosition >= 30) return "#f97316"; // 진한 주황 - 주의
+                                  return "#ef4444"; // 빨강 - 위험
+                                })()
+                              }
+                              strokeWidth="20"
+                              strokeLinecap="round"
+                              strokeDasharray={`${
+                                (() => {
+                                  const myRisk = resultData.p_final;
+                                  const avgRisk = benchmarkData.averageRiskScore;
+                                  
+                                  // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
+                                  const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
+                                  
+                                  // 게이지 채우기: relativePosition을 0-251 범위로 변환
+                                  return (relativePosition * 2.51).toFixed(2);
+                                })()
+                              } 251`}
+                            />
+                            {/* 중앙 텍스트 */}
+                            <text x="100" y="85" textAnchor="middle" className="text-5xl font-bold" fill="#1f2937">
+                              {(() => {
+                                const myRisk = resultData.p_final;
+                                const avgRisk = benchmarkData.averageRiskScore;
+                                
+                                // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
+                                const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
+                                
+                                // 상위/하위 표시 (50을 기준으로)
+                                if (relativePosition >= 50) {
+                                  // 평균보다 좋음 = 상위
+                                  const topPercent = Math.round(100 - relativePosition);
+                                  return `상위 ${topPercent}%`;
+                                } else {
+                                  // 평균보다 나쁨 = 하위
+                                  const bottomPercent = Math.round(relativePosition);
+                                  return `하위 ${bottomPercent}%`;
+                                }
+                              })()}
+                            </text>
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* 설명 */}
+                      <div className="mb-6">
+                        <p className="text-lg font-semibold text-foreground mb-2">
+                          {(() => {
+                            const myRisk = resultData.p_final;
+                            const avgRisk = benchmarkData.averageRiskScore;
+                            const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
+                            
+                            if (relativePosition >= 70) return "🎉 매우 안전한 상태입니다!";
+                            if (relativePosition >= 55) return "✅ 안전한 상태입니다";
+                            if (relativePosition >= 45) return "👍 평균 수준입니다";
+                            if (relativePosition >= 30) return "⚠️ 주의가 필요합니다";
+                            return "🚨 개선이 시급합니다";
+                          })()}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          내 위험도: <strong>{resultData.p_final.toFixed(1)}%</strong> | 
+                          업종 평균: <strong>{benchmarkData.averageRiskScore.toFixed(1)}%</strong>
+                          {resultData.p_final < benchmarkData.averageRiskScore ? (
+                            <span className="text-green-600 font-semibold ml-2">
+                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p 낮음 ✓)
+                            </span>
+                          ) : (
+                            <span className="text-orange-600 font-semibold ml-2">
+                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p 높음)
+                            </span>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* 범위 표시 */}
+                      <div className="flex justify-between items-center px-4 text-xs text-muted-foreground">
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-1"></div>
+                          <span>안전</span>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full mx-auto mb-1"></div>
+                          <span>양호</span>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-orange-500 rounded-full mx-auto mb-1"></div>
+                          <span>주의</span>
+                        </div>
+                        <div className="text-center">
+                          <div className="w-3 h-3 bg-red-500 rounded-full mx-auto mb-1"></div>
+                          <span>위험</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* 업종 비교 그래프 */}
           {benchmarkData && (

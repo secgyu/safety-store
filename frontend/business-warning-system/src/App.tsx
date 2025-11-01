@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { BrowserRouter, Navigate,Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { Toaster } from "@/components/ui/toaster";
 import { useAuthStore } from "@/lib/api";
@@ -40,42 +40,43 @@ const queryClient = new QueryClient({
 
 // 앱 초기화 시 Refresh Token으로 Access Token 가져오기
 function AuthInitializer({ children }: { children: React.ReactNode }) {
-  const { setAuthToken, setInitialized, isInitialized } = useAuthStore()
+  const { setAuthToken, setInitialized, isInitialized } = useAuthStore();
 
   useEffect(() => {
     async function initAuth() {
       try {
         // Refresh Token으로 Access Token 발급 시도
-        const response = await fetch('http://localhost:8000/api/auth/refresh', {
-          method: 'POST',
-          credentials: 'include',
-        })
+        const response = await fetch("http://localhost:8000/api/auth/refresh", {
+          method: "POST",
+          credentials: "include",
+        });
 
         if (response.ok) {
-          const data = await response.json()
-          setAuthToken(data.access_token)
-          console.log('✅ Access Token 자동 갱신 성공')
+          const data = await response.json();
+          setAuthToken(data.access_token);
         }
       } catch (error) {
-        console.log('ℹ️ Refresh Token 없음 또는 만료됨')
+        console.error("Refresh Token 없음 또는 만료됨", error);
       } finally {
-        setInitialized(true)
+        setInitialized(true);
       }
     }
 
     if (!isInitialized) {
-      initAuth()
+      initAuth();
     }
-  }, [setAuthToken, setInitialized, isInitialized])
+  }, [setAuthToken, setInitialized, isInitialized]);
 
   // 초기화 전에는 로딩 표시
   if (!isInitialized) {
-    return <div className="flex items-center justify-center min-h-screen">
-      <div className="text-lg">Loading...</div>
-    </div>
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 function App() {

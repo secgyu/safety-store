@@ -1,4 +1,4 @@
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { BarChart3, DollarSign, Lightbulb, MapPin, Star, TrendingDown, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -357,8 +357,9 @@ export default function ComparePage() {
                 </Select>
               </div>
             </div>
-            <div className="mt-3 text-sm text-muted-foreground">
-              <span className="font-medium">📍 대상 지역:</span> 성동구 전체
+            <div className="mt-3 text-sm text-muted-foreground flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <span className="font-medium">대상 지역:</span> 성동구 전체
             </div>
           </CardContent>
         </Card>
@@ -367,7 +368,7 @@ export default function ComparePage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>⭐</span>
+              <Star className="h-5 w-5 text-yellow-500" />
               <span>매출/고객 트렌드 비교</span>
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-2">내 가게와 업종 평균의 월별 추이를 비교해보세요</p>
@@ -375,7 +376,10 @@ export default function ComparePage() {
           <CardContent>
             {/* 매출 트렌드 */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">💰 월별 매출 추이 비교</h3>
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-green-600" />
+                월별 매출 추이 비교
+              </h3>
               <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -474,7 +478,7 @@ export default function ComparePage() {
             {/* 종합 인사이트 */}
             <div className="mt-8 p-6 bg-linear-to-r from-green-50 to-blue-50 rounded-lg">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <span>💡</span>
+                <Lightbulb className="h-5 w-5 text-yellow-600" />
                 <span>종합 트렌드 인사이트</span>
               </h3>
               <div className="space-y-2 text-sm">
@@ -512,7 +516,7 @@ export default function ComparePage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>⭐</span>
+              <Star className="h-5 w-5 text-yellow-500" />
               <span>산점도 - 매출과 위험도 관계 분석</span>
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
@@ -592,7 +596,10 @@ export default function ComparePage() {
                 {/* 통계 정보 */}
                 {scatterDataRaw && (
                   <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold mb-2">📊 {actualIndustry} 업종 통계</h4>
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4 text-blue-600" />
+                      {actualIndustry} 업종 통계
+                    </h4>
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">평균 매출:</span>
@@ -621,7 +628,7 @@ export default function ComparePage() {
               {/* 좌측: 사분면 설명 */}
               <div className="p-5 bg-linear-to-br from-green-50 to-blue-50 rounded-lg border border-green-200">
                 <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                  <span>📍</span>
+                  <MapPin className="h-5 w-5 text-green-600" />
                   <span>최적 구간 (고매출 저위험)</span>
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
@@ -672,7 +679,7 @@ export default function ComparePage() {
             {/* 종합 분석 */}
             <div className="mt-6 p-6 bg-linear-to-r from-indigo-50 to-purple-50 rounded-lg">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <span>💡</span>
+                <Lightbulb className="h-5 w-5 text-purple-600" />
                 <span>산점도 분석 인사이트</span>
               </h3>
               <div className="space-y-2 text-sm text-muted-foreground">
@@ -717,7 +724,7 @@ export default function ComparePage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <span>⭐</span>
+              <Star className="h-5 w-5 text-yellow-500" />
               <span>다중 업종 비교 - 업종별 주요 지표</span>
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
@@ -727,7 +734,10 @@ export default function ComparePage() {
           <CardContent>
             {/* 위험도 비교 차트 */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">📊 업종별 평균 위험도</h3>
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                업종별 평균 위험도
+              </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={multiIndustryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -742,7 +752,10 @@ export default function ComparePage() {
 
             {/* 매출 비교 차트 */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">💰 업종별 월 평균 매출</h3>
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-green-600" />
+                업종별 월 평균 매출
+              </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={multiIndustryChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -788,7 +801,7 @@ export default function ComparePage() {
             {/* 인사이트 요약 */}
             <div className="mt-8 p-6 bg-linear-to-r from-blue-50 to-purple-50 rounded-lg">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <span>💡</span>
+                <Lightbulb className="h-5 w-5 text-blue-600" />
                 <span>업종 비교 인사이트</span>
               </h3>
               <div className="space-y-2 text-sm text-muted-foreground">
@@ -869,7 +882,10 @@ export default function ComparePage() {
 
               {/* 인사이트 */}
               <div className="mt-6 space-y-3">
-                <h3 className="font-semibold text-lg mb-3">📊 업종 인사이트</h3>
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  업종 인사이트
+                </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-start gap-3">

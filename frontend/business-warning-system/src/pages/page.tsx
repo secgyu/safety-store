@@ -310,16 +310,25 @@ export default function HomePage() {
                 전화: 1588-0000
               </p>
               <div className="flex items-center gap-3">
-                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="https://www.facebook.com/"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   <Facebook className="h-5 w-5" />
                 </Link>
-                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="https://x.com/" className="text-muted-foreground hover:text-primary transition-colors">
                   <Twitter className="h-5 w-5" />
                 </Link>
-                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="https://www.instagram.com/"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   <Instagram className="h-5 w-5" />
                 </Link>
-                <Link to="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="https://www.youtube.com/"
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   <Youtube className="h-5 w-5" />
                 </Link>
               </div>

@@ -1,5 +1,5 @@
-import { ArrowLeft, Bot, Loader2, Send, Sparkles,User } from "lucide-react";
-import { useEffect,useRef, useState } from "react";
+import { ArrowLeft, Bot, Loader2, Send, Sparkles, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ export default function ConsultationPage() {
     {
       role: "assistant",
       content:
-        "안녕하세요! 저는 자영업 경영 AI 어시스턴트입니다. 진단 결과에 대해 궁금하신 점이나 개선 방법에 대해 무엇이든 물어보세요. 😊",
+        "안녕하세요! 저는 자영업 경영 AI 어시스턴트입니다. 진단 결과에 대해 궁금하신 점이나 개선 방법에 대해 무엇이든 물어보세요.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -46,9 +46,11 @@ export default function ConsultationPage() {
       const diagnosisData = sessionStorage.getItem("diagnosisData");
       const context = diagnosisData ? JSON.parse(diagnosisData) : null;
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           messages: [...messages, { role: "user", content: userMessage }],
           context,

@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: list = ["http://localhost:5173", "http://localhost:3000"]
     
+    # OpenAI
+    openai_api_key: str = ""
+    
     model_config = SettingsConfigDict(env_file=".env")
 
 

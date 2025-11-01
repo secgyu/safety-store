@@ -43,9 +43,10 @@ export function AppHeader() {
             className="flex items-center gap-2 font-bold text-xl text-primary hover:opacity-80 transition-opacity"
           >
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">자</span>
+              <img src="/public/favicon.svg" alt="구해줘 가게" className="w-6 h-6" />
             </div>
-            <span className="hidden sm:inline">자영업 조기경보</span>
+            {/* <img src="/public/favicon.svg" alt="구해줘 가게" className="w-6 h-6" /> */}
+            <span className="hidden sm:inline">구해줘 가게</span>
           </Link>
 
           {/* Desktop Navigation */}

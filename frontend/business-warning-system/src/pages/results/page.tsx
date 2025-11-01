@@ -1,4 +1,17 @@
-import { AlertCircle, BarChart3, Bell, Download, Lightbulb, MessageCircle, TrendingUp } from "lucide-react";
+import {
+  AlertCircle,
+  AlertOctagon,
+  AlertTriangle,
+  BarChart3,
+  Bell,
+  CheckCircle,
+  Download,
+  Lightbulb,
+  MessageCircle,
+  PartyPopper,
+  ThumbsUp,
+  TrendingUp,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -6,6 +19,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Legend,
   Line,
   LineChart,
   PolarAngleAxis,
@@ -17,7 +31,6 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-  Legend,
 } from "recharts";
 
 import { ActionCard } from "@/components/action-card";
@@ -27,8 +40,8 @@ import { RiskGauge } from "@/components/risk-gauge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { generatePDFReport } from "@/lib/pdf-generator";
 import { useBenchmark, useDiagnosisHistory } from "@/lib/api";
+import { generatePDFReport } from "@/lib/pdf-generator";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -76,7 +89,7 @@ export default function ResultsPage() {
       const parsedResult = JSON.parse(diagnosisResultStr);
 
       setDiagnosisInfo(parsedInfo);
-      
+
       // encoded_mct 설정 (이력 조회용)
       if (parsedInfo.encoded_mct) {
         setEncodedMct(parsedInfo.encoded_mct);
@@ -374,7 +387,10 @@ export default function ResultsPage() {
                   {/* 해석 및 인사이트 */}
                   <div className="space-y-6">
                     <div>
-                      <h3 className="font-semibold text-lg mb-4">📊 위험 요소 분석</h3>
+                      <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-600" />
+                        위험 요소 분석
+                      </h3>
                       <div className="space-y-4">
                         {/* 매출 안정성 */}
                         <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100">
@@ -434,7 +450,10 @@ export default function ResultsPage() {
                       <div className="flex gap-3">
                         <Lightbulb className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="font-semibold text-orange-900 mb-1">💡 종합 평가</h4>
+                          <h4 className="font-semibold text-orange-900 mb-1 flex items-center gap-2">
+                            <Lightbulb className="h-4 w-4" />
+                            종합 평가
+                          </h4>
                           <p className="text-sm text-orange-800">
                             {Math.min(
                               resultData.risk_components.sales_risk,
@@ -549,13 +568,23 @@ export default function ResultsPage() {
                             const trend = lastScore - firstScore;
 
                             if (trend > 5) {
-                              return "위험도가 지속적으로 개선되고 있습니다! 현재의 전략을 유지하세요. 🎉";
+                              return (
+                                <span className="flex items-center gap-1">
+                                  위험도가 지속적으로 개선되고 있습니다! 현재의 전략을 유지하세요.
+                                  <PartyPopper className="h-4 w-4 text-green-600 inline" />
+                                </span>
+                              );
                             } else if (trend > 0) {
                               return "위험도가 소폭 개선되고 있습니다. 꾸준히 관리하면 더 나아질 것입니다.";
                             } else if (trend > -5) {
                               return "위험도가 소폭 악화되고 있습니다. 개선 방안을 검토해보세요.";
                             } else {
-                              return "위험도가 크게 악화되고 있습니다. 즉시 개선 조치가 필요합니다. ⚠️";
+                              return (
+                                <span className="flex items-center gap-1">
+                                  위험도가 크게 악화되고 있습니다. 즉시 개선 조치가 필요합니다.
+                                  <AlertTriangle className="h-4 w-4 text-orange-600 inline" />
+                                </span>
+                              );
                             }
                           })()}
                         </p>
@@ -592,45 +621,50 @@ export default function ResultsPage() {
                             <path
                               d="M 20 100 A 80 80 0 0 1 180 100"
                               fill="none"
-                              stroke={
-                                (() => {
-                                  const myRisk = resultData.p_final;
-                                  const avgRisk = benchmarkData.averageRiskScore;
-                                  
-                                  // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
-                                  const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
-                                  
-                                  if (relativePosition >= 70) return "#10b981"; // 초록 - 매우 안전
-                                  if (relativePosition >= 55) return "#3b82f6"; // 파랑 - 안전
-                                  if (relativePosition >= 45) return "#f59e0b"; // 주황 - 평균 근처
-                                  if (relativePosition >= 30) return "#f97316"; // 진한 주황 - 주의
-                                  return "#ef4444"; // 빨강 - 위험
-                                })()
-                              }
+                              stroke={(() => {
+                                const myRisk = resultData.p_final;
+                                const avgRisk = benchmarkData.averageRiskScore;
+
+                                // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
+                                const relativePosition = Math.min(
+                                  100,
+                                  Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50)
+                                );
+
+                                if (relativePosition >= 70) return "#10b981"; // 초록 - 매우 안전
+                                if (relativePosition >= 55) return "#3b82f6"; // 파랑 - 안전
+                                if (relativePosition >= 45) return "#f59e0b"; // 주황 - 평균 근처
+                                if (relativePosition >= 30) return "#f97316"; // 진한 주황 - 주의
+                                return "#ef4444"; // 빨강 - 위험
+                              })()}
                               strokeWidth="20"
                               strokeLinecap="round"
-                              strokeDasharray={`${
-                                (() => {
-                                  const myRisk = resultData.p_final;
-                                  const avgRisk = benchmarkData.averageRiskScore;
-                                  
-                                  // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
-                                  const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
-                                  
-                                  // 게이지 채우기: relativePosition을 0-251 범위로 변환
-                                  return (relativePosition * 2.51).toFixed(2);
-                                })()
-                              } 251`}
+                              strokeDasharray={`${(() => {
+                                const myRisk = resultData.p_final;
+                                const avgRisk = benchmarkData.averageRiskScore;
+
+                                // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
+                                const relativePosition = Math.min(
+                                  100,
+                                  Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50)
+                                );
+
+                                // 게이지 채우기: relativePosition을 0-251 범위로 변환
+                                return (relativePosition * 2.51).toFixed(2);
+                              })()} 251`}
                             />
                             {/* 중앙 텍스트 */}
                             <text x="100" y="85" textAnchor="middle" className="text-5xl font-bold" fill="#1f2937">
                               {(() => {
                                 const myRisk = resultData.p_final;
                                 const avgRisk = benchmarkData.averageRiskScore;
-                                
+
                                 // 평균 대비 상대적 위치 계산 (0-100, 50이 평균)
-                                const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
-                                
+                                const relativePosition = Math.min(
+                                  100,
+                                  Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50)
+                                );
+
                                 // 상위/하위 표시 (50을 기준으로)
                                 if (relativePosition >= 50) {
                                   // 평균보다 좋음 = 상위
@@ -653,25 +687,54 @@ export default function ResultsPage() {
                           {(() => {
                             const myRisk = resultData.p_final;
                             const avgRisk = benchmarkData.averageRiskScore;
-                            const relativePosition = Math.min(100, Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50));
-                            
-                            if (relativePosition >= 70) return "🎉 매우 안전한 상태입니다!";
-                            if (relativePosition >= 55) return "✅ 안전한 상태입니다";
-                            if (relativePosition >= 45) return "👍 평균 수준입니다";
-                            if (relativePosition >= 30) return "⚠️ 주의가 필요합니다";
-                            return "🚨 개선이 시급합니다";
+                            const relativePosition = Math.min(
+                              100,
+                              Math.max(0, 50 + ((avgRisk - myRisk) / avgRisk) * 50)
+                            );
+
+                            if (relativePosition >= 70)
+                              return (
+                                <span className="flex items-center gap-1">
+                                  <PartyPopper className="h-4 w-4 text-green-600" /> 매우 안전한 상태입니다!
+                                </span>
+                              );
+                            if (relativePosition >= 55)
+                              return (
+                                <span className="flex items-center gap-1">
+                                  <CheckCircle className="h-4 w-4 text-green-600" /> 안전한 상태입니다
+                                </span>
+                              );
+                            if (relativePosition >= 45)
+                              return (
+                                <span className="flex items-center gap-1">
+                                  <ThumbsUp className="h-4 w-4 text-blue-600" /> 평균 수준입니다
+                                </span>
+                              );
+                            if (relativePosition >= 30)
+                              return (
+                                <span className="flex items-center gap-1">
+                                  <AlertTriangle className="h-4 w-4 text-orange-600" /> 주의가 필요합니다
+                                </span>
+                              );
+                            return (
+                              <span className="flex items-center gap-1">
+                                <AlertOctagon className="h-4 w-4 text-red-600" /> 개선이 시급합니다
+                              </span>
+                            );
                           })()}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          내 위험도: <strong>{resultData.p_final.toFixed(1)}%</strong> | 
-                          업종 평균: <strong>{benchmarkData.averageRiskScore.toFixed(1)}%</strong>
+                          내 위험도: <strong>{resultData.p_final.toFixed(1)}%</strong> | 업종 평균:{" "}
+                          <strong>{benchmarkData.averageRiskScore.toFixed(1)}%</strong>
                           {resultData.p_final < benchmarkData.averageRiskScore ? (
                             <span className="text-green-600 font-semibold ml-2">
-                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p 낮음 ✓)
+                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p
+                              낮음 ✓)
                             </span>
                           ) : (
                             <span className="text-orange-600 font-semibold ml-2">
-                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p 높음)
+                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p
+                              높음)
                             </span>
                           )}
                         </p>
@@ -786,9 +849,7 @@ export default function ResultsPage() {
                               {benchmarkData.metrics.customers.average.toLocaleString()}명
                             </p>
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            꾸준한 고객 유지가 사업 안정성의 핵심입니다.
-                          </p>
+                          <p className="text-sm text-muted-foreground">꾸준한 고객 유지가 사업 안정성의 핵심입니다.</p>
                         </div>
                       </div>
                     </div>
@@ -799,7 +860,10 @@ export default function ResultsPage() {
                     <div className="flex items-start gap-3">
                       <Lightbulb className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
                       <div>
-                        <h3 className="font-semibold text-lg mb-2">💡 업종 비교 인사이트</h3>
+                        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                          <Lightbulb className="h-5 w-5 text-blue-600" />
+                          업종 비교 인사이트
+                        </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           {resultData.p_final > benchmarkData.averageRiskScore ? (
                             <>

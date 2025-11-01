@@ -21,7 +21,7 @@ import { AppHeader } from "@/components/app-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useBenchmark } from "@/lib/api";
+import { useBenchmark, useScatterData } from "@/lib/api";
 
 const industries = [
   { value: "restaurant", label: "음식점 (한식/양식/일식/중식 등)" },
@@ -113,6 +113,9 @@ export default function ComparePage() {
   const { data: pubData } = useBenchmark("pub", undefined);
   const { data: retailData } = useBenchmark("retail", undefined);
   const { data: _otherData } = useBenchmark("other", undefined);
+
+  // 실제 산점도 데이터 가져오기 (선택한 업종의 모든 개별 가게)
+  const { data: scatterDataRaw, isLoading: isScatterLoading } = useScatterData(actualIndustry, 500);
 
   // 다중 업종 비교 차트 데이터 준비
   const multiIndustryChartData = useMemo(() => {
@@ -220,41 +223,17 @@ export default function ComparePage() {
     ];
   }, [benchmarkData]);
 
-  // 산점도 데이터 (매출 vs 위험도)
+  // 산점도 데이터 (매출 vs 위험도) - 실제 API 데이터 사용
   const scatterData = useMemo(() => {
-    return [
-      {
-        name: "음식점",
-        매출: Math.round((restaurantData?.metrics?.revenue?.average || 0) / 10000),
-        위험도: restaurantData?.averageRiskScore || 0,
-        고객수: restaurantData?.metrics?.customers?.average || 0,
-      },
-      {
-        name: "카페",
-        매출: Math.round((cafeData?.metrics?.revenue?.average || 0) / 10000),
-        위험도: cafeData?.averageRiskScore || 0,
-        고객수: cafeData?.metrics?.customers?.average || 0,
-      },
-      {
-        name: "패스트푸드",
-        매출: Math.round((fastfoodData?.metrics?.revenue?.average || 0) / 10000),
-        위험도: fastfoodData?.averageRiskScore || 0,
-        고객수: fastfoodData?.metrics?.customers?.average || 0,
-      },
-      {
-        name: "주점",
-        매출: Math.round((pubData?.metrics?.revenue?.average || 0) / 10000),
-        위험도: pubData?.averageRiskScore || 0,
-        고객수: pubData?.metrics?.customers?.average || 0,
-      },
-      {
-        name: "소매",
-        매출: Math.round((retailData?.metrics?.revenue?.average || 0) / 10000),
-        위험도: retailData?.averageRiskScore || 0,
-        고객수: retailData?.metrics?.customers?.average || 0,
-      },
-    ];
-  }, [restaurantData, cafeData, fastfoodData, pubData, retailData]);
+    if (!scatterDataRaw || !scatterDataRaw.points) return [];
+
+    return scatterDataRaw.points.map((point: any) => ({
+      name: point.merchantId || point.merchant_id,
+      매출: Math.round(point.revenue / 10000), // 만원 단위
+      위험도: point.riskScore || point.risk_score,
+      고객수: point.customers,
+    }));
+  }, [scatterDataRaw]);
 
   // 대분류 변경 시 세부업종 초기화
   const handleCategoryChange = (value: string) => {
@@ -537,37 +516,105 @@ export default function ComparePage() {
               <span>산점도 - 매출과 위험도 관계 분석</span>
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              업종별 매출과 위험도의 상관관계를 한눈에 파악하세요. 버블 크기는 고객 수를 나타냅니다.
+              선택한 업종의 <strong>개별 가게들</strong>의 매출과 위험도 분포를 확인하세요. 총{" "}
+              <strong className="text-blue-600">{scatterDataRaw?.totalCount || 0}개</strong> 가게 중{" "}
+              <strong className="text-blue-600">{scatterData.length}개</strong> 표시 중
             </p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={500}>
-              <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  type="number"
-                  dataKey="매출"
-                  name="매출"
-                  unit="만원"
-                  label={{ value: "매출 (만원)", position: "bottom" }}
-                />
-                <YAxis
-                  type="number"
-                  dataKey="위험도"
-                  name="위험도"
-                  unit="%"
-                  label={{ value: "위험도 (%)", angle: -90, position: "insideLeft" }}
-                />
-                <ZAxis type="number" dataKey="고객수" range={[100, 1000]} name="고객수" />
-                <Tooltip content={<ScatterTooltip />} cursor={{ strokeDasharray: "3 3" }} />
-                <Legend />
-                <Scatter name="음식점" data={[scatterData[0]]} fill="#f59e0b" />
-                <Scatter name="카페" data={[scatterData[1]]} fill="#06b6d4" />
-                <Scatter name="패스트푸드" data={[scatterData[2]]} fill="#ec4899" />
-                <Scatter name="주점" data={[scatterData[3]]} fill="#8b5cf6" />
-                <Scatter name="소매" data={[scatterData[4]]} fill="#10b981" />
-              </ScatterChart>
-            </ResponsiveContainer>
+            {isScatterLoading ? (
+              <div className="flex justify-center items-center h-[500px]">
+                <div className="text-center">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <p className="text-muted-foreground">데이터 로딩 중...</p>
+                </div>
+              </div>
+            ) : scatterData.length === 0 ? (
+              <div className="flex justify-center items-center h-[500px]">
+                <p className="text-muted-foreground">해당 업종의 데이터가 없습니다.</p>
+              </div>
+            ) : (
+              <>
+                <ResponsiveContainer width="100%" height={500}>
+                  <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      type="number"
+                      dataKey="매출"
+                      name="매출"
+                      unit="만원"
+                      label={{ value: "월평균 매출 (만원)", position: "bottom", offset: 0 }}
+                    />
+                    <YAxis
+                      type="number"
+                      dataKey="위험도"
+                      name="위험도"
+                      unit="%"
+                      label={{ value: "위험도 (%)", angle: -90, position: "insideLeft" }}
+                    />
+                    <ZAxis type="number" dataKey="고객수" range={[50, 500]} name="고객수" />
+                    <Tooltip content={<ScatterTooltip />} cursor={{ strokeDasharray: "3 3" }} />
+
+                    {/* 평균선 추가 */}
+                    {scatterDataRaw && (
+                      <>
+                        <line
+                          x1={Math.round(scatterDataRaw.avgRevenue / 10000)}
+                          y1="0%"
+                          x2={Math.round(scatterDataRaw.avgRevenue / 10000)}
+                          y2="100%"
+                          stroke="#ef4444"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                        />
+                        <line
+                          x1="0%"
+                          y1={scatterDataRaw.avgRisk}
+                          x2="100%"
+                          y2={scatterDataRaw.avgRisk}
+                          stroke="#ef4444"
+                          strokeWidth={2}
+                          strokeDasharray="5 5"
+                        />
+                      </>
+                    )}
+
+                    {/* 모든 개별 가게 데이터 */}
+                    <Scatter
+                      name={`${industries.find((i) => i.value === selectedCategory)?.label || "업종"} 가게들`}
+                      data={scatterData}
+                      fill="#3b82f6"
+                      fillOpacity={0.6}
+                    />
+                  </ScatterChart>
+                </ResponsiveContainer>
+
+                {/* 통계 정보 */}
+                {scatterDataRaw && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold mb-2">📊 {actualIndustry} 업종 통계</h4>
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">평균 매출:</span>
+                        <p className="font-semibold text-lg">
+                          {Math.round(scatterDataRaw.avgRevenue / 10000).toLocaleString()}만원
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">평균 고객 수:</span>
+                        <p className="font-semibold text-lg">
+                          {Math.round(scatterDataRaw.avgCustomers).toLocaleString()}명
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">평균 위험도:</span>
+                        <p className="font-semibold text-lg">{scatterDataRaw.avgRisk.toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
 
             {/* 산점도 해석 가이드 */}
             <div className="mt-6 grid md:grid-cols-2 gap-4">
@@ -578,21 +625,21 @@ export default function ComparePage() {
                   <span>최적 구간 (고매출 저위험)</span>
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  오른쪽 아래 영역에 위치한 업종이 가장 이상적입니다. 높은 매출과 낮은 위험도를 동시에 달성한
-                  업종입니다.
+                  오른쪽 아래 영역에 위치한 가게가 가장 이상적입니다. 높은 매출과 낮은 위험도를 동시에 달성했습니다.
                 </p>
                 <div className="space-y-2 text-sm">
-                  {scatterData
-                    .filter((d) => d.매출 > 4000 && d.위험도 < 60)
-                    .map((d, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <span className="text-green-600">✓</span>
-                        <span className="font-semibold">{d.name}</span>
-                        <span className="text-muted-foreground text-xs">
-                          (매출 {d.매출.toLocaleString()}만원, 위험도 {d.위험도}%)
-                        </span>
-                      </div>
-                    ))}
+                  <p className="font-semibold text-green-600">
+                    ✓{" "}
+                    {
+                      scatterData.filter(
+                        (d) =>
+                          d.매출 > (scatterDataRaw?.avgRevenue || 0) / 10000 &&
+                          d.위험도 < (scatterDataRaw?.avgRisk || 50)
+                      ).length
+                    }
+                    개 가게
+                  </p>
+                  <p className="text-xs text-muted-foreground">(평균 이상 매출 & 평균 이하 위험도)</p>
                 </div>
               </div>
 
@@ -603,20 +650,21 @@ export default function ComparePage() {
                   <span>주의 구간 (저매출 고위험)</span>
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  왼쪽 위 영역에 위치한 업종은 매출 대비 위험도가 높습니다. 특별한 관리와 개선이 필요한 업종입니다.
+                  왼쪽 위 영역에 위치한 가게는 매출 대비 위험도가 높습니다. 특별한 관리와 개선이 필요합니다.
                 </p>
                 <div className="space-y-2 text-sm">
-                  {scatterData
-                    .filter((d) => d.매출 < 4000 && d.위험도 > 60)
-                    .map((d, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <span className="text-red-600">!</span>
-                        <span className="font-semibold">{d.name}</span>
-                        <span className="text-muted-foreground text-xs">
-                          (매출 {d.매출.toLocaleString()}만원, 위험도 {d.위험도}%)
-                        </span>
-                      </div>
-                    ))}
+                  <p className="font-semibold text-red-600">
+                    !{" "}
+                    {
+                      scatterData.filter(
+                        (d) =>
+                          d.매출 < (scatterDataRaw?.avgRevenue || 0) / 10000 &&
+                          d.위험도 > (scatterDataRaw?.avgRisk || 50)
+                      ).length
+                    }
+                    개 가게
+                  </p>
+                  <p className="text-xs text-muted-foreground">(평균 이하 매출 & 평균 이상 위험도)</p>
                 </div>
               </div>
             </div>

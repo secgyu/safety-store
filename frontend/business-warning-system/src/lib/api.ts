@@ -187,6 +187,19 @@ class ApiClient {
     return handleResponse(response)
   }
 
+  async getScatterData(industry?: string, limit?: number): Promise<any> {
+    const response = await client.GET('/api/benchmark/scatter-data', {
+      params: {
+        query: {
+          ...(industry && { industry }),
+          ...(limit && { limit })
+        }
+      }
+    })
+
+    return handleResponse(response)
+  }
+
 
   // Chat
   async sendChatMessage(data: ChatRequest): Promise<ChatResponse> {
@@ -455,6 +468,15 @@ export function useCompareBenchmark() {
     mutationFn: (data: CompareRequest) => apiClient.compareBenchmark(data),
   })
 }
+
+export function useScatterData(industry?: string, limit?: number) {
+  return useQuery({
+    queryKey: ['scatter-data', industry, limit],
+    queryFn: () => apiClient.getScatterData(industry, limit),
+    enabled: !!industry,
+  })
+}
+
 // ========== Chat Hooks ==========
 export function useSendChatMessage() {
   return useMutation({

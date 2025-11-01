@@ -188,6 +188,24 @@ class CompareResponse(CamelBaseModel):
     insights: list[str]
 
 
+# ========== Scatter Plot Schemas ==========
+class ScatterPoint(CamelBaseModel):
+    merchant_id: str
+    revenue: float  # 월평균 매출
+    customers: float  # 월평균 고객수
+    risk_score: float  # 위험도
+    industry: str  # 업종명
+
+
+class ScatterData(CamelBaseModel):
+    points: list[ScatterPoint]
+    industry: str
+    total_count: int
+    avg_revenue: float
+    avg_customers: float
+    avg_risk: float
+
+
 # ========== Chat Schemas ==========
 class ChatMessage(CamelBaseModel):
     role: str

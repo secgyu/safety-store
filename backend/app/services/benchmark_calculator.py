@@ -74,6 +74,7 @@ class BenchmarkCalculator:
         self.monthly_usage = None
         self.monthly_customers = None
         self.risk_data = None
+        self.merged_df = None  # scatter plot용 병합 데이터
         self.industry_stats = None
         # 프로젝트 루트에서 실행될 때를 고려한 경로
         self.base_path = os.path.join(os.path.dirname(__file__), '..')
@@ -180,10 +181,10 @@ class BenchmarkCalculator:
         recent_months_data = merged.groupby('ENCODED_MCT').head(recent_months).copy()
         
         # 백분위를 실제 값으로 변환
-        recent_months_data['sales_pct'] = recent_months_data['RC_M1_SAA'].apply(
+        recent_months_data['Revenue_num'] = recent_months_data['RC_M1_SAA'].apply(
             self.parse_percentile_range
         )
-        recent_months_data['customers_pct'] = recent_months_data['RC_M1_UE_CUS_CN'].apply(
+        recent_months_data['Customers_num'] = recent_months_data['RC_M1_UE_CUS_CN'].apply(
             self.parse_percentile_range
         )
         
@@ -200,10 +201,17 @@ class BenchmarkCalculator:
             how='inner'
         )
         
-        # 3. 업종별 매출/고객수 집계 (HPSN_MCT_ZCD_NM 사용)
+        # 3. merged_df 생성 (scatter plot용) - 매출/고객/위험도 모두 포함
+        self.merged_df = recent_months_data.merge(
+            risk_recent[['ENCODED_MCT', 'TA_YM', 'RiskScore']],
+            on=['ENCODED_MCT', 'TA_YM'],
+            how='inner'
+        )
+        
+        # 4. 업종별 매출/고객수 집계 (HPSN_MCT_ZCD_NM 사용)
         usage_stats = recent_months_data.groupby('HPSN_MCT_ZCD_NM').agg({
-            'sales_pct': ['mean', 'median', 'std', 'count'],
-            'customers_pct': ['mean', 'median', 'std'],
+            'Revenue_num': ['mean', 'median', 'std', 'count'],
+            'Customers_num': ['mean', 'median', 'std'],
             'ENCODED_MCT': 'nunique'
         }).round(2)
         
@@ -213,7 +221,7 @@ class BenchmarkCalculator:
             'merchant_count'
         ]
         
-        # 4. 업종별 위험도 집계
+        # 5. 업종별 위험도 집계
         risk_stats = risk_with_industry.groupby('HPSN_MCT_ZCD_NM').agg({
             'RiskScore': ['mean', 'median', 'std'],
             'ENCODED_MCT': 'nunique'
@@ -404,6 +412,86 @@ class BenchmarkCalculator:
                 result[industry] = self.get_benchmark_for_industry(industry)
         
         return result
+    
+    def get_scatter_data(self, industry: str = None, limit: int = 500):
+        """
+        특정 업종의 개별 가게 데이터를 반환 (산점도용)
+        
+        Parameters:
+        -----------
+        industry : str
+            업종명 (한글). None이면 전체
+        limit : int
+            반환할 최대 데이터 개수 (성능 최적화)
+        
+        Returns:
+        --------
+        dict : ScatterData 형식의 데이터
+        """
+        if self.merged_df is None:
+            raise ValueError("데이터가 로드되지 않았습니다")
+        
+        # 업종 필터링
+        if industry and industry != "전체":
+            # 카테고리인 경우 (대분류)
+            if industry in CATEGORY_MAPPING:
+                industry_list = CATEGORY_MAPPING[industry]
+                df_filtered = self.merged_df[self.merged_df['HPSN_MCT_ZCD_NM'].isin(industry_list)]
+            else:
+                df_filtered = self.merged_df[self.merged_df['HPSN_MCT_ZCD_NM'] == industry]
+        else:
+            df_filtered = self.merged_df
+        
+        # 최신 월의 데이터만 사용
+        if 'TA_YM' in df_filtered.columns:
+            latest_month = df_filtered['TA_YM'].max()
+            df_filtered = df_filtered[df_filtered['TA_YM'] == latest_month]
+        
+        # 가맹점별 집계
+        merchant_data = df_filtered.groupby('ENCODED_MCT').agg({
+            'Revenue_num': 'mean',
+            'Customers_num': 'mean',
+            'RiskScore': 'mean',
+            'HPSN_MCT_ZCD_NM': 'first'  # 업종명
+        }).reset_index()
+        
+        # NaN 제거 및 이상치 필터링
+        merchant_data = merchant_data.dropna()
+        merchant_data = merchant_data[
+            (merchant_data['Revenue_num'] > 0) &
+            (merchant_data['Customers_num'] > 0) &
+            (merchant_data['RiskScore'] >= 0) &
+            (merchant_data['RiskScore'] <= 100)
+        ]
+        
+        # 샘플링 (너무 많으면)
+        if len(merchant_data) > limit:
+            merchant_data = merchant_data.sample(n=limit, random_state=42)
+        
+        # ScatterPoint 형식으로 변환
+        points = []
+        for _, row in merchant_data.iterrows():
+            points.append({
+                "merchant_id": str(row['ENCODED_MCT'])[:8],  # 앞 8자리만 (식별용)
+                "revenue": float(row['Revenue_num']),
+                "customers": float(row['Customers_num']),
+                "risk_score": float(row['RiskScore'] * 100),  # 0-1 -> 0-100%
+                "industry": str(row['HPSN_MCT_ZCD_NM'])
+            })
+        
+        # 평균값 계산
+        avg_revenue = float(merchant_data['Revenue_num'].mean())
+        avg_customers = float(merchant_data['Customers_num'].mean())
+        avg_risk = float(merchant_data['RiskScore'].mean() * 100)
+        
+        return {
+            "points": points,
+            "industry": industry or "전체",
+            "total_count": len(points),
+            "avg_revenue": avg_revenue,
+            "avg_customers": avg_customers,
+            "avg_risk": avg_risk
+        }
 
 
 # 사용 예시

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import Optional
-from app.schemas import BenchmarkData, CompareRequest, CompareResponse
+from app.schemas import BenchmarkData, CompareRequest, CompareResponse, ScatterData
 from app.services.benchmark_calculator import BenchmarkCalculator, map_industry_code
 
 router = APIRouter()
@@ -181,4 +181,32 @@ async def compare_benchmark(request: CompareRequest):
         },
         insights=insights,
     )
+
+
+@router.get("/scatter-data", response_model=ScatterData)
+async def get_scatter_data(industry: Optional[str] = None, limit: Optional[int] = 500):
+    """
+    특정 업종의 개별 가게 데이터를 반환 (산점도용)
+    - industry: 업종 코드 (restaurant, cafe 등)
+    - limit: 반환할 최대 데이터 수 (기본 500개, 성능 최적화)
+    """
+    print(f"[API] GET /api/benchmark/scatter-data - industry: {industry}, limit: {limit}")
+    
+    if benchmark_calc is None or benchmark_calc.merged_df is None:
+        raise HTTPException(status_code=503, detail="벤치마크 데이터가 로드되지 않았습니다.")
+    
+    # 프론트엔드 코드를 실제 업종명으로 변환
+    if industry:
+        mapped_industry = map_industry_code(industry)
+        print(f"[MAPPING] '{industry}' -> '{mapped_industry}'")
+    else:
+        mapped_industry = None
+    
+    try:
+        scatter_data = benchmark_calc.get_scatter_data(mapped_industry, limit)
+        print(f"[OK] 산점도 데이터 반환 완료: {len(scatter_data['points'])}개 점")
+        return scatter_data
+    except Exception as e:
+        print(f"[ERROR] 산점도 데이터 조회 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
 

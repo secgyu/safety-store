@@ -26,7 +26,7 @@ export default function LoginPage() {
     try {
       await login.mutateAsync({ email, password });
       // Redirect to dashboard
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       // Error is already handled by mutation
       console.error("Login failed:", error);

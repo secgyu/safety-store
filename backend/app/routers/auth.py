@@ -129,8 +129,8 @@ async def refresh_access_token(
 
 
 # 로그아웃 (Refresh Token 쿠키 삭제)
-@router.post("/logout")
-async def logout(response: Response):
+@router.post("/logout-custom")
+async def logout_custom(response: Response):
     """로그아웃: Refresh Token 쿠키 삭제"""
     response.delete_cookie(key="refresh_token", path="/")
     return {"message": "Logged out successfully"}

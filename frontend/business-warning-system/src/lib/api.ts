@@ -88,7 +88,7 @@ client.use({
     // 401 에러 시 Refresh Token으로 재시도
     if (response.status === 401) {
       const newToken = await refreshAccessToken()
-      
+
       if (newToken) {
         useAuthStore.getState().setAuthToken(newToken)
         // 재시도는 React Query에서 자동 처리
@@ -152,7 +152,7 @@ class ApiClient {
   }
 
   async logout(): Promise<void> {
-    await fetch('http://localhost:8000/api/auth/logout', {
+    await fetch('http://localhost:8000/api/auth/logout-custom', {
       method: 'POST',
       credentials: 'include',
     })
@@ -423,7 +423,7 @@ export function useSignup() {
 
 export function useAuth() {
   const { authToken } = useAuthStore()
-  
+
   return useQuery({
     queryKey: queryKeys.auth.me,
     queryFn: async () => {

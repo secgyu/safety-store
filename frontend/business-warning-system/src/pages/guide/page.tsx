@@ -58,11 +58,8 @@ export default function GuidePage() {
                     <div className="bg-muted/50 p-4 rounded-lg space-y-2">
                       <p className="font-semibold text-sm">필요한 정보:</p>
                       <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-4">
-                        <li>업종 (예: 음식점, 카페, 소매업 등)</li>
-                        <li>지역 (시/도 및 구/군)</li>
-                        <li>최근 3개월 평균 월 매출</li>
-                        <li>최근 3개월 평균 일 고객 수</li>
-                        <li>영업 기간</li>
+                        <li>사업체 코드</li>
+                        <li>가게이름</li>
                       </ul>
                     </div>
                   </CardContent>

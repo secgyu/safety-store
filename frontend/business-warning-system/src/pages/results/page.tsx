@@ -1,15 +1,32 @@
 import { AlertCircle, BarChart3, Bell, Download, Lightbulb, MessageCircle, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+  Legend,
+} from "recharts";
 
 import { ActionCard } from "@/components/action-card";
 import { AppHeader } from "@/components/app-header";
 import { RiskCard } from "@/components/risk-card";
 import { RiskGauge } from "@/components/risk-gauge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { generatePDFReport } from "@/lib/pdf-generator";
+import { useBenchmark } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -34,6 +51,10 @@ export default function ResultsPage() {
   const [loading, setLoading] = useState(true);
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [diagnosisInfo, setDiagnosisInfo] = useState<any>(null);
+  const [industryCode, setIndustryCode] = useState<string>("restaurant");
+
+  // 업종 평균 데이터 가져오기
+  const { data: benchmarkData } = useBenchmark(industryCode, undefined);
 
   useEffect(() => {
     const diagnosisDataStr = sessionStorage.getItem("diagnosisData");
@@ -265,6 +286,286 @@ export default function ResultsPage() {
               />
             </div>
           </div>
+
+          {/* 레이더 차트 - 위험 요소 분석 */}
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold mb-8">위험 요소 분석</h2>
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>3가지 위험 요소 상세 비교</CardTitle>
+                <p className="text-sm text-muted-foreground mt-2">
+                  매출, 고객, 시장 위험도를 시각화하여 어느 부분에 집중해야 하는지 확인하세요
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  {/* 레이더 차트 */}
+                  <div>
+                    <ResponsiveContainer width="100%" height={400}>
+                      <RadarChart
+                        data={[
+                          {
+                            category: "매출 안정성",
+                            myScore: resultData.risk_components.sales_risk,
+                            average: benchmarkData?.averageRiskScore || 0,
+                            fullMark: 100,
+                          },
+                          {
+                            category: "고객 유지력",
+                            myScore: resultData.risk_components.customer_risk,
+                            average: benchmarkData?.averageRiskScore || 0,
+                            fullMark: 100,
+                          },
+                          {
+                            category: "시장 경쟁력",
+                            myScore: resultData.risk_components.market_risk,
+                            average: benchmarkData?.averageRiskScore || 0,
+                            fullMark: 100,
+                          },
+                        ]}
+                      >
+                        <PolarGrid stroke="#e5e7eb" />
+                        <PolarAngleAxis dataKey="category" tick={{ fill: "#6b7280", fontSize: 13 }} />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: "#6b7280", fontSize: 11 }} />
+                        <Radar
+                          name="내 가게"
+                          dataKey="myScore"
+                          stroke="#3b82f6"
+                          fill="#3b82f6"
+                          fillOpacity={0.5}
+                          strokeWidth={2}
+                        />
+                        <Radar
+                          name="업종 평균"
+                          dataKey="average"
+                          stroke="#94a3b8"
+                          fill="#94a3b8"
+                          fillOpacity={0.25}
+                          strokeWidth={2}
+                        />
+                        <Legend
+                          wrapperStyle={{
+                            paddingTop: "20px",
+                          }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "white",
+                            border: "1px solid #e5e7eb",
+                            borderRadius: "8px",
+                          }}
+                          formatter={(value: number) => value.toFixed(1)}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* 해석 및 인사이트 */}
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="font-semibold text-lg mb-4">📊 위험 요소 분석</h3>
+                      <div className="space-y-4">
+                        {/* 매출 안정성 */}
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-blue-900">매출 안정성</span>
+                            <span className="text-2xl font-bold text-blue-600">
+                              {resultData.risk_components.sales_risk.toFixed(1)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-blue-800">
+                            {resultData.risk_components.sales_risk > 70
+                              ? "매출이 매우 안정적입니다! 현재 전략을 유지하세요."
+                              : resultData.risk_components.sales_risk > 50
+                              ? "매출이 양호합니다. 꾸준한 관리가 필요합니다."
+                              : "매출 개선이 필요합니다. 매출 증대 전략을 검토하세요."}
+                          </p>
+                        </div>
+
+                        {/* 고객 유지력 */}
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-purple-50 to-purple-100">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-purple-900">고객 유지력</span>
+                            <span className="text-2xl font-bold text-purple-600">
+                              {resultData.risk_components.customer_risk.toFixed(1)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-purple-800">
+                            {resultData.risk_components.customer_risk > 70
+                              ? "고객 충성도가 높습니다! 우수합니다."
+                              : resultData.risk_components.customer_risk > 50
+                              ? "고객 유지가 양호합니다. 재방문율을 높여보세요."
+                              : "고객 이탈 방지가 필요합니다. 고객 관리에 집중하세요."}
+                          </p>
+                        </div>
+
+                        {/* 시장 경쟁력 */}
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-green-100">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-semibold text-green-900">시장 경쟁력</span>
+                            <span className="text-2xl font-bold text-green-600">
+                              {resultData.risk_components.market_risk.toFixed(1)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-green-800">
+                            {resultData.risk_components.market_risk > 70
+                              ? "시장에서 강한 경쟁력을 가지고 있습니다!"
+                              : resultData.risk_components.market_risk > 50
+                              ? "시장 내 입지가 양호합니다. 차별화를 강화하세요."
+                              : "경쟁이 치열합니다. 차별화 전략이 필요합니다."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 종합 평가 */}
+                    <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-orange-200">
+                      <div className="flex gap-3">
+                        <Lightbulb className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold text-orange-900 mb-1">💡 종합 평가</h4>
+                          <p className="text-sm text-orange-800">
+                            {Math.min(
+                              resultData.risk_components.sales_risk,
+                              resultData.risk_components.customer_risk,
+                              resultData.risk_components.market_risk
+                            ) === resultData.risk_components.sales_risk
+                              ? "매출 안정성이 가장 취약합니다. 매출 증대 방안을 우선 검토하세요."
+                              : Math.min(
+                                  resultData.risk_components.sales_risk,
+                                  resultData.risk_components.customer_risk,
+                                  resultData.risk_components.market_risk
+                                ) === resultData.risk_components.customer_risk
+                              ? "고객 유지력이 가장 취약합니다. 고객 만족도 개선에 집중하세요."
+                              : "시장 경쟁력이 가장 취약합니다. 차별화 전략을 수립하세요."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 업종 비교 그래프 */}
+          {benchmarkData && (
+            <div className="mb-10">
+              <h2 className="text-3xl font-bold mb-8">업종 평균과 비교</h2>
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle>내 가게 vs 업종 평균</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {/* 위험도 비교 */}
+                    <div>
+                      <h3 className="font-semibold text-lg mb-4 text-center">위험도</h3>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <BarChart
+                          data={[
+                            { name: "내 가게", value: resultData.p_final, type: "mine" },
+                            { name: "업종 평균", value: benchmarkData.averageRiskScore, type: "average" },
+                          ]}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                          <XAxis dataKey="name" tick={{ fill: "#6b7280", fontSize: 12 }} />
+                          <YAxis tick={{ fill: "#6b7280", fontSize: 12 }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "white",
+                              border: "1px solid #e5e7eb",
+                              borderRadius: "8px",
+                            }}
+                            formatter={(value: number) => [`${value.toFixed(1)}%`, "위험도"]}
+                          />
+                          <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                            {[
+                              { name: "내 가게", value: resultData.p_final, type: "mine" },
+                              { name: "업종 평균", value: benchmarkData.averageRiskScore, type: "average" },
+                            ].map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.type === "mine" ? "#3b82f6" : "#94a3b8"} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                      <p className="text-center text-sm text-muted-foreground mt-2">
+                        {resultData.p_final > benchmarkData.averageRiskScore ? (
+                          <span className="text-orange-600 font-semibold">
+                            업종 평균보다 {(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p 높음
+                          </span>
+                        ) : (
+                          <span className="text-green-600 font-semibold">
+                            업종 평균보다 {(benchmarkData.averageRiskScore - resultData.p_final).toFixed(1)}%p 낮음
+                          </span>
+                        )}
+                      </p>
+                    </div>
+
+                    {/* 매출 비교 - 가상 데이터 (실제로는 API에서) */}
+                    <div>
+                      <h3 className="font-semibold text-lg mb-4 text-center">월 평균 매출</h3>
+                      <div className="text-center py-8">
+                        <div className="space-y-4">
+                          <div className="bg-blue-50 rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">업종 평균</p>
+                            <p className="text-2xl font-bold text-blue-600">
+                              ₩{benchmarkData.metrics.revenue.average.toLocaleString()}
+                            </p>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            실제 매출 데이터는 진단 시 입력한 정보를 기반으로 합니다.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 고객 수 비교 */}
+                    <div>
+                      <h3 className="font-semibold text-lg mb-4 text-center">월 평균 고객 수</h3>
+                      <div className="text-center py-8">
+                        <div className="space-y-4">
+                          <div className="bg-purple-50 rounded-lg p-4">
+                            <p className="text-sm text-muted-foreground mb-1">업종 평균</p>
+                            <p className="text-2xl font-bold text-purple-600">
+                              {benchmarkData.metrics.customers.average.toLocaleString()}명
+                            </p>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            꾸준한 고객 유지가 사업 안정성의 핵심입니다.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 인사이트 */}
+                  <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Lightbulb className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-semibold text-lg mb-2">💡 업종 비교 인사이트</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {resultData.p_final > benchmarkData.averageRiskScore ? (
+                            <>
+                              현재 위험도가 업종 평균보다 높습니다. <strong>매출 안정화</strong>와{" "}
+                              <strong>고객 유지</strong> 전략에 집중하여 위험도를 낮춰보세요. 아래 맞춤 개선 제안을
+                              참고하세요.
+                            </>
+                          ) : (
+                            <>
+                              업종 평균보다 안정적인 상태입니다! 현재의 운영 방식을 유지하면서{" "}
+                              <strong>지속적인 모니터링</strong>으로 안정성을 더욱 강화하세요.
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           <div className="mb-10">
             <h2 className="text-3xl font-bold mb-8">맞춤 개선 제안</h2>

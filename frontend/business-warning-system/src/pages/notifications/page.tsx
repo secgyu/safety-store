@@ -96,8 +96,12 @@ export default function NotificationsPage() {
         <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <Link to="/" className="text-2xl font-bold text-blue-600">
-                구해줘 식당
+              <Link
+                to="/"
+                className="flex items-center font-bold text-xl text-primary hover:opacity-80 transition-opacity"
+              >
+                <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+                <span className="hidden sm:inline">구해줘 가게</span>
               </Link>
             </div>
           </div>
@@ -140,8 +144,12 @@ export default function NotificationsPage() {
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
-              구해줘 식당
+            <Link
+              to="/"
+              className="flex items-center font-bold text-xl text-primary hover:opacity-80 transition-opacity"
+            >
+              <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+              <span className="hidden sm:inline">구해줘 가게</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/diagnose" className="text-gray-600 hover:text-blue-600">

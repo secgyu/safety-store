@@ -1,4 +1,4 @@
-import { AlertCircle, ArrowLeft, BarChart3,CheckCircle2, TrendingUp } from "lucide-react";
+import { AlertCircle, ArrowLeft, BarChart3, CheckCircle2, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -35,11 +35,9 @@ export default function GuidePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <p className="text-muted-foreground">
-                      홈페이지에서 "무료 진단 시작하기" 버튼을 클릭하여 진단을 시작합니다.
-                    </p>
+                    <p className="text-muted-foreground">홈페이지에서 "진단 하기" 버튼을 클릭하여 진단을 시작합니다.</p>
                     <ul className="list-disc list-inside space-y-2 text-muted-foreground ml-4">
-                      <li>회원가입 없이도 바로 이용 가능합니다</li>
+                      <li>회원가입 후 바로 진단 가능합니다</li>
                       <li>약 3분 정도 소요됩니다</li>
                       <li>모바일에서도 편리하게 이용할 수 있습니다</li>
                     </ul>

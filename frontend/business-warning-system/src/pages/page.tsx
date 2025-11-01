@@ -5,14 +5,13 @@ import {
   Clock,
   Facebook,
   Instagram,
-  Shield,
   TrendingUp,
   Twitter,
   Users,
   Youtube,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { AppHeader } from "@/components/app-header";
 import { OnboardingTour } from "@/components/onboarding-tour";
@@ -24,6 +23,7 @@ import { hasCompletedOnboarding, markOnboardingComplete } from "@/lib/onboarding
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -36,6 +36,16 @@ export default function HomePage() {
   const handleOnboardingComplete = () => {
     markOnboardingComplete();
     setShowOnboarding(false);
+  };
+
+  const handleDiagnoseClick = () => {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      alert("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.");
+      navigate("/login");
+    } else {
+      navigate("/diagnose");
+    }
   };
 
   return (
@@ -60,14 +70,12 @@ export default function HomePage() {
           <p className="text-lg text-muted-foreground mb-12">3분만에 우리 가게 건강 체크 • 무료 진단 • AI 분석</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              asChild
+              onClick={handleDiagnoseClick}
               size="lg"
               className="text-lg px-10 py-7 h-auto rounded-2xl shadow-lg hover:shadow-xl transition-all"
             >
-              <Link to="/diagnose">
-                지금 바로 무료 진단받기
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              지금 바로 무료 진단받기
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button
               asChild
@@ -103,7 +111,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-bold mb-4">간단한 정보 입력</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  업종, 성동구 내 위치, 최근 매출과 고객 수만 입력하면 됩니다. 복잡한 서류는 필요 없어요.
+                  사업체 코드 또는 가게 이름을 입력하면 됩니다. 복잡한 서류는 필요 없어요.
                 </p>
               </CardContent>
             </Card>
@@ -230,7 +238,7 @@ export default function HomePage() {
               <CardContent className="pt-8 pb-8">
                 <h3 className="text-xl font-bold mb-3">진단 비용이 있나요?</h3>
                 <p className="text-muted-foreground leading-relaxed text-lg">
-                  아니요, 완전 무료입니다. 회원가입 없이도 바로 진단을 받을 수 있습니다.
+                  아니요, 완전 무료입니다. 회원가입 후 바로 진단을 받을 수 있습니다.
                 </p>
               </CardContent>
             </Card>
@@ -272,11 +280,9 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/20 to-purple-500/20 -z-10" />
           <h2 className="text-4xl md:text-5xl font-bold mb-6">지금 바로 시작하세요</h2>
           <p className="text-xl mb-10 text-muted-foreground">3분이면 우리 가게의 건강 상태를 확인할 수 있습니다</p>
-          <Button asChild size="lg" className="text-lg px-10 py-7 h-auto rounded-2xl shadow-xl">
-            <Link to="/diagnose">
-              무료 진단 시작하기
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
+          <Button onClick={handleDiagnoseClick} size="lg" className="text-lg px-10 py-7 h-auto rounded-2xl shadow-xl">
+            무료 진단 시작하기
+            <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
@@ -286,7 +292,7 @@ export default function HomePage() {
             <span>•</span>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5" />
-              <span>회원가입 불필요</span>
+              <span>회원가입 후 진단 가능</span>
             </div>
           </div>
         </div>
@@ -298,8 +304,8 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Shield className="h-6 w-6 text-primary" />
-                <span className="font-bold">사업 안전 진단</span>
+                <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+                <span className="font-bold">구해줘 가게</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                 서울 성동구 영세·중소 가맹점을 위한 AI 기반 폐업 위험 조기경보 시스템

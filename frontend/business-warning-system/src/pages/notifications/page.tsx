@@ -97,7 +97,7 @@ export default function NotificationsPage() {
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Link to="/" className="text-2xl font-bold text-blue-600">
-                자영업 조기경보
+                구해줘 식당
               </Link>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function NotificationsPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="text-2xl font-bold text-blue-600">
-              자영업 조기경보
+              구해줘 식당
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/diagnose" className="text-gray-600 hover:text-blue-600">

@@ -38,14 +38,8 @@ export function AppHeader() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link
-            to="/"
-            className="flex items-center gap-2 font-bold text-xl text-primary hover:opacity-80 transition-opacity"
-          >
-            <div className="w-8 h-8 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center">
-              <img src="/public/favicon.svg" alt="구해줘 가게" className="w-6 h-6" />
-            </div>
-            {/* <img src="/public/favicon.svg" alt="구해줘 가게" className="w-6 h-6" /> */}
+          <Link to="/" className="flex items-center font-bold text-xl text-primary hover:opacity-80 transition-opacity">
+            <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
             <span className="hidden sm:inline">구해줘 가게</span>
           </Link>
 

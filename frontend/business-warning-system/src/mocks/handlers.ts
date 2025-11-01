@@ -1,19 +1,7 @@
 import { http, HttpResponse } from 'msw'
 
-import type {
-  ActionPlan,
-  AuthResponse,
-  BenchmarkData,
-  ChatResponse,
-  CompareResponse,
-  ContactResponse,
-  DiagnosisHistory,
-  DiagnosisResponse,
-  FAQ,
-  Insight,
-  Statistics,
-  SuccessStory,
-} from '@/types/api'
+import type { ActionPlan, BenchmarkData, ChatResponse, CompareResponse, ContactResponse, DiagnosisHistory, DiagnosisResponse, FAQ, Insight, Statistics, SuccessStory } from '@/lib/api'
+
 
 // Mock 데이터 저장소
 const mockUsers = new Map<string, any>()
@@ -62,7 +50,7 @@ export const handlers = [
 
 
       return HttpResponse.json(response)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '로그인 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),
@@ -103,7 +91,7 @@ export const handlers = [
       }
 
       return HttpResponse.json(response)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '회원가입 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),
@@ -122,7 +110,7 @@ export const handlers = [
 
       const { password: _, ...userWithoutPassword } = user
       return HttpResponse.json({ user: userWithoutPassword })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '사용자 정보 조회 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),
@@ -177,7 +165,7 @@ export const handlers = [
       mockDiagnoses.get(userId)?.push(diagnosis)
 
       return HttpResponse.json(diagnosis)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '진단 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),
@@ -193,7 +181,7 @@ export const handlers = [
       const response: DiagnosisHistory = { diagnoses }
 
       return HttpResponse.json(response)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '진단 기록 조회 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),
@@ -208,7 +196,7 @@ export const handlers = [
 
       const actionPlans = mockActionPlans.get(userId) || []
       return HttpResponse.json(actionPlans)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '개선 계획 조회 실패' }, { status: 500 })
     }
   }),
@@ -238,7 +226,7 @@ export const handlers = [
       mockActionPlans.get(userId)?.push(actionPlan)
 
       return HttpResponse.json(actionPlan, { status: 201 })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '개선 계획 생성 실패' }, { status: 500 })
     }
   }),
@@ -264,7 +252,7 @@ export const handlers = [
       mockActionPlans.set(userId, plans)
 
       return HttpResponse.json(plans[planIndex])
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '개선 계획 업데이트 실패' }, { status: 500 })
     }
   }),
@@ -295,7 +283,7 @@ export const handlers = [
       mockActionPlans.set(userId, plans)
 
       return HttpResponse.json({ success: true })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '액션 아이템 삭제 실패' }, { status: 500 })
     }
   }),
@@ -326,7 +314,7 @@ export const handlers = [
       }
 
       return HttpResponse.json(benchmarkData)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '벤치마크 데이터 조회 실패' }, { status: 500 })
     }
   }),
@@ -361,7 +349,7 @@ export const handlers = [
       }
 
       return HttpResponse.json(comparison)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '비교 분석 실패' }, { status: 500 })
     }
   }),
@@ -379,7 +367,7 @@ export const handlers = [
       }
 
       return HttpResponse.json(response)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: 'Failed to generate response' }, { status: 500 })
     }
   }),
@@ -404,7 +392,7 @@ export const handlers = [
           id: '3',
           category: '요금',
           question: '서비스 이용료는 얼마인가요?',
-          answer: '기본 진단은 무료입니다. 프리미엄 기능(상세 분석, 전문가 상담 등)은 월 29,000원부터 시작합니다.',
+          answer: '진단은 무료입니다. 회원가입 후 바로 진단을 받을 수 있습니다.',
         },
         {
           id: '4',
@@ -415,7 +403,7 @@ export const handlers = [
       ]
 
       return HttpResponse.json(faqs)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: 'FAQ 조회 실패' }, { status: 500 })
     }
   }),
@@ -446,7 +434,7 @@ export const handlers = [
       ]
 
       return HttpResponse.json(insights)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '인사이트 조회 실패' }, { status: 500 })
     }
   }),
@@ -461,7 +449,7 @@ export const handlers = [
 
       const notifications = mockNotifications.get(userId) || []
       return HttpResponse.json(notifications)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '알림 조회 실패' }, { status: 500 })
     }
   }),
@@ -483,7 +471,7 @@ export const handlers = [
 
       mockNotifications.set(userId, filtered)
       return HttpResponse.json({ success: true })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '알림 삭제 실패' }, { status: 500 })
     }
   }),
@@ -507,7 +495,7 @@ export const handlers = [
       mockNotifications.set(userId, notifications)
 
       return HttpResponse.json({ success: true })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '알림 읽음 처리 실패' }, { status: 500 })
     }
   }),
@@ -521,7 +509,7 @@ export const handlers = [
 
       const body = await request.json()
       return HttpResponse.json({ success: true, settings: body })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '알림 설정 업데이트 실패' }, { status: 500 })
     }
   }),
@@ -547,7 +535,7 @@ export const handlers = [
       }
 
       return HttpResponse.json(statistics)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '통계 조회 실패' }, { status: 500 })
     }
   }),
@@ -583,7 +571,7 @@ export const handlers = [
       ]
 
       return HttpResponse.json(stories)
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '성공 사례 조회 실패' }, { status: 500 })
     }
   }),
@@ -604,7 +592,7 @@ export const handlers = [
       }
 
       return HttpResponse.json(response, { status: 201 })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '문의 제출 실패' }, { status: 500 })
     }
   }),
@@ -624,7 +612,7 @@ export const handlers = [
 
       const { password: _, ...userWithoutPassword } = user
       return HttpResponse.json({ user: userWithoutPassword })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '프로필 조회 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),
@@ -647,7 +635,7 @@ export const handlers = [
 
       const { password: _, ...userWithoutPassword } = updatedUser
       return HttpResponse.json({ user: userWithoutPassword })
-    } catch (error) {
+    } catch {
       return HttpResponse.json({ error: '프로필 수정 중 오류가 발생했습니다.' }, { status: 500 })
     }
   }),

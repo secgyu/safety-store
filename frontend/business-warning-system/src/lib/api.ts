@@ -430,7 +430,7 @@ export function useAuth() {
       try {
         return await apiClient.getMe()
       }
-      catch (er) { // 401 에러라면 null 반환
+      catch { // 401 에러라면 null 반환
         return null;
       }
     },

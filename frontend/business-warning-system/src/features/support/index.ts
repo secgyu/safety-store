@@ -1,3 +1,2 @@
-// Support Feature Public API
-// TODO: Export hooks, components, types after implementation
-
+export { supportApi, useSendChatMessage, useFAQs, useSubmitContact, useSuccessStories } from './api/supportApi'
+export * from './types'

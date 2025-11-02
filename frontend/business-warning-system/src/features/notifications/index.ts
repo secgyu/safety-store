@@ -1,3 +1,8 @@
-// Notifications Feature Public API
-// TODO: Export hooks, components, types after implementation
-
+export {
+  notificationsApi,
+  useNotifications,
+  useMarkAsRead,
+  useNotificationSettings,
+  useUpdateNotificationSettings,
+} from './api/notificationsApi'
+export * from './types'

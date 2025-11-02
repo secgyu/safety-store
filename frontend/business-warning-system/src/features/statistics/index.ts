@@ -1,3 +1,2 @@
-// Statistics Feature Public API
-// TODO: Export hooks, components, types after implementation
-
+export { statisticsApi, useStatistics } from './api/statisticsApi'
+export * from './types'

@@ -1,3 +1,1 @@
-// User Feature Public API
-// TODO: Export hooks, components, types after implementation
-
+export { UserMenu } from './components/UserMenu'

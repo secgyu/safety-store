@@ -1,3 +1,2 @@
-// Insights Feature Public API
-// TODO: Export hooks, components, types after implementation
-
+export { insightsApi, useInsights } from './api/insightsApi'
+export * from './types'

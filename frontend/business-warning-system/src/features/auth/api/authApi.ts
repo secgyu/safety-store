@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { client, handleResponse } from '@/shared/lib/api-client'
 import { useAuthStore } from '../store/authStore'
-import type { BearerResponse, LoginRequest, SignupRequest, User, UserResponse } from '../types'
+import type { BearerResponse, LoginRequest, SignupRequest, User, UserResponse, UserUpdate } from '../types'
 
 // ========== Token Refresh ==========
 async function refreshAccessToken(): Promise<string | null> {
@@ -55,7 +55,7 @@ class AuthApi {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        email: data.username,
+        email: data.email,
         password: data.password,
       }),
     })
@@ -85,7 +85,7 @@ class AuthApi {
     })
   }
 
-  async updateUser(data: Partial<User>): Promise<UserResponse> {
+  async updateUser(data: UserUpdate): Promise<User> {
     const response = await client.PATCH('/api/users/me', { body: data })
     return handleResponse(response)
   }

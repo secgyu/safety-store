@@ -8,37 +8,10 @@ from app.core.auth import (
     get_user_db
 )
 from app.models.user import UserTable
-from app.schemas import UserResponse
-from fastapi_users import schemas as fastapi_users_schemas
-from pydantic import EmailStr, BaseModel
+from app.schemas import UserRead, UserCreate, UserUpdate, UserResponse, LoginRequest, AuthResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_async_session
 from typing import Optional
-
-
-# FastAPI Users용 스키마 정의
-class UserRead(fastapi_users_schemas.BaseUser[int]):
-    name: str
-    business_name: str | None = None
-    industry: str | None = None
-
-
-class UserCreate(fastapi_users_schemas.BaseUserCreate):
-    name: str
-    business_name: str | None = None
-    industry: str | None = None
-
-
-class UserUpdate(fastapi_users_schemas.BaseUserUpdate):
-    name: str | None = None
-    business_name: str | None = None
-    industry: str | None = None
-
-
-# 로그인 요청 스키마
-class LoginRequest(BaseModel):
-    email: str
-    password: str
 
 
 router = APIRouter()
@@ -47,7 +20,7 @@ router = APIRouter()
 
 
 # 커스텀 로그인 엔드포인트 (Refresh Token 쿠키 추가)
-@router.post("/login-custom")
+@router.post("/login-custom", response_model=AuthResponse)
 async def custom_login(
     response: Response,
     login_data: LoginRequest,
@@ -88,14 +61,24 @@ async def custom_login(
         path="/"
     )
     
-    return {
-        "access_token": access_token,
-        "token_type": "bearer"
-    }
+    return AuthResponse(
+        user=UserRead(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            business_name=user.business_name,
+            industry=user.industry,
+            created_at=user.created_at,
+            is_active=user.is_active,
+            is_superuser=user.is_superuser,
+            is_verified=user.is_verified,
+        ),
+        token=access_token,
+    )
 
 
 # Refresh Token으로 Access Token 재발급
-@router.post("/refresh")
+@router.post("/refresh", response_model=AuthResponse)
 async def refresh_access_token(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
@@ -122,14 +105,24 @@ async def refresh_access_token(
     # 새로운 Access Token 발급
     new_access_token = create_access_token(user.id)
     
-    return {
-        "access_token": new_access_token,
-        "token_type": "bearer"
-    }
+    return AuthResponse(
+        user=UserRead(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            business_name=user.business_name,
+            industry=user.industry,
+            created_at=user.created_at,
+            is_active=user.is_active,
+            is_superuser=user.is_superuser,
+            is_verified=user.is_verified,
+        ),
+        token=new_access_token,
+    )
 
 
 # 로그아웃 (Refresh Token 쿠키 삭제)
-@router.post("/logout-custom")
+@router.post("/logout-custom", response_model=dict)
 async def logout_custom(response: Response):
     """로그아웃: Refresh Token 쿠키 삭제"""
     response.delete_cookie(key="refresh_token", path="/")
@@ -139,17 +132,17 @@ async def logout_custom(response: Response):
 # 커스텀 엔드포인트
 @router.get("/me", response_model=UserResponse)
 async def get_me(user: UserTable = Depends(fastapi_users.current_user(active=True))):
-    return {
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "name": user.name,
-            "business_name": user.business_name,
-            "industry": user.industry,
-            "created_at": user.created_at.isoformat(),
-            "is_active": user.is_active,
-            "is_superuser": user.is_superuser,
-            "is_verified": user.is_verified,
-        }
-    }
+    return UserResponse(
+        user=UserRead(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            business_name=user.business_name,
+            industry=user.industry,
+            created_at=user.created_at,
+            is_active=user.is_active,
+            is_superuser=user.is_superuser,
+            is_verified=user.is_verified,
+        )
+    )
 

@@ -124,7 +124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
+                  "$ref": "#/components/schemas/UserRead"
                 }
               }
             }
@@ -182,7 +182,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
+                  "$ref": "#/components/schemas/UserRead"
                 }
               }
             }
@@ -207,7 +207,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__routers__auth__UserUpdate"
+                "$ref": "#/components/schemas/UserUpdate"
               }
             }
           },
@@ -219,7 +219,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
+                  "$ref": "#/components/schemas/UserRead"
                 }
               }
             }
@@ -301,7 +301,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
+                  "$ref": "#/components/schemas/UserRead"
                 }
               }
             }
@@ -354,7 +354,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__routers__auth__UserUpdate"
+                "$ref": "#/components/schemas/UserUpdate"
               }
             }
           }
@@ -365,7 +365,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__routers__auth__UserRead"
+                  "$ref": "#/components/schemas/UserRead"
                 }
               }
             }
@@ -489,7 +489,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
               }
             }
           },
@@ -519,7 +521,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
               }
             }
           }
@@ -539,7 +543,10 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object",
+                  "title": "Response Logout Custom Api Auth Logout Custom Post"
+                }
               }
             }
           }
@@ -1586,7 +1593,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__schemas__UserUpdate"
+                "$ref": "#/components/schemas/UserUpdate"
               }
             }
           },
@@ -1761,6 +1768,23 @@
           "items"
         ],
         "title": "ActionPlanRequest"
+      },
+      "AuthResponse": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserRead"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user",
+          "token"
+        ],
+        "title": "AuthResponse"
       },
       "BearerResponse": {
         "properties": {
@@ -2496,6 +2520,7 @@
         "properties": {
           "email": {
             "type": "string",
+            "format": "email",
             "title": "Email"
           },
           "password": {
@@ -2893,47 +2918,11 @@
             "type": "string",
             "title": "Password"
           },
-          "is_active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Active",
-            "default": true
-          },
-          "is_superuser": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Superuser",
-            "default": false
-          },
-          "is_verified": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Verified",
-            "default": false
-          },
           "name": {
             "type": "string",
             "title": "Name"
           },
-          "business_name": {
+          "businessName": {
             "anyOf": [
               {
                 "type": "string"
@@ -2942,7 +2931,7 @@
                 "type": "null"
               }
             ],
-            "title": "Business Name"
+            "title": "Businessname"
           },
           "industry": {
             "anyOf": [
@@ -2964,208 +2953,7 @@
         ],
         "title": "UserCreate"
       },
-      "UserResponse": {
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/app__schemas__UserRead"
-          }
-        },
-        "type": "object",
-        "required": [
-          "user"
-        ],
-        "title": "UserResponse"
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          }
-        },
-        "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError"
-      },
-      "app__routers__auth__UserRead": {
-        "properties": {
-          "id": {
-            "type": "integer",
-            "title": "Id"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email"
-          },
-          "is_active": {
-            "type": "boolean",
-            "title": "Is Active",
-            "default": true
-          },
-          "is_superuser": {
-            "type": "boolean",
-            "title": "Is Superuser",
-            "default": false
-          },
-          "is_verified": {
-            "type": "boolean",
-            "title": "Is Verified",
-            "default": false
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "business_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Business Name"
-          },
-          "industry": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Industry"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "email",
-          "name"
-        ],
-        "title": "UserRead"
-      },
-      "app__routers__auth__UserUpdate": {
-        "properties": {
-          "password": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Password"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "email"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "is_active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Active"
-          },
-          "is_superuser": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Superuser"
-          },
-          "is_verified": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Verified"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "business_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Business Name"
-          },
-          "industry": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Industry"
-          }
-        },
-        "type": "object",
-        "title": "UserUpdate"
-      },
-      "app__schemas__UserRead": {
+      "UserRead": {
         "properties": {
           "id": {
             "type": "integer",
@@ -3232,7 +3020,19 @@
         ],
         "title": "UserRead"
       },
-      "app__schemas__UserUpdate": {
+      "UserResponse": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user"
+        ],
+        "title": "UserResponse"
+      },
+      "UserUpdate": {
         "properties": {
           "name": {
             "anyOf": [
@@ -3281,6 +3081,39 @@
         },
         "type": "object",
         "title": "UserUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
       }
     },
     "securitySchemes": {

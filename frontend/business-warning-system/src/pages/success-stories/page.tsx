@@ -1,9 +1,9 @@
 import { ArrowLeft, Quote } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { useSuccessStories } from "@/lib/api";
 
 export default function SuccessStoriesPage() {
@@ -59,7 +59,7 @@ export default function SuccessStoriesPage() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-2xl font-bold">{story.business_name}</h3>
+                      <h3 className="text-2xl font-bold">{story.businessName}</h3>
                       <Badge>{story.industry}</Badge>
                     </div>
                     <p className="text-muted-foreground">{story.location}</p>
@@ -75,11 +75,11 @@ export default function SuccessStoriesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-red-50 rounded-lg p-4">
                       <div className="font-semibold text-sm text-muted-foreground mb-1">개선 전</div>
-                      <p className="text-2xl font-bold text-red-600">{story.before_score}점</p>
+                      <p className="text-2xl font-bold text-red-600">{story.beforeScore}점</p>
                     </div>
                     <div className="bg-green-50 rounded-lg p-4">
                       <div className="font-semibold text-sm text-muted-foreground mb-1">개선 후</div>
-                      <p className="text-2xl font-bold text-green-600">{story.after_score}점</p>
+                      <p className="text-2xl font-bold text-green-600">{story.afterScore}점</p>
                     </div>
                   </div>
                   <div>

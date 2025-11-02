@@ -1,3 +1,4 @@
 // Statistics Feature Types
-export type { Statistics } from '@/shared/types/api-generated'
+import type { components } from '@/shared/types/api-generated'
 
+export type Statistics = components['schemas']['Statistics']

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { client, handleResponse } from '@/shared/lib/api-client'
-import type { Notification, NotificationSettings, NotificationSettingsResponse } from '../types'
+import type { Notification, NotificationSettings, NotificationSettingsResponse, SuccessResponse } from '../types'
 
 class NotificationsApi {
   async getNotifications(): Promise<Notification[]> {
@@ -8,15 +8,10 @@ class NotificationsApi {
     return handleResponse(response)
   }
 
-  async markAsRead(id: string): Promise<Notification> {
+  async markAsRead(id: string): Promise<SuccessResponse> {
     const response = await client.PUT('/api/notifications/{notification_id}/read', {
       params: { path: { notification_id: id } },
     })
-    return handleResponse(response)
-  }
-
-  async getSettings(): Promise<NotificationSettingsResponse> {
-    const response = await client.GET('/api/notifications/settings')
     return handleResponse(response)
   }
 
@@ -42,13 +37,6 @@ export function useMarkAsRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
-  })
-}
-
-export function useNotificationSettings() {
-  return useQuery({
-    queryKey: ['notificationSettings'],
-    queryFn: notificationsApi.getSettings,
   })
 }
 

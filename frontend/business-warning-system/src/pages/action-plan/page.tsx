@@ -2,12 +2,12 @@ import { AlertCircle, ArrowLeft, Calendar, CheckCircle2, Edit3, Target, Trash2, 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Progress } from "@/shared/components/ui/progress";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { type ActionPlanItem, useActionPlans, useDeleteActionPlanItem, useUpdateActionPlan } from "@/lib/api";
 
 interface Goal {

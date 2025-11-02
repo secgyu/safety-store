@@ -23,7 +23,7 @@ from app.routers import (
     support,
     user,
 )
-from app.routers.auth import UserRead, UserCreate, UserUpdate
+from app.schemas import UserRead, UserCreate, UserUpdate
 
 
 # Custom JSON Response - by_alias=True로 자동 직렬화

@@ -680,6 +680,12 @@ export interface components {
             /** Items */
             items: components["schemas"]["ActionPlanItem"][];
         };
+        /** AuthResponse */
+        AuthResponse: {
+            user: components["schemas"]["UserRead"];
+            /** Token */
+            token: string;
+        };
         /** BearerResponse */
         BearerResponse: {
             /** Access Token */
@@ -947,7 +953,10 @@ export interface components {
         };
         /** LoginRequest */
         LoginRequest: {
-            /** Email */
+            /**
+             * Email
+             * Format: email
+             */
             email: string;
             /** Password */
             password: string;
@@ -1099,93 +1108,15 @@ export interface components {
             email: string;
             /** Password */
             password: string;
-            /**
-             * Is Active
-             * @default true
-             */
-            is_active: boolean | null;
-            /**
-             * Is Superuser
-             * @default false
-             */
-            is_superuser: boolean | null;
-            /**
-             * Is Verified
-             * @default false
-             */
-            is_verified: boolean | null;
             /** Name */
             name: string;
-            /** Business Name */
-            business_name?: string | null;
-            /** Industry */
-            industry?: string | null;
-        };
-        /** UserResponse */
-        UserResponse: {
-            user: components["schemas"]["app__schemas__UserRead"];
-        };
-        /** ValidationError */
-        ValidationError: {
-            /** Location */
-            loc: (string | number)[];
-            /** Message */
-            msg: string;
-            /** Error Type */
-            type: string;
-        };
-        /** UserRead */
-        app__routers__auth__UserRead: {
-            /** Id */
-            id: number;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /**
-             * Is Active
-             * @default true
-             */
-            is_active: boolean;
-            /**
-             * Is Superuser
-             * @default false
-             */
-            is_superuser: boolean;
-            /**
-             * Is Verified
-             * @default false
-             */
-            is_verified: boolean;
-            /** Name */
-            name: string;
-            /** Business Name */
-            business_name?: string | null;
-            /** Industry */
-            industry?: string | null;
-        };
-        /** UserUpdate */
-        app__routers__auth__UserUpdate: {
-            /** Password */
-            password?: string | null;
-            /** Email */
-            email?: string | null;
-            /** Is Active */
-            is_active?: boolean | null;
-            /** Is Superuser */
-            is_superuser?: boolean | null;
-            /** Is Verified */
-            is_verified?: boolean | null;
-            /** Name */
-            name?: string | null;
-            /** Business Name */
-            business_name?: string | null;
+            /** Businessname */
+            businessName?: string | null;
             /** Industry */
             industry?: string | null;
         };
         /** UserRead */
-        app__schemas__UserRead: {
+        UserRead: {
             /** Id */
             id: number;
             /**
@@ -1220,8 +1151,12 @@ export interface components {
              */
             isVerified: boolean;
         };
+        /** UserResponse */
+        UserResponse: {
+            user: components["schemas"]["UserRead"];
+        };
         /** UserUpdate */
-        app__schemas__UserUpdate: {
+        UserUpdate: {
             /** Name */
             name?: string | null;
             /** Businessname */
@@ -1230,6 +1165,15 @@ export interface components {
             industry?: string | null;
             /** Password */
             password?: string | null;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
         };
     };
     responses: never;
@@ -1334,7 +1278,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
+                    "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Bad Request */
@@ -1372,7 +1316,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
+                    "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Missing token or inactive user. */
@@ -1393,7 +1337,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__routers__auth__UserUpdate"];
+                "application/json": components["schemas"]["UserUpdate"];
             };
         };
         responses: {
@@ -1403,7 +1347,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
+                    "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Bad Request */
@@ -1450,7 +1394,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
+                    "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Missing token or inactive user. */
@@ -1546,7 +1490,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__routers__auth__UserUpdate"];
+                "application/json": components["schemas"]["UserUpdate"];
             };
         };
         responses: {
@@ -1556,7 +1500,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__routers__auth__UserRead"];
+                    "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Bad Request */
@@ -1619,7 +1563,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
             /** @description Validation Error */
@@ -1648,7 +1592,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AuthResponse"];
                 };
             };
         };
@@ -1668,7 +1612,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": Record<string, never>;
                 };
             };
         };
@@ -2358,7 +2302,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__schemas__UserUpdate"];
+                "application/json": components["schemas"]["UserUpdate"];
             };
         };
         responses: {

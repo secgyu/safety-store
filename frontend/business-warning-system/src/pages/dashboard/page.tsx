@@ -2,11 +2,11 @@ import { AlertCircle, Bell, Calendar, Download, Eye, MessageCircle, TrendingUp }
 import { Link } from "react-router-dom";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { AppHeader } from "@/components/app-header";
-import { RiskGauge } from "@/components/risk-gauge";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
+import { RiskGauge } from "@/features/diagnosis/components/RiskIndicators/RiskGauge";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { useAuth, useDiagnosisHistory } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
@@ -22,18 +22,11 @@ type HistoryRecord = {
 
 export default function DashboardPage() {
   const { data: authData } = useAuth();
-  const { data: diagnosisData, isLoading } = useDiagnosisHistory();
-
-  // Convert API data to UI format
-  const historyData: HistoryRecord[] =
-    diagnosisData?.diagnoses.map((d) => ({
-      id: d.id,
-      date: d.createdAt,
-      riskScore: d.overallScore,
-      alert: d.riskLevel,
-      salesChange: d.components.sales.score - 50, // Mock calculation
-      customerChange: d.components.customer.score - 50, // Mock calculation
-    })) || [];
+  // TODO: 실제로는 최근 진단 기록에서 encoded_mct를 가져와야 함
+  // const { data: diagnosisData, isLoading } = useDiagnosisHistory(encodedMct);
+  
+  // Mock data for now
+  const historyData: HistoryRecord[] = [];
 
   const latestDiagnosis = historyData[0] || {
     id: "1",
@@ -101,24 +94,6 @@ export default function DashboardPage() {
   };
 
   const trendAnalysis = getTrendAnalysis();
-
-  if (isLoading) {
-    return (
-      <>
-        <AppHeader />
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-          <div className="container mx-auto px-4 py-8 max-w-6xl">
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-muted-foreground">진단 기록을 불러오는 중...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>

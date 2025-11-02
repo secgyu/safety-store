@@ -7,8 +7,8 @@ import type { components, paths } from '@/shared/types/api-generated'
 // ========== Type Exports (from generated types) ==========
 export type LoginRequest = components['schemas']['Body_auth_jwt_login_api_auth_login_post']
 export type SignupRequest = components['schemas']['UserCreate']
-export type User = components['schemas']['app__schemas__UserRead']
-export type FastAPIUser = components['schemas']['app__routers__auth__UserRead']  // FastAPI Users response type
+export type User = components['schemas']['UserRead']
+export type FastAPIUser = components['schemas']['UserRead']  // FastAPI Users response type
 export type DiagnosisRequest = components['schemas']['DiagnosisRequest']
 export type DiagnosisResponse = components['schemas']['DiagnosisResponse']
 export type DiagnosisHistory = components['schemas']['DiagnosisHistory']
@@ -33,7 +33,7 @@ export type Statistics = components['schemas']['Statistics']
 export type SuccessStory = components['schemas']['SuccessStory']
 export type ContactRequest = components['schemas']['ContactRequest']
 export type ContactResponse = components['schemas']['ContactResponse']
-export type UserUpdate = components['schemas']['app__schemas__UserUpdate']
+export type UserUpdate = components['schemas']['UserUpdate']
 export type BearerResponse = components['schemas']['BearerResponse']
 export type SuccessResponse = components['schemas']['SuccessResponse']
 export type UserResponse = components['schemas']['UserResponse']

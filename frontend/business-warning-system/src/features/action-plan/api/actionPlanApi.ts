@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { client, handleResponse } from '@/shared/lib/api-client'
-import type { ActionPlan, ActionPlanRequest, SuccessResponse } from '@/shared/types/api-generated'
+import type { ActionPlan, ActionPlanRequest, SuccessResponse } from '../types'
 
 class ActionPlanApi {
   async getActionPlans(): Promise<ActionPlan[]> {
@@ -13,10 +13,9 @@ class ActionPlanApi {
     return handleResponse(response)
   }
 
-  async updateActionPlan(id: string, data: Partial<ActionPlan>): Promise<ActionPlan> {
+  async updateActionPlan(id: string, data: ActionPlanRequest): Promise<ActionPlan> {
     const response = await client.PUT('/api/action-plan/{plan_id}', {
       params: { path: { plan_id: id } },
-      // @ts-expect-error - Partial type mismatch
       body: data,
     })
     return handleResponse(response)
@@ -55,7 +54,7 @@ export function useCreateActionPlan() {
 export function useUpdateActionPlan() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<ActionPlan> }) =>
+    mutationFn: ({ id, data }: { id: string; data: ActionPlanRequest }) =>
       actionPlanApi.updateActionPlan(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['actionPlans'] })

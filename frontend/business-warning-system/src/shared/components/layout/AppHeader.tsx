@@ -2,10 +2,10 @@ import { HelpCircle, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
-import { UserMenu } from "@/components/user-menu"; // TODO: Phase 6에서 @/features/user로 변경
+import { Button } from "@/shared/components/ui/button";
+import { UserMenu } from "@/features/user/components/UserMenu"; // TODO: Phase 6에서 @/features/user로 변경
 import { useLogout } from "@/lib/api";
-import { resetOnboarding } from "@/lib/onboarding";
+import { resetOnboarding } from "@/shared/services/onboarding/onboardingService";
 
 export function AppHeader() {
   const location = useLocation();
@@ -29,7 +29,7 @@ export function AppHeader() {
   };
 
   const handleLogout = () => {
-    logout();
+    logout.mutate();
     navigate("/");
   };
 

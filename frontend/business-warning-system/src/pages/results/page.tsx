@@ -34,15 +34,15 @@ import {
   YAxis,
 } from "recharts";
 
-import { ActionCard } from "@/components/action-card";
-import { AppHeader } from "@/components/app-header";
-import { RiskCard } from "@/components/risk-card";
-import { RiskGauge } from "@/components/risk-gauge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { ActionCard } from "@/features/diagnosis/components/RiskIndicators/ActionCard";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
+import { RiskCard } from "@/features/diagnosis/components/RiskIndicators/RiskCard";
+import { RiskGauge } from "@/features/diagnosis/components/RiskIndicators/RiskGauge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { useToast } from "@/shared/hooks/use-toast";
 import { client, useBenchmark, useDiagnosisHistory } from "@/lib/api";
-import { generatePDFReport } from "@/lib/pdf-generator";
+import { generatePDFReport } from "@/shared/services/pdf/pdfGenerator";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 
@@ -113,14 +113,17 @@ export default function ResultsPage() {
         // API 응답을 ResultData 형식으로 매핑
         const mappedResult: ResultData = {
           p_final: apiResult.overallScore || 0,
-          alert: apiResult.riskLevel || "GREEN",
+          alert: (apiResult.riskLevel || "GREEN") as AlertLevel,
           risk_components: {
             sales_risk: apiResult.components?.sales?.score || 0,
             customer_risk: apiResult.components?.customer?.score || 0,
             market_risk: apiResult.components?.market?.score || 0,
           },
-          recommendations: apiResult.recommendations || [],
-          revenue_ratio: apiResult.revenueRatio,
+          recommendations: (apiResult.recommendations || []).map(r => ({
+            ...r,
+            priority: r.priority as "high" | "medium" | "low"
+          })),
+          revenue_ratio: apiResult.revenueRatio ?? undefined,
         };
 
         // diagnosisInfo 설정 (다운로드 등에 필요)

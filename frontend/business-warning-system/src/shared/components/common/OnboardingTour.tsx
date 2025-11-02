@@ -1,7 +1,7 @@
 import { ArrowLeft,ArrowRight, X } from "lucide-react";
 import { useEffect,useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 
 interface TourStep {
   title: string;

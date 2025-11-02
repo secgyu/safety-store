@@ -14,7 +14,7 @@ class SupportApi {
   }
 
   async submitContact(data: ContactRequest): Promise<ContactResponse> {
-    const response = await client.POST('/api/contact', { body: data })
+    const response = await client.POST('/api/support/contact', { body: data })
     return handleResponse(response)
   }
 

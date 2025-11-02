@@ -2,14 +2,14 @@ import { ArrowRight, BarChart3, CheckCircle2, Clock, TrendingUp, Users } from "l
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { AppHeader } from "@/components/app-header";
-import { OnboardingTour } from "@/components/onboarding-tour";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Footer from "@/footer/footer";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
+import { OnboardingTour } from "@/shared/components/common/OnboardingTour";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import Footer from "@/shared/components/layout/Footer";
 import { useAuth } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
-import { hasCompletedOnboarding, markOnboardingComplete } from "@/lib/onboarding";
+import { useToast } from "@/shared/hooks/use-toast";
+import { hasCompletedOnboarding, markOnboardingComplete } from "@/shared/services/onboarding/onboardingService";
 
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);

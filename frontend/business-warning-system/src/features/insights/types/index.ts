@@ -1,3 +1,4 @@
 // Insights Feature Types
-export type { Insight } from '@/shared/types/api-generated'
+import type { components } from '@/shared/types/api-generated'
 
+export type Insight = components['schemas']['Insight']

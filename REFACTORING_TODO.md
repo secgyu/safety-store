@@ -28,9 +28,11 @@
 ## Phase 1: 기반 구조 생성 ✅
 
 ### 목표
+
 프로젝트의 새로운 폴더 구조를 생성하고 기본 설정 파일들을 준비합니다.
 
 ### 작업 항목
+
 - [x] 리팩터링 계획 문서 작성
 - [ ] 디렉터리 구조 생성
 - [ ] tsconfig.json paths 설정 업데이트
@@ -38,6 +40,7 @@
 - [ ] 빌드 테스트
 
 ### 상세 작업
+
 ```bash
 # 1. 디렉터리 생성
 mkdir -p src/app/providers
@@ -72,9 +75,11 @@ echo "// TODO: Export public API" > src/features/user/index.ts
 ## Phase 2: Shared 폴더 구성 ⬜
 
 ### 목표
+
 공통으로 사용되는 리소스들을 shared 폴더로 이동합니다.
 
 ### 작업 항목
+
 - [ ] 타입 파일 이동
   - [ ] `src/types/api-generated.ts` → `src/shared/types/api-generated.ts`
 - [ ] API 클라이언트 분리
@@ -103,6 +108,7 @@ echo "// TODO: Export public API" > src/features/user/index.ts
 - [ ] Import 경로 수정 및 테스트
 
 ### 예상 파일 구조
+
 ```
 shared/
 ├── components/
@@ -138,9 +144,11 @@ shared/
 ## Phase 3: features/auth 모듈 분리 ⬜
 
 ### 목표
+
 인증 관련 로직을 독립된 feature 모듈로 분리합니다.
 
 ### 작업 항목
+
 - [ ] Store 분리
   - [ ] `lib/api.ts`에서 Zustand store 추출 → `features/auth/store/authStore.ts`
 - [ ] API 로직 분리
@@ -163,6 +171,7 @@ shared/
 - [ ] Import 경로 수정 및 테스트
 
 ### 예상 파일 구조
+
 ```
 features/auth/
 ├── components/
@@ -181,12 +190,13 @@ features/auth/
 ```
 
 ### Public API 예시
+
 ```typescript
 // features/auth/index.ts
-export { useAuthStore } from './store/authStore'
-export { useAuth, useAuthInitializer } from './hooks'
-export { useLogin, useSignup, useLogout, useCurrentUser } from './api/authApi'
-export * from './types'
+export { useAuthStore } from "./store/authStore";
+export { useAuth, useAuthInitializer } from "./hooks";
+export { useLogin, useSignup, useLogout, useCurrentUser } from "./api/authApi";
+export * from "./types";
 ```
 
 ---
@@ -194,9 +204,11 @@ export * from './types'
 ## Phase 4: features/diagnosis 모듈 분리 ⬜
 
 ### 목표
+
 진단 관련 로직을 독립된 feature 모듈로 분리합니다. 가장 큰 파일(results/page.tsx 1,169줄)을 포함합니다.
 
 ### 작업 항목
+
 - [ ] API 로직 분리
   - [ ] `lib/api.ts`에서 진단 API 추출 → `features/diagnosis/api/diagnosisApi.ts`
     - useDiagnose
@@ -230,6 +242,7 @@ export * from './types'
 - [ ] Import 경로 수정 및 테스트
 
 ### 예상 파일 구조
+
 ```
 features/diagnosis/
 ├── components/
@@ -269,9 +282,11 @@ features/diagnosis/
 ## Phase 5: features/benchmark 모듈 분리 ⬜
 
 ### 목표
+
 벤치마크/비교 관련 로직을 독립된 feature 모듈로 분리합니다. 큰 파일(compare/page.tsx 1,140줄)을 포함합니다.
 
 ### 작업 항목
+
 - [ ] API 로직 분리
   - [ ] `lib/api.ts`에서 벤치마크 API 추출 → `features/benchmark/api/benchmarkApi.ts`
     - useBenchmark
@@ -294,6 +309,7 @@ features/diagnosis/
 - [ ] Import 경로 수정 및 테스트
 
 ### 예상 파일 구조
+
 ```
 features/benchmark/
 ├── components/
@@ -322,36 +338,43 @@ features/benchmark/
 ## Phase 6: 나머지 features 모듈 분리 ⬜
 
 ### 목표
+
 나머지 도메인들을 각각 독립된 feature 모듈로 분리합니다.
 
 ### 작업 항목
 
 #### 6-1. features/action-plan
+
 - [ ] API: `lib/api.ts`에서 추출
 - [ ] 컴포넌트: `pages/action-plan/page.tsx` 분석 후 분리
 - [ ] Public API 작성
 
 #### 6-2. features/statistics
+
 - [ ] API: `lib/api.ts`에서 추출
 - [ ] 컴포넌트: `pages/statistics/page.tsx` 분석 후 분리
 - [ ] Public API 작성
 
 #### 6-3. features/insights
+
 - [ ] API: `lib/api.ts`에서 추출
 - [ ] 컴포넌트: `pages/insights/page.tsx` 분석 후 분리
 - [ ] Public API 작성
 
 #### 6-4. features/notifications
+
 - [ ] API: `lib/api.ts`에서 추출
 - [ ] 컴포넌트: `pages/notifications/page.tsx` 분석 후 분리
 - [ ] Public API 작성
 
 #### 6-5. features/support
+
 - [ ] API: `lib/api.ts`에서 추출 (FAQ, Contact 등)
 - [ ] 컴포넌트: `pages/support/page.tsx`, `pages/faq/page.tsx` 분석 후 분리
 - [ ] Public API 작성
 
 #### 6-6. features/user
+
 - [ ] 컴포넌트: `components/user-menu.tsx` → `features/user/components/UserMenu.tsx`
 - [ ] 컴포넌트: `pages/settings/page.tsx` 분석 후 분리
 - [ ] Public API 작성
@@ -361,9 +384,11 @@ features/benchmark/
 ## Phase 7: Pages 폴더 간소화 ⬜
 
 ### 목표
+
 페이지 컴포넌트를 얇은 래퍼로 변경하고 폴더 구조를 단순화합니다.
 
 ### 작업 항목
+
 - [ ] 폴더 구조 단순화
   - [ ] `pages/login/page.tsx` → `pages/login.tsx`
   - [ ] `pages/signup/page.tsx` → `pages/signup.tsx`
@@ -378,21 +403,23 @@ features/benchmark/
 ### 변경 전/후 비교
 
 #### 변경 전 (pages/results/page.tsx)
+
 ```typescript
 // 1,169줄 - 모든 로직 포함
 export default function ResultsPage() {
   // 상태 관리, API 호출, 비즈니스 로직, UI...
-  return <div>...</div>
+  return <div>...</div>;
 }
 ```
 
 #### 변경 후 (pages/results.tsx)
+
 ```typescript
 // ~50줄 - 얇은 래퍼
-import { ResultsView } from '@/features/diagnosis'
+import { ResultsView } from "@/features/diagnosis";
 
 export default function ResultsPage() {
-  return <ResultsView />
+  return <ResultsView />;
 }
 ```
 
@@ -401,9 +428,11 @@ export default function ResultsPage() {
 ## Phase 8: App 폴더 정리 ⬜
 
 ### 목표
+
 앱 초기화 로직을 정리하고 providers를 분리합니다.
 
 ### 작업 항목
+
 - [ ] Providers 분리
   - [ ] `App.tsx`에서 QueryClientProvider 추출 → `app/providers/QueryProvider.tsx`
   - [ ] `App.tsx`에서 AuthInitializer 추출 → `app/providers/AuthProvider.tsx`
@@ -415,6 +444,7 @@ export default function ResultsPage() {
 - [ ] 빌드 테스트
 
 ### 예상 파일 구조
+
 ```
 app/
 ├── App.tsx              # 최상위 앱 (Providers 조합)
@@ -429,9 +459,11 @@ app/
 ## Phase 9: 기존 파일 정리 및 테스트 ⬜
 
 ### 목표
+
 사용하지 않는 파일을 삭제하고 전체 테스트를 수행합니다.
 
 ### 작업 항목
+
 - [ ] 이동된 파일 확인 및 삭제
   - [ ] `src/components/` (feature로 이동된 파일들)
   - [ ] `src/lib/api.ts` (완전히 분리되었는지 확인)
@@ -453,9 +485,11 @@ app/
 ## Phase 10: 문서화 및 마무리 ⬜
 
 ### 목표
+
 리팩터링 내용을 문서화하고 마무리합니다.
 
 ### 작업 항목
+
 - [ ] 아키텍처 문서 업데이트
   - [ ] README.md 업데이트 (새 구조 반영)
   - [ ] 폴더 구조 다이어그램 추가
@@ -478,12 +512,14 @@ app/
 ## 📊 통계
 
 ### 리팩터링 전
+
 - 총 파일 수: ~80개
 - 300줄 이상 파일: 4개
 - 최대 파일 크기: 1,169줄 (results/page.tsx)
 - API 로직 파일: 1개 (api.ts, 694줄)
 
 ### 리팩터링 후 (예상)
+
 - 총 파일 수: ~120개
 - 300줄 이상 파일: 0개
 - 최대 파일 크기: ~300줄
@@ -495,27 +531,29 @@ app/
 ## 🔄 진행 중 이슈 트래킹
 
 ### 이슈 로그
+
 (발생한 문제와 해결 방법을 기록)
 
 | 날짜 | Phase | 이슈 | 해결 |
-|-----|-------|------|------|
-| - | - | - | - |
+| ---- | ----- | ---- | ---- |
+| -    | -     | -    | -    |
 
 ---
 
 ## 📞 도움이 필요할 때
 
 ### 질문 체크리스트
+
 - [ ] `REFACTORING_PLAN.md` 확인했는가?
 - [ ] 현재 Phase의 상세 작업 확인했는가?
 - [ ] 이전 Phase가 완료되었는가?
 - [ ] 빌드 에러가 있는가?
 
 ### 다음 작업
+
 현재 Phase 1 진행 중 → **디렉터리 구조 생성** 부터 시작
 
 ---
 
 **마지막 업데이트:** 2025-11-02  
 **현재 진행:** Phase 1 - 리팩터링 계획 문서 작성 완료
-

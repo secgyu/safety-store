@@ -18,6 +18,37 @@ interface DiagnosisData {
     description: string
     priority: string
   }>
+
+  // 세부 경영 지표
+  detailedMetrics?: {
+    avgRevenue: number          // 월평균 매출
+    avgCustomers: number         // 월평균 고객 수
+    customerSpending: number     // 객단가 (매출/고객수)
+    revenueGrowth?: number       // 매출 성장률 %
+    customerGrowth?: number      // 고객 수 성장률 %
+  }
+
+  // 업종 비교 데이터
+  benchmarkData?: {
+    industryName: string         // 업종명
+    averageRiskScore: number     // 업종 평균 위험도
+    myPosition: number           // 업종 내 백분위 (0-100)
+    revenueComparison: {
+      mine: number               // 내 매출
+      average: number            // 업종 평균 매출
+      differencePercent: number  // 차이 %
+    }
+    customerComparison: {
+      mine: number               // 내 고객 수
+      average: number            // 업종 평균 고객 수
+      differencePercent: number  // 차이 %
+    }
+  }
+
+  // 차트 이미지 (Base64)
+  chartImages?: {
+    radarChart?: string          // 레이더 차트 이미지
+  }
 }
 
 export async function generatePDFReport(data: DiagnosisData) {
@@ -173,6 +204,28 @@ function createHTMLReport(data: DiagnosisData): string {
         </table>
       </div>
 
+      <!-- 레이더 차트 -->
+      ${data.chartImages?.radarChart ? `
+      <div style="margin-bottom: 30px; page-break-inside: avoid;">
+        <h2 style="color: #0f172a; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
+          📊 위험 요소 시각화
+        </h2>
+        <div style="text-align: center; padding: 20px; background-color: #f8fafc; border-radius: 8px;">
+          <img src="${data.chartImages.radarChart}" 
+               style="max-width: 100%; height: auto; border-radius: 8px;" 
+               alt="위험 요소 레이더 차트" />
+        </div>
+        <div style="margin-top: 15px; padding: 15px; background-color: #eff6ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+          <p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">
+            💡 <strong>차트 해석:</strong> 
+            레이더 차트는 3가지 위험 요소(매출 안정성, 고객 유지력, 시장 경쟁력)를 한눈에 비교합니다. 
+            파란색 영역이 내 가게, 회색 영역이 업종 평균입니다. 
+            바깥쪽으로 갈수록 점수가 높고 안정적입니다.
+          </p>
+        </div>
+      </div>
+      ` : ''}
+
       <!-- 사업 지표 -->
       <div style="margin-bottom: 30px;">
         <h2 style="color: #0f172a; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">💼 사업 지표</h2>
@@ -196,21 +249,202 @@ function createHTMLReport(data: DiagnosisData): string {
         </table>
       </div>
 
+      <!-- 세부 경영 지표 -->
+      ${data.detailedMetrics ? `
+      <div style="margin-bottom: 30px; page-break-inside: avoid;">
+        <h2 style="color: #0f172a; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
+          📈 세부 경영 지표
+        </h2>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0;">
+          <tbody>
+            <tr>
+              <td style="padding: 12px; background-color: #f8fafc; font-weight: 600; width: 30%; border: 1px solid #e2e8f0;">
+                월 평균 매출
+              </td>
+              <td style="padding: 12px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 18px; font-weight: 700; color: #1e40af;">
+                  ₩${data.detailedMetrics.avgRevenue.toLocaleString()}
+                </span>
+              </td>
+              <td style="padding: 12px; background-color: #f8fafc; font-weight: 600; width: 30%; border: 1px solid #e2e8f0;">
+                ${data.detailedMetrics.revenueGrowth !== undefined ? '매출 성장률' : ''}
+              </td>
+              <td style="padding: 12px; border: 1px solid #e2e8f0;">
+                ${data.detailedMetrics.revenueGrowth !== undefined ? `
+                  <span style="font-size: 18px; font-weight: 700; color: ${data.detailedMetrics.revenueGrowth >= 0 ? '#22c55e' : '#ef4444'};">
+                    ${data.detailedMetrics.revenueGrowth >= 0 ? '+' : ''}${data.detailedMetrics.revenueGrowth.toFixed(1)}%
+                  </span>
+                ` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px; background-color: #f8fafc; font-weight: 600; border: 1px solid #e2e8f0;">
+                월 평균 고객 수
+              </td>
+              <td style="padding: 12px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 18px; font-weight: 700; color: #7c3aed;">
+                  ${data.detailedMetrics.avgCustomers.toLocaleString()}명
+                </span>
+              </td>
+              <td style="padding: 12px; background-color: #f8fafc; font-weight: 600; border: 1px solid #e2e8f0;">
+                ${data.detailedMetrics.customerGrowth !== undefined ? '고객 증가율' : ''}
+              </td>
+              <td style="padding: 12px; border: 1px solid #e2e8f0;">
+                ${data.detailedMetrics.customerGrowth !== undefined ? `
+                  <span style="font-size: 18px; font-weight: 700; color: ${data.detailedMetrics.customerGrowth >= 0 ? '#22c55e' : '#ef4444'};">
+                    ${data.detailedMetrics.customerGrowth >= 0 ? '+' : ''}${data.detailedMetrics.customerGrowth.toFixed(1)}%
+                  </span>
+                ` : ''}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px; background-color: #f8fafc; font-weight: 600; border: 1px solid #e2e8f0;">
+                객단가
+              </td>
+              <td style="padding: 12px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 18px; font-weight: 700; color: #16a34a;">
+                  ₩${data.detailedMetrics.customerSpending.toLocaleString()}
+                </span>
+              </td>
+              <td style="padding: 12px; background-color: #f8fafc; font-weight: 600; border: 1px solid #e2e8f0;">
+                영업 기간
+              </td>
+              <td style="padding: 12px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 18px; font-weight: 700; color: #f97316;">
+                  ${data.operatingMonths}개월
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div style="margin-top: 15px; padding: 15px; background-color: #eff6ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+          <p style="margin: 0; color: #1e40af; font-size: 13px; line-height: 1.6;">
+            💡 <strong>해석:</strong> 
+            객단가는 고객 1명당 평균 지출 금액입니다. 
+            ${data.detailedMetrics.customerSpending > 15000
+        ? '높은 객단가를 유지하고 있습니다.'
+        : data.detailedMetrics.customerSpending > 8000
+          ? '적절한 객단가 수준입니다.'
+          : '객단가 상승 전략을 고려해보세요.'}
+            ${data.detailedMetrics.revenueGrowth !== undefined && data.detailedMetrics.revenueGrowth > 0
+        ? ' 매출이 성장 중이니 현재 전략을 유지하세요.'
+        : data.detailedMetrics.revenueGrowth !== undefined && data.detailedMetrics.revenueGrowth < -5
+          ? ' 매출 감소세가 있으니 개선 방안을 검토하세요.'
+          : ''}
+          </p>
+        </div>
+      </div>
+      ` : ''}
+
+      <!-- 업종 비교 -->
+      ${data.benchmarkData ? `
+      <div style="margin-bottom: 30px; page-break-inside: avoid;">
+        <h2 style="color: #0f172a; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">
+          🏆 업종 내 순위 및 비교
+        </h2>
+        
+        <!-- 업종 내 위치 -->
+        <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #3b82f6;">
+          <div style="text-align: center;">
+            <p style="margin: 0 0 10px 0; color: #64748b; font-size: 14px;">업종 내 내 위치</p>
+            <div style="font-size: 42px; font-weight: bold; color: ${data.overallRisk > data.benchmarkData.averageRiskScore ? '#ef4444' : '#22c55e'}; margin-bottom: 5px;">
+              ${data.benchmarkData.myPosition >= 50 ? '상위' : '하위'} ${Math.abs(data.benchmarkData.myPosition).toFixed(0)}%
+            </div>
+            <p style="margin: 5px 0 0 0; color: #64748b; font-size: 13px;">
+              ${data.benchmarkData.industryName} 업종 기준
+            </p>
+          </div>
+        </div>
+        
+        <!-- 업종 평균 비교 테이블 -->
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+          <thead>
+            <tr style="background-color: #f8fafc;">
+              <th style="padding: 12px; text-align: left; border: 1px solid #e2e8f0; font-weight: 600;">항목</th>
+              <th style="padding: 12px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">내 가게</th>
+              <th style="padding: 12px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">업종 평균</th>
+              <th style="padding: 12px; text-align: center; border: 1px solid #e2e8f0; font-weight: 600;">차이</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 안전점수 비교 -->
+            <tr>
+              <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: 600;">안전점수</td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 16px; font-weight: 700; color: #1e40af;">
+                ${data.overallRisk.toFixed(1)}점
+              </td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 16px; font-weight: 700; color: #64748b;">
+                ${data.benchmarkData.averageRiskScore.toFixed(1)}점
+              </td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-weight: 700; color: ${data.overallRisk > data.benchmarkData.averageRiskScore ? '#22c55e' : '#ef4444'};">
+                ${data.overallRisk > data.benchmarkData.averageRiskScore ? '+' : ''}${(data.overallRisk - data.benchmarkData.averageRiskScore).toFixed(1)}점
+                ${data.overallRisk > data.benchmarkData.averageRiskScore ? '(더 안전)' : '(주의 필요)'}
+              </td>
+            </tr>
+            
+            <!-- 매출 비교 -->
+            <tr style="background-color: #f8fafc;">
+              <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: 600;">월 평균 매출</td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 16px; font-weight: 700; color: #1e40af;">
+                ₩${data.benchmarkData.revenueComparison.mine.toLocaleString()}
+              </td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 16px; font-weight: 700; color: #64748b;">
+                ₩${data.benchmarkData.revenueComparison.average.toLocaleString()}
+              </td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-weight: 700; color: ${data.benchmarkData.revenueComparison.differencePercent >= 0 ? '#22c55e' : '#ef4444'};">
+                ${data.benchmarkData.revenueComparison.differencePercent >= 0 ? '+' : ''}${data.benchmarkData.revenueComparison.differencePercent.toFixed(1)}%
+              </td>
+            </tr>
+            
+            <!-- 고객 수 비교 -->
+            <tr>
+              <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: 600;">월 평균 고객 수</td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 16px; font-weight: 700; color: #7c3aed;">
+                ${data.benchmarkData.customerComparison.mine.toLocaleString()}명
+              </td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-size: 16px; font-weight: 700; color: #64748b;">
+                ${data.benchmarkData.customerComparison.average.toLocaleString()}명
+              </td>
+              <td style="padding: 10px; text-align: center; border: 1px solid #e2e8f0; font-weight: 700; color: ${data.benchmarkData.customerComparison.differencePercent >= 0 ? '#22c55e' : '#ef4444'};">
+                ${data.benchmarkData.customerComparison.differencePercent >= 0 ? '+' : ''}${data.benchmarkData.customerComparison.differencePercent.toFixed(1)}%
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <!-- 인사이트 -->
+        <div style="padding: 15px; background-color: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+          <p style="margin: 0; color: #92400e; font-size: 13px; line-height: 1.6;">
+            💡 <strong>업종 비교 인사이트:</strong> 
+            ${data.overallRisk > data.benchmarkData.averageRiskScore
+        ? `현재 안전점수가 업종 평균보다 ${(data.overallRisk - data.benchmarkData.averageRiskScore).toFixed(1)}점 높아 상대적으로 안정적입니다. 현재의 운영 방식을 유지하면서 지속적인 모니터링으로 안정성을 더욱 강화하세요.`
+        : `안전점수가 업종 평균보다 ${Math.abs(data.overallRisk - data.benchmarkData.averageRiskScore).toFixed(1)}점 낮습니다. 매출 안정화와 고객 유지 전략에 집중하여 위험도를 낮춰보세요. 아래 맞춤 개선 제안을 참고하세요.`}
+            ${data.benchmarkData.revenueComparison.differencePercent < -10
+        ? ' 특히 매출이 업종 평균보다 10% 이상 낮으므로 매출 증대 방안을 우선 검토해야 합니다.'
+        : data.benchmarkData.revenueComparison.differencePercent > 10
+          ? ' 매출은 업종 평균보다 10% 이상 높아 우수합니다.'
+          : ''}
+          </p>
+        </div>
+      </div>
+      ` : ''}
+
       <!-- 개선 제안 -->
       <div style="margin-bottom: 30px;">
         <h2 style="color: #0f172a; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">💡 맞춤 개선 제안</h2>
         ${data.recommendations.slice(0, 5).map((rec, index) => {
-    const priorityColors: Record<string, string> = {
-      HIGH: "#ef4444",
-      MEDIUM: "#eab308",
-      LOW: "#22c55e",
-    };
-    const priorityLabels: Record<string, string> = {
-      HIGH: "높음",
-      MEDIUM: "보통",
-      LOW: "낮음",
-    };
-    return `
+            const priorityColors: Record<string, string> = {
+              HIGH: "#ef4444",
+              MEDIUM: "#eab308",
+              LOW: "#22c55e",
+            };
+            const priorityLabels: Record<string, string> = {
+              HIGH: "높음",
+              MEDIUM: "보통",
+              LOW: "낮음",
+            };
+            return `
             <div style="margin-bottom: 15px; padding: 15px; background-color: #f8fafc; border-radius: 8px; border-left: 4px solid ${priorityColors[rec.priority] || "#64748b"};">
               <table style="width: 100%;">
                 <tr>
@@ -233,7 +467,7 @@ function createHTMLReport(data: DiagnosisData): string {
               <p style="margin: 8px 0 0 0; color: #475569; font-size: 13px; line-height: 1.6;">${rec.description}</p>
             </div>
           `;
-  }).join('')}
+          }).join('')}
       </div>
 
       <!-- 푸터 -->

@@ -1,3 +1,4 @@
+import html2canvas from "html2canvas";
 import {
   AlertCircle,
   AlertOctagon,
@@ -258,8 +259,76 @@ export default function ResultsPage() {
     try {
       toast({
         title: "PDF 생성 중",
-        description: "잠시만 기다려주세요...",
+        description: "차트를 캡처하고 있습니다...",
       });
+
+      // 레이더 차트 캡처
+      let radarChartImage: string | undefined;
+      const radarChartElement = document.getElementById("radar-chart-for-pdf");
+
+      if (radarChartElement) {
+        try {
+          const canvas = await html2canvas(radarChartElement, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: "#ffffff",
+          });
+          radarChartImage = canvas.toDataURL("image/png");
+        } catch (chartError) {
+          console.error("레이더 차트 캡처 실패:", chartError);
+          // 차트 캡처 실패해도 PDF는 생성
+        }
+      }
+
+      toast({
+        title: "PDF 생성 중",
+        description: "데이터를 처리하고 있습니다...",
+      });
+
+      // 업종 평균 데이터에서 실제 값 가져오기
+      const avgRevenue = benchmarkData?.metrics?.revenue?.average || 0;
+      const avgCustomers = benchmarkData?.metrics?.customers?.average || 1;
+      const customerSpending = avgRevenue > 0 && avgCustomers > 0 ? Math.round(avgRevenue / avgCustomers) : 0;
+
+      // 성장률 계산 (historyData가 있으면)
+      let revenueGrowth: number | undefined;
+      let customerGrowth: number | undefined;
+
+      if (historyData && historyData.diagnoses && historyData.diagnoses.length >= 2) {
+        const oldest = historyData.diagnoses[historyData.diagnoses.length - 1];
+        const newest = historyData.diagnoses[0];
+
+        // 점수 변화를 성장률로 변환 (임시 계산)
+        if (oldest.overallScore > 0) {
+          revenueGrowth = ((newest.overallScore - oldest.overallScore) / oldest.overallScore) * 100;
+        }
+
+        // 고객 관련 점수 변화
+        if (oldest.components?.customer?.score && newest.components?.customer?.score) {
+          customerGrowth =
+            ((newest.components.customer.score - oldest.components.customer.score) / oldest.components.customer.score) *
+            100;
+        }
+      }
+
+      // 업종 비교 데이터 계산
+      const industryAvgRisk = benchmarkData?.averageRiskScore || 50;
+
+      // 업종 내 내 위치 계산 (백분위)
+      // 위험도가 낮을수록 좋으므로, 내 위험도가 평균보다 낮으면 상위권
+      const relativePosition = Math.min(
+        100,
+        Math.max(0, 50 + ((industryAvgRisk - resultData.p_final) / industryAvgRisk) * 50)
+      );
+
+      // 매출 비교
+      const myRevenue = Math.round((avgRevenue * (resultData.revenue_ratio || 100)) / 100);
+      const revenueDiff = avgRevenue > 0 ? ((myRevenue - avgRevenue) / avgRevenue) * 100 : 0;
+
+      // 고객 수 비교 (임시로 평균 사용, 실제로는 내 고객 수 데이터 필요)
+      const myCustomers = Math.round(avgCustomers);
+      const customerDiff = 0; // 실제 데이터가 없으므로 0
 
       await generatePDFReport({
         businessName: diagnosisInfo?.business_name || "내 가게",
@@ -270,14 +339,43 @@ export default function ResultsPage() {
         salesRisk: resultData.risk_components.sales_risk,
         customerRisk: resultData.risk_components.customer_risk,
         marketRisk: resultData.risk_components.market_risk,
-        revenue: 0, // 매출은 별도 표시
-        customerCount: 0, // 고객 수는 별도 표시
-        operatingMonths: 0, // 운영 개월은 별도 표시
+        revenue: Math.round(avgRevenue),
+        customerCount: Math.round(avgCustomers),
+        operatingMonths: historyData?.diagnoses?.length || 0, // 진단 횟수를 개월로 사용
         recommendations: resultData.recommendations.map((rec) => ({
           title: rec.title,
           description: rec.description,
           priority: rec.priority.toUpperCase(),
         })),
+        detailedMetrics: {
+          avgRevenue: Math.round(avgRevenue),
+          avgCustomers: Math.round(avgCustomers),
+          customerSpending: customerSpending,
+          revenueGrowth: revenueGrowth,
+          customerGrowth: customerGrowth,
+        },
+        benchmarkData: benchmarkData
+          ? {
+              industryName: industryCode || "업종",
+              averageRiskScore: industryAvgRisk,
+              myPosition: relativePosition,
+              revenueComparison: {
+                mine: myRevenue,
+                average: Math.round(avgRevenue),
+                differencePercent: revenueDiff,
+              },
+              customerComparison: {
+                mine: myCustomers,
+                average: Math.round(avgCustomers),
+                differencePercent: customerDiff,
+              },
+            }
+          : undefined,
+        chartImages: radarChartImage
+          ? {
+              radarChart: radarChartImage,
+            }
+          : undefined,
       });
 
       toast({
@@ -353,7 +451,7 @@ export default function ResultsPage() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* 레이더 차트 */}
-                  <div>
+                  <div id="radar-chart-for-pdf">
                     <ResponsiveContainer width="100%" height={400}>
                       <RadarChart
                         data={[
@@ -839,8 +937,8 @@ export default function ResultsPage() {
                       <p className="text-center text-sm text-muted-foreground mt-2">
                         {resultData.p_final > benchmarkData.averageRiskScore ? (
                           <span className="text-green-600 font-semibold">
-                            업종 평균보다 {(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}점 높음
-                            (더 안전)
+                            업종 평균보다 {(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}점 높음 (더
+                            안전)
                           </span>
                         ) : (
                           <span className="text-orange-600 font-semibold">

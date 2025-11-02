@@ -1,9 +1,6 @@
 // Diagnosis Feature Public API
-// TODO: Export hooks, components, types after implementation
-
-// Example exports (uncomment after implementation):
-// export { useDiagnose, useDiagnosisHistory } from './api/diagnosisApi'
-// export { ResultsView } from './components/ResultsView'
-// export { DiagnosisForm } from './components/DiagnosisForm'
-// export * from './types'
-
+export { diagnosisApi, useBusinessSearch, useDiagnose, useDiagnosisHistory, useRecentDiagnosis, useDiagnosisRecords } from './api/diagnosisApi'
+export { RiskCard } from './components/RiskIndicators/RiskCard'
+export { RiskGauge } from './components/RiskIndicators/RiskGauge'
+export { ActionCard } from './components/RiskIndicators/ActionCard'
+export * from './types'

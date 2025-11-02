@@ -895,6 +895,8 @@ export interface components {
             createdAt: string;
             /** Taym */
             taYm?: string | null;
+            /** Revenueratio */
+            revenueRatio?: number | null;
         };
         /** ErrorModel */
         ErrorModel: {
@@ -1028,6 +1030,8 @@ export interface components {
         ScatterPoint: {
             /** Merchantid */
             merchantId: string;
+            /** Merchantname */
+            merchantName: string;
             /** Revenue */
             revenue: number;
             /** Customers */

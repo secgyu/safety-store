@@ -150,28 +150,14 @@ class DiagnosisService:
         usage_key = f"{encoded_mct}_{ta_ym_formatted}"
         revenue_ratio = None
         
-        print(f"🔍 [DEBUG] Original TA_YM: {ta_ym}")
-        print(f"🔍 [DEBUG] Formatted TA_YM: {ta_ym_formatted}")
-        print(f"🔍 [DEBUG] Looking for key: {usage_key}")
-        print(f"🔍 [DEBUG] Total usage_data entries: {len(usage_data)}")
-        
         if usage_key in usage_data:
             try:
                 # M1_SME_RY_SAA_RAT: 동일 업종 매출금액 비율
                 ratio_str = usage_data[usage_key].get('M1_SME_RY_SAA_RAT', '0')
-                print(f"🔍 [DEBUG] Found ratio_str: {ratio_str}")
                 if ratio_str and ratio_str != '-999999.9':
                     revenue_ratio = float(ratio_str)
-                    print(f"🔍 [DEBUG] Parsed revenue_ratio: {revenue_ratio}")
-            except (ValueError, KeyError) as e:
-                print(f"🔍 [DEBUG] Error parsing ratio: {e}")
-        else:
-            print(f"🔍 [DEBUG] Key not found in usage_data")
-            # 가능한 키 샘플 출력 (처음 5개)
-            sample_keys = list(usage_data.keys())[:5]
-            print(f"🔍 [DEBUG] Sample keys: {sample_keys}")
-        
-        print(f"🔍 [DEBUG] Final revenue_ratio: {revenue_ratio}")
+            except (ValueError, KeyError):
+                pass
         
         # 0-100 스케일로 변환 (risk를 score로)
         sales_score = max(0, min(100, (1 - sales_risk) * 100))

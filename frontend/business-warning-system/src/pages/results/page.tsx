@@ -122,9 +122,6 @@ export default function ResultsPage() {
           revenue_ratio: apiResult.revenueRatio,
         };
 
-        console.log("🔍 [DEBUG] API Result:", apiResult);
-        console.log("🔍 [DEBUG] revenue_ratio:", mappedResult.revenue_ratio);
-
         // diagnosisInfo 설정 (다운로드 등에 필요)
         setDiagnosisInfo({
           encoded_mct: mctCode,
@@ -855,13 +852,6 @@ export default function ResultsPage() {
                     {/* 매출 비교 */}
                     <div>
                       <h3 className="font-semibold text-lg mb-4 text-center">월 평균 매출</h3>
-                      {/* 디버깅 정보 */}
-                      {import.meta.env.DEV && (
-                        <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-                          <p>🔍 Debug: revenue_ratio = {resultData.revenue_ratio?.toString() ?? "null/undefined"}</p>
-                          <p>🔍 Has benchmarkData: {benchmarkData ? "Yes" : "No"}</p>
-                        </div>
-                      )}
                       {resultData.revenue_ratio && benchmarkData ? (
                         <>
                           <ResponsiveContainer width="100%" height={250}>

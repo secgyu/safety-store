@@ -14,6 +14,9 @@ export type DiagnosisResponse = components['schemas']['DiagnosisResponse']
 export type DiagnosisHistory = components['schemas']['DiagnosisHistory']
 export type BusinessSearchResult = components['schemas']['BusinessSearchResult']
 export type BusinessSearchResponse = components['schemas']['BusinessSearchResponse']
+export type DiagnosisRecordSimple = components['schemas']['DiagnosisRecordSimple']
+export type DiagnosisRecordListItem = components['schemas']['DiagnosisRecordListItem']
+export type DiagnosisRecordList = components['schemas']['DiagnosisRecordList']
 export type ActionPlanRequest = components['schemas']['ActionPlanRequest']
 export type ActionPlan = components['schemas']['ActionPlan']
 export type ActionPlanItem = components['schemas']['ActionPlanItem']
@@ -183,6 +186,26 @@ class ApiClient {
     const response = await client.GET('/api/diagnose/history', {
       params: {
         query: { encoded_mct: encodedMct }
+      }
+    })
+
+    return handleResponse(response)
+  }
+
+  async getRecentDiagnosis(): Promise<DiagnosisRecordSimple | null> {
+    const response = await client.GET('/api/diagnose/recent')
+
+    if (response.error || !response.data) {
+      return null
+    }
+
+    return response.data
+  }
+
+  async getMyDiagnosisRecords(limit: number = 10): Promise<DiagnosisRecordList> {
+    const response = await client.GET('/api/diagnose/my-records', {
+      params: {
+        query: { limit }
       }
     })
 
@@ -487,6 +510,20 @@ export function useDiagnosisHistory(encodedMct: string) {
     queryKey: queryKeys.diagnosis.history(encodedMct),
     queryFn: () => apiClient.getDiagnosisHistory(encodedMct),
     enabled: !!encodedMct,
+  })
+}
+
+export function useRecentDiagnosis() {
+  return useQuery({
+    queryKey: ['diagnosis', 'recent'],
+    queryFn: () => apiClient.getRecentDiagnosis(),
+  })
+}
+
+export function useMyDiagnosisRecords(limit: number = 10) {
+  return useQuery({
+    queryKey: ['diagnosis', 'my-records', limit],
+    queryFn: () => apiClient.getMyDiagnosisRecords(limit),
   })
 }
 

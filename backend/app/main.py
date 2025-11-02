@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from app.config import settings
 from app.database import engine, Base
 from app.core.auth import auth_backend, fastapi_users
+from app.models.user import UserTable  # UserTable import 추가
+from app.models.diagnosis import DiagnosisRecord  # DiagnosisRecord import 추가
 from app.routers import (
     auth,
     diagnosis,

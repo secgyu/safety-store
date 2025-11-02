@@ -119,6 +119,28 @@ class DiagnosisHistory(CamelBaseModel):
     diagnoses: list[DiagnosisResponse]
 
 
+# ========== Diagnosis Record Schemas (저장용) ==========
+class DiagnosisRecordSimple(CamelBaseModel):
+    """최근 진단 기록 (간단한 정보만)"""
+    encoded_mct: str
+    business_name: str
+    created_at: str
+
+
+class DiagnosisRecordListItem(CamelBaseModel):
+    """진단 기록 목록 아이템"""
+    id: int
+    encoded_mct: str
+    business_name: str
+    created_at: str
+
+
+class DiagnosisRecordList(CamelBaseModel):
+    """사용자의 진단 기록 목록"""
+    records: list[DiagnosisRecordListItem]
+    total: int
+
+
 # ========== Action Plan Schemas ==========
 class ActionPlanItem(CamelBaseModel):
     id: str

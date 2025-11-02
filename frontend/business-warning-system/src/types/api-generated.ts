@@ -202,9 +202,49 @@ export interface paths {
         /**
          * Predict Diagnosis
          * @description 진단 예측 API
-         *     ENCODED_MCT를 받아서 해당하는 최신 진단 데이터를 반환
+         *     ENCODED_MCT를 받아서 해당하는 최신 진단 데이터를 반환하고 기록 저장
          */
         post: operations["predict_diagnosis_api_diagnose_predict_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/diagnose/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Recent Diagnosis
+         * @description 사용자의 가장 최근 진단 기록 조회
+         */
+        get: operations["get_recent_diagnosis_api_diagnose_recent_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/diagnose/my-records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get My Diagnosis Records
+         * @description 사용자의 모든 진단 기록 목록
+         */
+        get: operations["get_my_diagnosis_records_api_diagnose_my_records_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -796,6 +836,42 @@ export interface components {
         DiagnosisHistory: {
             /** Diagnoses */
             diagnoses: components["schemas"]["DiagnosisResponse"][];
+        };
+        /**
+         * DiagnosisRecordList
+         * @description 사용자의 진단 기록 목록
+         */
+        DiagnosisRecordList: {
+            /** Records */
+            records: components["schemas"]["DiagnosisRecordListItem"][];
+            /** Total */
+            total: number;
+        };
+        /**
+         * DiagnosisRecordListItem
+         * @description 진단 기록 목록 아이템
+         */
+        DiagnosisRecordListItem: {
+            /** Id */
+            id: number;
+            /** Encodedmct */
+            encodedMct: string;
+            /** Businessname */
+            businessName: string;
+            /** Createdat */
+            createdAt: string;
+        };
+        /**
+         * DiagnosisRecordSimple
+         * @description 최근 진단 기록 (간단한 정보만)
+         */
+        DiagnosisRecordSimple: {
+            /** Encodedmct */
+            encodedMct: string;
+            /** Businessname */
+            businessName: string;
+            /** Createdat */
+            createdAt: string;
         };
         /** DiagnosisRequest */
         DiagnosisRequest: {
@@ -1664,6 +1740,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DiagnosisResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_recent_diagnosis_api_diagnose_recent_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosisRecordSimple"] | null;
+                };
+            };
+        };
+    };
+    get_my_diagnosis_records_api_diagnose_my_records_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosisRecordList"];
                 };
             };
             /** @description Validation Error */

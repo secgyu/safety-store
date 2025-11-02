@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, usePredictDiagnosis, useSearchBusinesses } from "@/lib/api";
+import { useAuth, usePredictDiagnosis, useRecentDiagnosis, useSearchBusinesses } from "@/lib/api";
 
 type Step = {
   id: number;
@@ -39,6 +39,7 @@ export default function DiagnosePage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: user, isLoading: isLoadingAuth } = useAuth();
+  const { data: recentDiagnosis, isLoading: isLoadingRecent } = useRecentDiagnosis();
   const predict = usePredictDiagnosis();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -63,8 +64,32 @@ export default function DiagnosePage() {
     }
   }, [user, isLoadingAuth, navigate, toast]);
 
+  // 최근 진단 체크 - 있으면 바로 결과 페이지로
+  useEffect(() => {
+    if (!isLoadingAuth && !isLoadingRecent && user && recentDiagnosis) {
+      // 최근 진단이 있으면 해당 가게로 바로 진단 실행
+      const proceedWithRecentDiagnosis = async () => {
+        try {
+          const result = await predict.mutateAsync({
+            encodedMct: recentDiagnosis.encodedMct,
+          });
+
+          sessionStorage.setItem("diagnosisData", JSON.stringify({ encoded_mct: recentDiagnosis.encodedMct }));
+          sessionStorage.setItem("diagnosisResult", JSON.stringify(result));
+
+          navigate("/results");
+        } catch (error) {
+          console.error("Error loading recent diagnosis:", error);
+          // 에러 발생 시 그냥 진단 페이지 계속 진행
+        }
+      };
+
+      proceedWithRecentDiagnosis();
+    }
+  }, [user, recentDiagnosis, isLoadingAuth, isLoadingRecent, predict, navigate]);
+
   // 로딩 중이면 아무것도 렌더링하지 않음
-  if (isLoadingAuth) {
+  if (isLoadingAuth || isLoadingRecent) {
     return (
       <>
         <AppHeader />

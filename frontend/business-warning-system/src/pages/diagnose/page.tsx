@@ -1,5 +1,5 @@
-import { ArrowLeft, ArrowRight, Bot, Loader2, Search, Building2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, Bot, Building2, Loader2, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AppHeader } from "@/components/app-header";
@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { usePredictDiagnosis, useSearchBusinesses } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth, usePredictDiagnosis, useSearchBusinesses } from "@/lib/api";
 
 type Step = {
   id: number;
@@ -20,7 +21,8 @@ type Step = {
 const steps: Step[] = [
   {
     id: 1,
-    question: "안녕하세요! 진단하실 가게 이름을 입력해주세요.\n※ 개인정보 보호를 위해 가게명이 일부만 공개되어 있습니다. (예: 춘리** )",
+    question:
+      "안녕하세요! 진단하실 가게 이름을 입력해주세요.\n※ 개인정보 보호를 위해 가게명이 일부만 공개되어 있습니다. (예: 춘리** )",
     field: "search_keyword",
     type: "search",
     placeholder: "가게 이름 앞 글자를 입력하세요 (1-2자)",
@@ -35,6 +37,8 @@ const steps: Step[] = [
 
 export default function DiagnosePage() {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { data: user, isLoading: isLoadingAuth } = useAuth();
   const predict = usePredictDiagnosis();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
@@ -47,6 +51,35 @@ export default function DiagnosePage() {
     { role: "assistant", content: steps[0].question },
   ]);
 
+  // 로그인 체크
+  useEffect(() => {
+    if (!isLoadingAuth && !user) {
+      toast({
+        title: "로그인이 필요합니다",
+        description: "진단 서비스를 이용하시려면 로그인해주세요.",
+        variant: "destructive",
+      });
+      navigate("/login");
+    }
+  }, [user, isLoadingAuth, navigate, toast]);
+
+  // 로딩 중이면 아무것도 렌더링하지 않음
+  if (isLoadingAuth) {
+    return (
+      <>
+        <AppHeader />
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </>
+    );
+  }
+
+  // 로그인하지 않은 경우 렌더링하지 않음
+  if (!user) {
+    return null;
+  }
+
   const currentStepData = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
 
@@ -58,16 +91,13 @@ export default function DiagnosePage() {
   const handleSearch = () => {
     const keyword = formData.search_keyword;
     if (!keyword || keyword.length < 1) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "검색어를 1자 이상 입력해주세요." },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "검색어를 1자 이상 입력해주세요." }]);
       return;
     }
 
     setMessages((prev) => [...prev, { role: "user", content: keyword }]);
     setSearchKeyword(keyword);
-    
+
     // 다음 스텝으로 이동
     if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);

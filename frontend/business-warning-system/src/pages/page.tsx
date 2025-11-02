@@ -7,20 +7,21 @@ import { OnboardingTour } from "@/components/onboarding-tour";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Footer from "@/footer/footer";
-import { getCurrentUser } from "@/lib/auth";
+import { useAuth } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 import { hasCompletedOnboarding, markOnboardingComplete } from "@/lib/onboarding";
 
 export default function HomePage() {
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { data: user } = useAuth();
 
   useEffect(() => {
     // Check if user has completed onboarding
     if (!hasCompletedOnboarding()) {
       setShowOnboarding(true);
     }
-    setUser(getCurrentUser());
   }, []);
 
   const handleOnboardingComplete = () => {
@@ -29,9 +30,12 @@ export default function HomePage() {
   };
 
   const handleDiagnoseClick = () => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      alert("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동합니다.");
+    if (!user) {
+      toast({
+        title: "로그인이 필요합니다",
+        description: "진단 서비스를 이용하시려면 로그인해주세요.",
+        variant: "destructive",
+      });
       navigate("/login");
     } else {
       navigate("/diagnose");

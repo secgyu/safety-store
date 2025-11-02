@@ -170,7 +170,7 @@ class BenchmarkCalculator:
         
         # 1. 가맹점과 월별 데이터 조인 (매출, 고객수) - HPSN_MCT_ZCD_NM이 업종 컬럼
         merged = self.monthly_usage.merge(
-            self.merchants[['ENCODED_MCT', 'HPSN_MCT_ZCD_NM', 'HPSN_MCT_BZN_CD_NM', 'MCT_SIGUNGU_NM']], 
+            self.merchants[['ENCODED_MCT', 'HPSN_MCT_ZCD_NM', 'HPSN_MCT_BZN_CD_NM', 'MCT_SIGUNGU_NM', 'MCT_NM']], 
             on='ENCODED_MCT',
             how='inner'
         )
@@ -457,7 +457,8 @@ class BenchmarkCalculator:
             'Revenue_num': 'mean',
             'Customers_num': 'mean',
             'RiskScore': 'mean',
-            'HPSN_MCT_ZCD_NM': 'first'  # 업종명
+            'HPSN_MCT_ZCD_NM': 'first',  # 업종명
+            'MCT_NM': 'first'  # 가맹점명
         }).reset_index()
         
         # NaN 제거 및 이상치 필터링
@@ -478,6 +479,7 @@ class BenchmarkCalculator:
         for _, row in merchant_data.iterrows():
             points.append({
                 "merchant_id": str(row['ENCODED_MCT'])[:8],  # 앞 8자리만 (식별용)
+                "merchant_name": str(row.get('MCT_NM', '알 수 없음')),  # 가맹점명
                 "revenue": float(row['Revenue_num']),
                 "customers": float(row['Customers_num']),
                 "risk_score": float(row['RiskScore'] * 100),  # 0-1 -> 0-100%

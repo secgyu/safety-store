@@ -225,6 +225,7 @@ class CompareResponse(CamelBaseModel):
 # ========== Scatter Plot Schemas ==========
 class ScatterPoint(CamelBaseModel):
     merchant_id: str
+    merchant_name: str  # 가맹점명
     revenue: float  # 월평균 매출
     customers: float  # 월평균 고객수
     risk_score: float  # 위험도

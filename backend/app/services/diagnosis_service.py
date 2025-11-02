@@ -28,6 +28,61 @@ class DiagnosisService:
         self._data_cache = data
         return data
     
+    def _load_business_data(self):
+        """big_data_set1_f.csv 파일에서 가게 정보 로드"""
+        businesses = []
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'big_data_set1_f.csv')
+        
+        # 한국어 CSV 파일은 보통 cp949 인코딩을 사용
+        with open(csv_path, 'r', encoding='cp949') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                businesses.append({
+                    'encoded_mct': row['ENCODED_MCT'],
+                    'name': row['MCT_NM'],
+                    'area': row['MCT_BSE_AR'],
+                    'business_type': row['HPSN_MCT_ZCD_NM']
+                })
+        
+        return businesses
+    
+    def search_businesses(self, keyword: str, limit: int = 10) -> list[dict]:
+        """가게 이름으로 검색"""
+        if not keyword or len(keyword.strip()) == 0:
+            return []
+        
+        keyword = keyword.strip().lower()
+        businesses = self._load_business_data()
+        
+        # 두 가지 매칭: 시작 매칭과 포함 매칭
+        starts_with = []
+        contains = []
+        
+        for business in businesses:
+            name_lower = business['name'].lower()
+            # 별표(*) 제거한 이름으로도 비교
+            name_without_asterisk = name_lower.replace('*', '')
+            
+            if name_lower.startswith(keyword) or name_without_asterisk.startswith(keyword):
+                starts_with.append(business)
+            elif keyword in name_lower or keyword in name_without_asterisk:
+                contains.append(business)
+        
+        # 시작 매칭을 우선, 그 다음 포함 매칭
+        results = starts_with + contains
+        
+        # 중복 제거 (같은 ENCODED_MCT)
+        seen = set()
+        unique_results = []
+        for business in results:
+            if business['encoded_mct'] not in seen:
+                seen.add(business['encoded_mct'])
+                unique_results.append(business)
+                if len(unique_results) >= limit:
+                    break
+        
+        return unique_results
+    
     def get_latest_diagnosis(self, encoded_mct: str) -> Optional[dict]:
         """특정 ENCODED_MCT의 최신 진단 데이터를 반환"""
         data = self._load_csv()

@@ -76,6 +76,17 @@ class DiagnosisRequest(CamelBaseModel):
     encoded_mct: str
 
 
+class BusinessSearchResult(CamelBaseModel):
+    encoded_mct: str
+    name: str
+    area: str
+    business_type: str
+
+
+class BusinessSearchResponse(CamelBaseModel):
+    results: list[BusinessSearchResult]
+
+
 class DiagnosisComponentScore(CamelBaseModel):
     score: float
     trend: str

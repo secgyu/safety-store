@@ -92,6 +92,66 @@ export interface paths {
         patch: operations["users_patch_user_api_users__id__patch"];
         trace?: never;
     };
+    "/api/auth/login-custom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Custom Login
+         * @description 로그인: Access Token 반환 + Refresh Token을 httpOnly 쿠키에 저장
+         */
+        post: operations["custom_login_api_auth_login_custom_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh Access Token
+         * @description Refresh Token으로 새로운 Access Token 발급
+         */
+        post: operations["refresh_access_token_api_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/logout-custom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout Custom
+         * @description 로그아웃: Refresh Token 쿠키 삭제
+         */
+        post: operations["logout_custom_api_auth_logout_custom_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/me": {
         parameters: {
             query?: never;
@@ -101,6 +161,27 @@ export interface paths {
         };
         /** Get Me */
         get: operations["get_me_api_auth_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/diagnose/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search Businesses
+         * @description 가게 이름으로 검색하는 API
+         *     keyword: 검색할 가게 이름
+         */
+        get: operations["search_businesses_api_diagnose_search_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -207,7 +288,7 @@ export interface paths {
         };
         /**
          * Get Benchmark
-         * @description 벤치마크 데이터 조회
+         * @description 실제 데이터 기반 벤치마크 조회
          */
         get: operations["get_benchmark_api_benchmark_get"];
         put?: never;
@@ -229,7 +310,7 @@ export interface paths {
         put?: never;
         /**
          * Compare Benchmark
-         * @description 벤치마크 비교 분석
+         * @description 벤치마크 비교 분석 - 실제 데이터 기반
          */
         post: operations["compare_benchmark_api_benchmark_compare_post"];
         delete?: never;
@@ -238,7 +319,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/blog": {
+    "/api/benchmark/scatter-data": {
         parameters: {
             query?: never;
             header?: never;
@@ -246,30 +327,12 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get Blog Posts
-         * @description 블로그 포스트 목록 조회
+         * Get Scatter Data
+         * @description 특정 업종의 개별 가게 데이터를 반환 (산점도용)
+         *     - industry: 업종 코드 (restaurant, cafe 등)
+         *     - limit: 반환할 최대 데이터 수 (기본 500개, 성능 최적화)
          */
-        get: operations["get_blog_posts_api_blog_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/blog/{post_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Blog Post
-         * @description 특정 블로그 포스트 조회
-         */
-        get: operations["get_blog_post_api_blog__post_id__get"];
+        get: operations["get_scatter_data_api_benchmark_scatter_data_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -289,7 +352,7 @@ export interface paths {
         put?: never;
         /**
          * Send Chat Message
-         * @description 챗봇 메시지 전송
+         * @description 챗봇 메시지 전송 - OpenAI GPT 사용
          */
         post: operations["send_chat_message_api_chat_post"];
         delete?: never;
@@ -602,25 +665,6 @@ export interface components {
             customers: components["schemas"]["MetricValue"];
             profitMargin: components["schemas"]["MetricValue"];
         };
-        /** BlogPost */
-        BlogPost: {
-            /** Id */
-            id: string;
-            /** Title */
-            title: string;
-            /** Content */
-            content: string;
-            /** Excerpt */
-            excerpt: string;
-            /** Author */
-            author: string;
-            /** Publishedat */
-            publishedAt: string;
-            /** Tags */
-            tags: string[];
-            /** Imageurl */
-            imageUrl: string;
-        };
         /** Body_auth_jwt_login_api_auth_login_post */
         Body_auth_jwt_login_api_auth_login_post: {
             /** Grant Type */
@@ -638,6 +682,22 @@ export interface components {
             client_id?: string | null;
             /** Client Secret */
             client_secret?: string | null;
+        };
+        /** BusinessSearchResponse */
+        BusinessSearchResponse: {
+            /** Results */
+            results: components["schemas"]["BusinessSearchResult"][];
+        };
+        /** BusinessSearchResult */
+        BusinessSearchResult: {
+            /** Encodedmct */
+            encodedMct: string;
+            /** Name */
+            name: string;
+            /** Area */
+            area: string;
+            /** Businesstype */
+            businessType: string;
         };
         /** ChatMessage */
         ChatMessage: {
@@ -807,6 +867,13 @@ export interface components {
             /** Publishedat */
             publishedAt: string;
         };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Email */
+            email: string;
+            /** Password */
+            password: string;
+        };
         /** MetricValue */
         MetricValue: {
             /** Average */
@@ -865,6 +932,34 @@ export interface components {
             orange: number;
             /** Red */
             red: number;
+        };
+        /** ScatterData */
+        ScatterData: {
+            /** Points */
+            points: components["schemas"]["ScatterPoint"][];
+            /** Industry */
+            industry: string;
+            /** Totalcount */
+            totalCount: number;
+            /** Avgrevenue */
+            avgRevenue: number;
+            /** Avgcustomers */
+            avgCustomers: number;
+            /** Avgrisk */
+            avgRisk: number;
+        };
+        /** ScatterPoint */
+        ScatterPoint: {
+            /** Merchantid */
+            merchantId: string;
+            /** Revenue */
+            revenue: number;
+            /** Customers */
+            customers: number;
+            /** Riskscore */
+            riskScore: number;
+            /** Industry */
+            industry: string;
         };
         /** Statistics */
         Statistics: {
@@ -1425,6 +1520,79 @@ export interface operations {
             };
         };
     };
+    custom_login_api_auth_login_custom_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_access_token_api_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    logout_custom_api_auth_logout_custom_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
     get_me_api_auth_me_get: {
         parameters: {
             query?: never;
@@ -1441,6 +1609,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+        };
+    };
+    search_businesses_api_diagnose_search_get: {
+        parameters: {
+            query: {
+                keyword: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BusinessSearchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1695,9 +1894,12 @@ export interface operations {
             };
         };
     };
-    get_blog_posts_api_blog_get: {
+    get_scatter_data_api_benchmark_scatter_data_get: {
         parameters: {
-            query?: never;
+            query?: {
+                industry?: string | null;
+                limit?: number | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1710,29 +1912,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BlogPost"][];
-                };
-            };
-        };
-    };
-    get_blog_post_api_blog__post_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                post_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BlogPost"];
+                    "application/json": components["schemas"]["ScatterData"];
                 };
             };
             /** @description Validation Error */

@@ -1,11 +1,31 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.schemas import DiagnosisRequest, DiagnosisResponse, DiagnosisHistory
+from app.schemas import DiagnosisRequest, DiagnosisResponse, DiagnosisHistory, BusinessSearchResponse
 from app.services.diagnosis_service import diagnosis_service
 from app.core.auth import current_active_user
 from app.models.user import UserTable
 
 
 router = APIRouter()
+
+
+@router.get("/search", response_model=BusinessSearchResponse)
+async def search_businesses(
+    keyword: str,
+    user: UserTable = Depends(current_active_user)
+):
+    """
+    가게 이름으로 검색하는 API
+    keyword: 검색할 가게 이름
+    """
+    if not keyword or len(keyword.strip()) == 0:
+        raise HTTPException(status_code=400, detail="검색어를 입력해주세요.")
+    
+    results = diagnosis_service.search_businesses(keyword)
+    
+    if not results:
+        return {"results": []}
+    
+    return {"results": results}
 
 
 @router.post("/predict", response_model=DiagnosisResponse)

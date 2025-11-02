@@ -12,6 +12,8 @@ export type FastAPIUser = components['schemas']['app__routers__auth__UserRead'] 
 export type DiagnosisRequest = components['schemas']['DiagnosisRequest']
 export type DiagnosisResponse = components['schemas']['DiagnosisResponse']
 export type DiagnosisHistory = components['schemas']['DiagnosisHistory']
+export type BusinessSearchResult = components['schemas']['BusinessSearchResult']
+export type BusinessSearchResponse = components['schemas']['BusinessSearchResponse']
 export type ActionPlanRequest = components['schemas']['ActionPlanRequest']
 export type ActionPlan = components['schemas']['ActionPlan']
 export type ActionPlanItem = components['schemas']['ActionPlanItem']
@@ -159,6 +161,16 @@ class ApiClient {
   }
 
   // Diagnosis
+  async searchBusinesses(keyword: string): Promise<BusinessSearchResponse> {
+    const response = await client.GET('/api/diagnose/search', {
+      params: {
+        query: { keyword }
+      }
+    })
+
+    return handleResponse(response)
+  }
+
   async predictDiagnosis(data: DiagnosisRequest): Promise<DiagnosisResponse> {
     const response = await client.POST('/api/diagnose/predict', {
       body: data
@@ -456,6 +468,14 @@ export function useLogout() {
 }
 
 // ========== Diagnosis Hooks ==========
+export function useSearchBusinesses(keyword: string) {
+  return useQuery({
+    queryKey: ['businesses', 'search', keyword],
+    queryFn: () => apiClient.searchBusinesses(keyword),
+    enabled: !!keyword && keyword.length > 0,
+  })
+}
+
 export function usePredictDiagnosis() {
   return useMutation({
     mutationFn: (data: DiagnosisRequest) => apiClient.predictDiagnosis(data),

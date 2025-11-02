@@ -1,4 +1,3 @@
-import { ScrollToTop } from '@/shared/components/common/ScrollToTop'
 import { Toaster } from '@/shared/components/ui/toaster'
 import { AuthProvider } from '@/app/providers/AuthProvider'
 import { QueryProvider } from '@/app/providers/QueryProvider'
@@ -9,7 +8,6 @@ function App() {
     <QueryProvider>
       <AuthProvider>
         <AppRoutes />
-        <ScrollToTop />
         <Toaster />
       </AuthProvider>
     </QueryProvider>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
+import { ScrollToTop } from '@/shared/components/common/ScrollToTop'
 import ActionPlanPage from '@/pages/action-plan/page'
 import CalculatorsPage from '@/pages/calculators/page'
 import ComparePage from '@/pages/compare/page'
@@ -24,6 +25,7 @@ import TermsPage from '@/pages/terms/page'
 export function AppRoutes() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />

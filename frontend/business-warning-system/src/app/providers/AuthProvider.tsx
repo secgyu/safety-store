@@ -15,7 +15,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (response.ok) {
           const data = await response.json()
-          setAuthToken(data.access_token)
+          // AuthResponse 형태: { user: {...}, token: "..." }
+          setAuthToken(data.token)
           console.log('✅ 자동 로그인 성공')
         } else {
           console.log('ℹ️ Refresh token 없음 - 비로그인 상태')

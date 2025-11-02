@@ -14,7 +14,8 @@ async function refreshAccessToken(): Promise<string | null> {
     if (!response.ok) return null
 
     const data = await response.json()
-    return data.access_token
+    // AuthResponse 형태: { user: {...}, token: "..." }
+    return data.token
   } catch (error) {
     console.error('Token refresh failed:', error)
     return null
@@ -49,7 +50,7 @@ client.use({
 
 // ========== API Functions ==========
 class AuthApi {
-  async login(data: LoginRequest): Promise<BearerResponse> {
+  async login(data: LoginRequest): Promise<{ user: User; token: string }> {
     const response = await fetch('http://localhost:8000/api/auth/login-custom', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -65,6 +66,7 @@ class AuthApi {
       throw new Error(errorData.detail || 'Login failed')
     }
 
+    // AuthResponse 형태: { user: {...}, token: "..." }
     return response.json()
   }
 
@@ -100,7 +102,8 @@ export function useLogin() {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      setAuthToken(data.access_token)
+      // AuthResponse에서 token 필드 사용
+      setAuthToken(data.token)
     },
   })
 }

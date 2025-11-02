@@ -55,9 +55,14 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
         if (response.ok) {
           const data = await response.json();
           setAuthToken(data.access_token);
+          console.log("✅ 자동 로그인 성공");
+        } else {
+          // 401이나 다른 에러는 정상 (로그인 안 된 상태)
+          console.log("ℹ️ Refresh token 없음 - 비로그인 상태");
         }
       } catch (error) {
-        console.error("Refresh Token 없음 또는 만료됨", error);
+        // 네트워크 에러 등 - 조용히 처리
+        console.log("ℹ️ 인증 초기화 실패:", error);
       } finally {
         setInitialized(true);
       }

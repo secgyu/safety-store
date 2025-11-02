@@ -89,9 +89,9 @@ client.use({
     }
     return request
   },
-  onResponse: async ({ response }) => {
-    // 401 에러 시 Refresh Token으로 재시도
-    if (response.status === 401) {
+  onResponse: async ({ response, request }) => {
+    // ✅ /refresh 엔드포인트 자체의 401은 무시 (무한 루프 방지)
+    if (response.status === 401 && !request.url.includes('/api/auth/refresh')) {
       const newToken = await refreshAccessToken()
 
       if (newToken) {

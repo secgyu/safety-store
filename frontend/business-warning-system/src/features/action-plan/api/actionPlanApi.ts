@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tantml:react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { client, handleResponse } from '@/shared/lib/api-client'
 import type { ActionPlan, ActionPlanRequest, SuccessResponse } from '@/shared/types/api-generated'
 

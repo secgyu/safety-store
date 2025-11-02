@@ -1,125 +1,19 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useEffect } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-
-import { ScrollToTop } from "@/components/ScrollToTop";
-import { Toaster } from "@/components/ui/toaster";
-import { useAuthStore } from "@/lib/api";
-
-import ActionPlanPage from "./pages/action-plan/page";
-import CalculatorsPage from "./pages/calculators/page";
-import ComparePage from "./pages/compare/page";
-import ConsultationPage from "./pages/consultation/page";
-import DashboardPage from "./pages/dashboard/page";
-import DiagnosePage from "./pages/diagnose/page";
-import FaqPage from "./pages/faq/page";
-import GuidePage from "./pages/guide/page";
-import InsightsPage from "./pages/insights/page";
-import LoginPage from "./pages/login/page";
-import NotificationsPage from "./pages/notifications/page";
-// Pages
-import HomePage from "./pages/page";
-import PrivacyPage from "./pages/privacy/page";
-import ResultsPage from "./pages/results/page";
-import SettingsPage from "./pages/settings/page";
-import SignupPage from "./pages/signup/page";
-import StatisticsPage from "./pages/statistics/page";
-import SuccessStoriesPage from "./pages/success-stories/page";
-import SupportPage from "./pages/support/page";
-import TermsPage from "./pages/terms/page";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 60 * 1000, // 1분
-    },
-  },
-});
-
-// 앱 초기화 시 Refresh Token으로 Access Token 가져오기
-function AuthInitializer({ children }: { children: React.ReactNode }) {
-  const { setAuthToken, setInitialized, isInitialized } = useAuthStore();
-
-  useEffect(() => {
-    async function initAuth() {
-      try {
-        // Refresh Token으로 Access Token 발급 시도
-        const response = await fetch("http://localhost:8000/api/auth/refresh", {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setAuthToken(data.access_token);
-          console.log("✅ 자동 로그인 성공");
-        } else {
-          // 401이나 다른 에러는 정상 (로그인 안 된 상태)
-          console.log("ℹ️ Refresh token 없음 - 비로그인 상태");
-        }
-      } catch (error) {
-        // 네트워크 에러 등 - 조용히 처리
-        console.log("ℹ️ 인증 초기화 실패:", error);
-      } finally {
-        setInitialized(true);
-      }
-    }
-
-    if (!isInitialized) {
-      initAuth();
-    }
-  }, [setAuthToken, setInitialized, isInitialized]);
-
-  // 초기화 전에는 로딩 표시
-  if (!isInitialized) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
+import { ScrollToTop } from '@/shared/components/common/ScrollToTop'
+import { Toaster } from '@/shared/components/ui/toaster'
+import { AuthProvider } from './providers/AuthProvider'
+import { QueryProvider } from './providers/QueryProvider'
+import { AppRoutes } from './routes'
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <QueryProvider>
+      <AuthProvider>
+        <AppRoutes />
         <ScrollToTop />
-        <AuthInitializer>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/diagnose" element={<DiagnosePage />} />
-            <Route path="/results" element={<ResultsPage />} />
-            <Route path="/action-plan" element={<ActionPlanPage />} />
-            <Route path="/compare" element={<ComparePage />} />
-            <Route path="/calculators" element={<CalculatorsPage />} />
-            <Route path="/consultation" element={<ConsultationPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/faq" element={<FaqPage />} />
-            <Route path="/guide" element={<GuidePage />} />
-            <Route path="/statistics" element={<StatisticsPage />} />
-            <Route path="/insights" element={<InsightsPage />} />
-            <Route path="/success-stories" element={<SuccessStoriesPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Toaster />
-        </AuthInitializer>
-      </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  );
+        <Toaster />
+      </AuthProvider>
+    </QueryProvider>
+  )
 }
 
-export default App;
+export default App

@@ -36,7 +36,7 @@ async def get_benchmark(industry: Optional[str] = None, region: Optional[str] = 
         return BenchmarkData(
             industry=industry or "전체",
             region=region or "전국",
-            average_risk_score=65.0,
+            average_risk_score=35.0,  # 안전점수 (0.65 위험도 -> 35 안전점수)
             metrics={
                 "revenue": {"average": 45000000, "median": 38000000},
                 "expenses": {"average": 35000000, "median": 30000000},

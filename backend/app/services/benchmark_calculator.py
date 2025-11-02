@@ -280,9 +280,14 @@ class BenchmarkCalculator:
         avg_customers = int(stats.get('customers_mean', 50) * base_customers / 100)
         median_customers = int(stats.get('customers_median', 50) * base_customers / 100)
         
-        # 위험도 (0~1 스케일을 0~100 스케일로 변환)
-        avg_risk = float(stats.get('risk_mean', 0.65) * 100)
-        median_risk = float(stats.get('risk_median', 0.65) * 100)
+        # 위험도를 안전점수로 변환 (0~1 스케일을 0~100 안전점수로)
+        # risk_mean이 0.2면 -> 안전점수 80
+        avg_risk = float(stats.get('risk_mean', 0.65))
+        median_risk = float(stats.get('risk_median', 0.65))
+        
+        # 안전점수로 변환: (1 - risk) * 100
+        avg_safety_score = round((1 - avg_risk) * 100, 2)
+        median_safety_score = round((1 - median_risk) * 100, 2)
         
         return {
             "industry": mapped_industry,  # 실제 업종명 반환
@@ -291,8 +296,8 @@ class BenchmarkCalculator:
             "median_revenue": median_revenue,
             "average_customers": avg_customers,
             "median_customers": median_customers,
-            "average_risk_score": round(avg_risk, 2),
-            "median_risk_score": round(median_risk, 2),
+            "average_risk_score": avg_safety_score,  # 이제 안전점수 (높을수록 안전)
+            "median_risk_score": median_safety_score,
             "merchant_count": int(stats.get('merchant_count', 0)),
             "sample_size": int(stats.get('sales_count', 0))
         }
@@ -352,9 +357,9 @@ class BenchmarkCalculator:
         avg_customers = int(weighted_customers_mean * base_customers / 100)
         median_customers = int(customers_median * base_customers / 100)
         
-        # 위험도 (0~1 스케일을 0~100 스케일로 변환)
-        avg_risk = float(weighted_risk_mean * 100)
-        median_risk = float(risk_median * 100)
+        # 위험도를 안전점수로 변환 (0~1 스케일을 0~100 안전점수로)
+        avg_safety_score = round((1 - weighted_risk_mean) * 100, 2)
+        median_safety_score = round((1 - risk_median) * 100, 2)
         
         print(f"[INFO] 카테고리 '{category_code}': {len(valid_industries)}개 업종, 총 {int(total_merchants)}개 가맹점")
         
@@ -367,8 +372,8 @@ class BenchmarkCalculator:
             "median_revenue": median_revenue,
             "average_customers": avg_customers,
             "median_customers": median_customers,
-            "average_risk_score": round(avg_risk, 2),
-            "median_risk_score": round(median_risk, 2),
+            "average_risk_score": avg_safety_score,  # 안전점수 (높을수록 안전)
+            "median_risk_score": median_safety_score,
             "merchant_count": int(total_merchants),
             "sample_size": int(category_stats['sales_count'].sum())
         }
@@ -381,8 +386,8 @@ class BenchmarkCalculator:
             "median_revenue": 38000000,
             "average_customers": 850,
             "median_customers": 720,
-            "average_risk_score": 65.0,
-            "median_risk_score": 63.0,
+            "average_risk_score": 35.0,  # 안전점수 (0.65 위험도 -> 35 안전점수)
+            "median_risk_score": 37.0,  # 안전점수 (0.63 위험도 -> 37 안전점수)
             "merchant_count": 0,
             "sample_size": 0
         }

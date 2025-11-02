@@ -307,7 +307,7 @@ export default function ResultsPage() {
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-                    현재 위험도는 <span className={alertInfo.color}>'{alertInfo.label}'</span> 단계입니다
+                    현재 안전점수는 <span className={alertInfo.color}>'{alertInfo.label}'</span> 단계입니다
                   </h1>
                   <p className="text-xl text-muted-foreground mb-6">{alertInfo.description}</p>
                   <p className="text-lg text-muted-foreground">
@@ -753,17 +753,17 @@ export default function ResultsPage() {
                           })()}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          내 위험도: <strong>{resultData.p_final.toFixed(1)}%</strong> | 업종 평균:{" "}
-                          <strong>{benchmarkData.averageRiskScore.toFixed(1)}%</strong>
-                          {resultData.p_final < benchmarkData.averageRiskScore ? (
+                          내 안전점수: <strong>{resultData.p_final.toFixed(1)}점</strong> | 업종 평균:{" "}
+                          <strong>{benchmarkData.averageRiskScore.toFixed(1)}점</strong>
+                          {resultData.p_final > benchmarkData.averageRiskScore ? (
                             <span className="text-green-600 font-semibold ml-2">
-                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p
-                              낮음 ✓)
+                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}점
+                              높음 ✓)
                             </span>
                           ) : (
                             <span className="text-orange-600 font-semibold ml-2">
-                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p
-                              높음)
+                              (평균보다 {Math.abs(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}점
+                              낮음)
                             </span>
                           )}
                         </p>
@@ -805,9 +805,9 @@ export default function ResultsPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-3 gap-6">
-                    {/* 위험도 비교 */}
+                    {/* 안전점수 비교 */}
                     <div>
-                      <h3 className="font-semibold text-lg mb-4 text-center">위험도</h3>
+                      <h3 className="font-semibold text-lg mb-4 text-center">안전점수</h3>
                       <ResponsiveContainer width="100%" height={250}>
                         <BarChart
                           data={[
@@ -824,7 +824,7 @@ export default function ResultsPage() {
                               border: "1px solid #e5e7eb",
                               borderRadius: "8px",
                             }}
-                            formatter={(value: number) => [`${value.toFixed(1)}%`, "위험도"]}
+                            formatter={(value: number) => [`${value.toFixed(1)}점`, "안전점수"]}
                           />
                           <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                             {[
@@ -838,12 +838,14 @@ export default function ResultsPage() {
                       </ResponsiveContainer>
                       <p className="text-center text-sm text-muted-foreground mt-2">
                         {resultData.p_final > benchmarkData.averageRiskScore ? (
-                          <span className="text-orange-600 font-semibold">
-                            업종 평균보다 {(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}%p 높음
+                          <span className="text-green-600 font-semibold">
+                            업종 평균보다 {(resultData.p_final - benchmarkData.averageRiskScore).toFixed(1)}점 높음
+                            (더 안전)
                           </span>
                         ) : (
-                          <span className="text-green-600 font-semibold">
-                            업종 평균보다 {(benchmarkData.averageRiskScore - resultData.p_final).toFixed(1)}%p 낮음
+                          <span className="text-orange-600 font-semibold">
+                            업종 평균보다 {(benchmarkData.averageRiskScore - resultData.p_final).toFixed(1)}점 낮음
+                            (주의 필요)
                           </span>
                         )}
                       </p>

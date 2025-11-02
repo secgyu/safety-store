@@ -52,6 +52,13 @@ interface DiagnosisData {
 }
 
 export async function generatePDFReport(data: DiagnosisData) {
+  // 디버깅: 전달받은 데이터 확인
+  console.log("PDF 생성 시작");
+  console.log("차트 이미지 데이터 존재:", !!data.chartImages?.radarChart);
+  if (data.chartImages?.radarChart) {
+    console.log("차트 이미지 길이:", data.chartImages.radarChart.length);
+  }
+
   // HTML로 PDF 내용 생성
   const htmlContent = createHTMLReport(data);
 

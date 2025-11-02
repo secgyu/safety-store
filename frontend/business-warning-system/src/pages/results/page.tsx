@@ -268,17 +268,42 @@ export default function ResultsPage() {
 
       if (radarChartElement) {
         try {
+          // 차트가 완전히 렌더링될 때까지 대기 (500ms)
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          console.log("레이더 차트 요소 발견:", radarChartElement);
+          console.log("차트 크기:", {
+            width: radarChartElement.offsetWidth,
+            height: radarChartElement.offsetHeight,
+          });
+
           const canvas = await html2canvas(radarChartElement, {
             scale: 2,
             useCORS: true,
             logging: false,
             backgroundColor: "#ffffff",
+            foreignObjectRendering: false,
+            // oklch 문제 해결: Card의 배경색만 무시하고 차트는 캡처
+            ignoreElements: (element) => {
+              // Card나 glass-card 같은 oklch 배경색을 사용하는 요소 무시
+              const classList = element.className || "";
+              if (typeof classList === "string") {
+                return classList.includes("glass-card") || classList.includes("bg-gradient");
+              }
+              return false;
+            },
           });
+
           radarChartImage = canvas.toDataURL("image/png");
+
+          console.log("레이더 차트 캡처 성공!");
+          console.log("이미지 데이터 길이:", radarChartImage.length);
         } catch (chartError) {
           console.error("레이더 차트 캡처 실패:", chartError);
           // 차트 캡처 실패해도 PDF는 생성
         }
+      } else {
+        console.error("레이더 차트 요소를 찾을 수 없습니다 (ID: radar-chart-for-pdf)");
       }
 
       toast({
@@ -378,6 +403,9 @@ export default function ResultsPage() {
           : undefined,
       });
 
+      // 디버깅: PDF에 전달된 데이터 확인
+      console.log("PDF 생성 완료 - 차트 이미지 포함 여부:", !!radarChartImage);
+
       toast({
         title: "다운로드 완료",
         description: "PDF 리포트가 다운로드되었습니다.",
@@ -451,7 +479,7 @@ export default function ResultsPage() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* 레이더 차트 */}
-                  <div id="radar-chart-for-pdf">
+                  <div id="radar-chart-for-pdf" style={{ width: "600px", height: "400px", margin: "0 auto" }}>
                     <ResponsiveContainer width="100%" height={400}>
                       <RadarChart
                         data={[

@@ -268,42 +268,24 @@ export default function ResultsPage() {
 
       if (radarChartElement) {
         try {
-          // 차트가 완전히 렌더링될 때까지 대기 (500ms)
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          console.log("레이더 차트 요소 발견:", radarChartElement);
-          console.log("차트 크기:", {
-            width: radarChartElement.offsetWidth,
-            height: radarChartElement.offsetHeight,
-          });
+          // 차트가 완전히 렌더링될 때까지 대기
+          await new Promise((resolve) => setTimeout(resolve, 800));
 
           const canvas = await html2canvas(radarChartElement, {
             scale: 2,
+            backgroundColor: "#ffffff", // 명시적 흰색 배경
             useCORS: true,
             logging: false,
-            backgroundColor: "#ffffff",
-            foreignObjectRendering: false,
-            // oklch 문제 해결: Card의 배경색만 무시하고 차트는 캡처
-            ignoreElements: (element) => {
-              // Card나 glass-card 같은 oklch 배경색을 사용하는 요소 무시
-              const classList = element.className || "";
-              if (typeof classList === "string") {
-                return classList.includes("glass-card") || classList.includes("bg-gradient");
-              }
-              return false;
-            },
           });
 
           radarChartImage = canvas.toDataURL("image/png");
-
-          console.log("레이더 차트 캡처 성공!");
-          console.log("이미지 데이터 길이:", radarChartImage.length);
+          console.log("✅ 레이더 차트 캡처 성공!");
         } catch (chartError) {
-          console.error("레이더 차트 캡처 실패:", chartError);
+          console.error("❌ 레이더 차트 캡처 실패:", chartError);
           // 차트 캡처 실패해도 PDF는 생성
         }
       } else {
-        console.error("레이더 차트 요소를 찾을 수 없습니다 (ID: radar-chart-for-pdf)");
+        console.warn("⚠️ 레이더 차트 요소를 찾을 수 없습니다");
       }
 
       toast({
@@ -479,64 +461,64 @@ export default function ResultsPage() {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* 레이더 차트 */}
-                  <div id="radar-chart-for-pdf" style={{ width: "600px", height: "400px", margin: "0 auto" }}>
-                    <ResponsiveContainer width="100%" height={400}>
-                      <RadarChart
-                        data={[
-                          {
-                            category: "매출 안정성",
-                            myScore: resultData.risk_components.sales_risk,
-                            average: benchmarkData?.averageRiskScore || 0,
-                            fullMark: 100,
-                          },
-                          {
-                            category: "고객 유지력",
-                            myScore: resultData.risk_components.customer_risk,
-                            average: benchmarkData?.averageRiskScore || 0,
-                            fullMark: 100,
-                          },
-                          {
-                            category: "시장 경쟁력",
-                            myScore: resultData.risk_components.market_risk,
-                            average: benchmarkData?.averageRiskScore || 0,
-                            fullMark: 100,
-                          },
-                        ]}
-                      >
-                        <PolarGrid stroke="#e5e7eb" />
-                        <PolarAngleAxis dataKey="category" tick={{ fill: "#6b7280", fontSize: 13 }} />
-                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: "#6b7280", fontSize: 11 }} />
-                        <Radar
-                          name="내 가게"
-                          dataKey="myScore"
-                          stroke="#3b82f6"
-                          fill="#3b82f6"
-                          fillOpacity={0.5}
-                          strokeWidth={2}
-                        />
-                        <Radar
-                          name="업종 평균"
-                          dataKey="average"
-                          stroke="#94a3b8"
-                          fill="#94a3b8"
-                          fillOpacity={0.25}
-                          strokeWidth={2}
-                        />
-                        <Legend
-                          wrapperStyle={{
-                            paddingTop: "20px",
-                          }}
-                        />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "white",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                          }}
-                          formatter={(value: number) => value.toFixed(1)}
-                        />
-                      </RadarChart>
-                    </ResponsiveContainer>
+                  <div id="radar-chart-for-pdf" style={{ width: "600px", height: "400px", margin: "0 auto", backgroundColor: "#ffffff" }}>
+                    <RadarChart
+                      width={600}
+                      height={400}
+                      data={[
+                        {
+                          category: "매출 안정성",
+                          myScore: resultData.risk_components.sales_risk,
+                          average: benchmarkData?.averageRiskScore || 0,
+                          fullMark: 100,
+                        },
+                        {
+                          category: "고객 유지력",
+                          myScore: resultData.risk_components.customer_risk,
+                          average: benchmarkData?.averageRiskScore || 0,
+                          fullMark: 100,
+                        },
+                        {
+                          category: "시장 경쟁력",
+                          myScore: resultData.risk_components.market_risk,
+                          average: benchmarkData?.averageRiskScore || 0,
+                          fullMark: 100,
+                        },
+                      ]}
+                    >
+                      <PolarGrid stroke="#e5e7eb" />
+                      <PolarAngleAxis dataKey="category" tick={{ fill: "#6b7280", fontSize: 13 }} />
+                      <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: "#6b7280", fontSize: 11 }} />
+                      <Radar
+                        name="내 가게"
+                        dataKey="myScore"
+                        stroke="#3b82f6"
+                        fill="#3b82f6"
+                        fillOpacity={0.5}
+                        strokeWidth={2}
+                      />
+                      <Radar
+                        name="업종 평균"
+                        dataKey="average"
+                        stroke="#94a3b8"
+                        fill="#94a3b8"
+                        fillOpacity={0.25}
+                        strokeWidth={2}
+                      />
+                      <Legend
+                        wrapperStyle={{
+                          paddingTop: "20px",
+                        }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                        }}
+                        formatter={(value: number) => value.toFixed(1)}
+                      />
+                    </RadarChart>
                   </div>
 
                   {/* 해석 및 인사이트 */}

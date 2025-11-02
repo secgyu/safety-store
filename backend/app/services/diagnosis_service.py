@@ -8,6 +8,7 @@ class DiagnosisService:
     def __init__(self, csv_path: str = "risk_output.csv"):
         self.csv_path = csv_path
         self._data_cache = None
+        self._usage_cache = None  # 매출 데이터 캐시
         
     def _load_csv(self):
         """CSV 파일을 메모리에 로드"""
@@ -27,6 +28,25 @@ class DiagnosisService:
         
         self._data_cache = data
         return data
+    
+    def _load_usage_data(self):
+        """ds2_monthly_usage.csv 파일에서 매출 데이터 로드"""
+        if self._usage_cache is not None:
+            return self._usage_cache
+            
+        usage_data = {}
+        csv_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ds2_monthly_usage.csv')
+        
+        with open(csv_path, 'r', encoding='cp949') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                encoded_mct = row['ENCODED_MCT']
+                ta_ym = row['TA_YM']
+                key = f"{encoded_mct}_{ta_ym}"
+                usage_data[key] = row
+        
+        self._usage_cache = usage_data
+        return usage_data
     
     def _load_business_data(self):
         """big_data_set1_f.csv 파일에서 가게 정보 로드"""
@@ -114,6 +134,44 @@ class DiagnosisService:
         p_final = float(row['p_final'])
         alert = row['Alert']
         ta_ym = row['TA_YM']
+        encoded_mct = row['ENCODED_MCT']
+        
+        # 매출 비율 데이터 가져오기 (ds2에서)
+        usage_data = self._load_usage_data()
+        
+        # TA_YM 형식 변환: "2024-12-01" -> "202412"
+        # risk_output.csv는 "YYYY-MM-DD" 형식, ds2는 "YYYYMM" 형식
+        if '-' in ta_ym:
+            # "2024-12-01" -> "202412"
+            ta_ym_formatted = ta_ym[:7].replace('-', '')
+        else:
+            ta_ym_formatted = ta_ym
+        
+        usage_key = f"{encoded_mct}_{ta_ym_formatted}"
+        revenue_ratio = None
+        
+        print(f"🔍 [DEBUG] Original TA_YM: {ta_ym}")
+        print(f"🔍 [DEBUG] Formatted TA_YM: {ta_ym_formatted}")
+        print(f"🔍 [DEBUG] Looking for key: {usage_key}")
+        print(f"🔍 [DEBUG] Total usage_data entries: {len(usage_data)}")
+        
+        if usage_key in usage_data:
+            try:
+                # M1_SME_RY_SAA_RAT: 동일 업종 매출금액 비율
+                ratio_str = usage_data[usage_key].get('M1_SME_RY_SAA_RAT', '0')
+                print(f"🔍 [DEBUG] Found ratio_str: {ratio_str}")
+                if ratio_str and ratio_str != '-999999.9':
+                    revenue_ratio = float(ratio_str)
+                    print(f"🔍 [DEBUG] Parsed revenue_ratio: {revenue_ratio}")
+            except (ValueError, KeyError) as e:
+                print(f"🔍 [DEBUG] Error parsing ratio: {e}")
+        else:
+            print(f"🔍 [DEBUG] Key not found in usage_data")
+            # 가능한 키 샘플 출력 (처음 5개)
+            sample_keys = list(usage_data.keys())[:5]
+            print(f"🔍 [DEBUG] Sample keys: {sample_keys}")
+        
+        print(f"🔍 [DEBUG] Final revenue_ratio: {revenue_ratio}")
         
         # 0-100 스케일로 변환 (risk를 score로)
         sales_score = max(0, min(100, (1 - sales_risk) * 100))
@@ -128,7 +186,7 @@ class DiagnosisService:
         insights = self._generate_insights(row)
         
         return {
-            "id": f"diagnosis-{row['ENCODED_MCT']}-{ta_ym}",
+            "id": f"diagnosis-{encoded_mct}-{ta_ym}",
             "overall_score": round(overall_score, 2),
             "risk_level": alert,
             "components": {
@@ -148,7 +206,8 @@ class DiagnosisService:
             "recommendations": recommendations,
             "insights": insights,
             "created_at": datetime.now().isoformat(),
-            "ta_ym": ta_ym
+            "ta_ym": ta_ym,
+            "revenue_ratio": revenue_ratio  # 업종 평균 대비 매출 비율
         }
     
     def _get_trend_message(self, category: str, risk_value: float) -> str:

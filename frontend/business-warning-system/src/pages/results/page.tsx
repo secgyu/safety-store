@@ -40,7 +40,7 @@ import { RiskGauge } from "@/components/risk-gauge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useBenchmark, useDiagnosisHistory } from "@/lib/api";
+import { client, useBenchmark, useDiagnosisHistory } from "@/lib/api";
 import { generatePDFReport } from "@/lib/pdf-generator";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
@@ -58,6 +58,7 @@ type ResultData = {
     description: string;
     priority: "high" | "medium" | "low";
   }>;
+  revenue_ratio?: number; // 업종 평균 대비 매출 비율 (100% = 평균)
 };
 
 export default function ResultsPage() {
@@ -65,8 +66,8 @@ export default function ResultsPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [resultData, setResultData] = useState<ResultData | null>(null);
-  const [diagnosisInfo, setDiagnosisInfo] = useState<any>(null);
-  const [industryCode, setIndustryCode] = useState<string>("restaurant");
+  const [diagnosisInfo, setDiagnosisInfo] = useState<{ encoded_mct: string; business_name: string } | null>(null);
+  const [industryCode] = useState<string>("restaurant");
   const [encodedMct, setEncodedMct] = useState<string>("");
 
   // 업종 평균 데이터 가져오기
@@ -76,45 +77,76 @@ export default function ResultsPage() {
   const { data: historyData } = useDiagnosisHistory(encodedMct);
 
   useEffect(() => {
-    const diagnosisDataStr = sessionStorage.getItem("diagnosisData");
-    const diagnosisResultStr = sessionStorage.getItem("diagnosisResult");
+    const loadDiagnosisResult = async () => {
+      try {
+        setLoading(true);
 
-    if (!diagnosisDataStr || !diagnosisResultStr) {
-      navigate("/diagnose");
-      return;
-    }
+        // 1단계: 내가 진단한 기록이 있는지 API로 확인
+        const recentResponse = await client.GET("/api/diagnose/recent");
 
-    try {
-      const parsedInfo = JSON.parse(diagnosisDataStr);
-      const parsedResult = JSON.parse(diagnosisResultStr);
+        if (!recentResponse.data || !recentResponse.data.encodedMct) {
+          // 진단 기록이 없으면 진단 페이지로
+          toast({
+            title: "진단 기록 없음",
+            description: "진단을 먼저 진행해주세요.",
+            variant: "default",
+          });
+          navigate("/diagnose");
+          return;
+        }
 
-      setDiagnosisInfo(parsedInfo);
+        const { encodedMct: mctCode, businessName } = recentResponse.data;
+        setEncodedMct(mctCode);
 
-      // encoded_mct 설정 (이력 조회용)
-      if (parsedInfo.encoded_mct) {
-        setEncodedMct(parsedInfo.encoded_mct);
+        // 2단계: encoded_mct로 실제 진단 결과 조회
+        const diagnosisResponse = await client.POST("/api/diagnose/predict", {
+          body: { encodedMct: mctCode },
+        });
+
+        const apiResult = diagnosisResponse.data;
+
+        if (!apiResult) {
+          throw new Error("진단 결과를 받아오지 못했습니다.");
+        }
+
+        // API 응답을 ResultData 형식으로 매핑
+        const mappedResult: ResultData = {
+          p_final: apiResult.overallScore || 0,
+          alert: apiResult.riskLevel || "GREEN",
+          risk_components: {
+            sales_risk: apiResult.components?.sales?.score || 0,
+            customer_risk: apiResult.components?.customer?.score || 0,
+            market_risk: apiResult.components?.market?.score || 0,
+          },
+          recommendations: apiResult.recommendations || [],
+          revenue_ratio: apiResult.revenueRatio,
+        };
+
+        console.log("🔍 [DEBUG] API Result:", apiResult);
+        console.log("🔍 [DEBUG] revenue_ratio:", mappedResult.revenue_ratio);
+
+        // diagnosisInfo 설정 (다운로드 등에 필요)
+        setDiagnosisInfo({
+          encoded_mct: mctCode,
+          business_name: businessName,
+        });
+
+        setResultData(mappedResult);
+        setLoading(false);
+      } catch (error) {
+        console.error("[ERROR] Failed to load diagnosis:", error);
+        toast({
+          title: "오류 발생",
+          description: "진단 결과를 불러오는데 실패했습니다.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        navigate("/diagnose");
       }
+    };
 
-      // API 응답을 ResultData 형식으로 매핑
-      const mappedResult: ResultData = {
-        p_final: parsedResult.overallScore || parsedResult.p_final || 0,
-        alert: parsedResult.riskLevel || parsedResult.alert || "GREEN",
-        risk_components: {
-          sales_risk: parsedResult.components?.sales?.score || parsedResult.risk_components?.sales_risk || 0,
-          customer_risk: parsedResult.components?.customer?.score || parsedResult.risk_components?.customer_risk || 0,
-          market_risk: parsedResult.components?.market?.score || parsedResult.risk_components?.market_risk || 0,
-        },
-        recommendations: parsedResult.recommendations || [],
-      };
-
-      setResultData(mappedResult);
-      setLoading(false);
-    } catch (error) {
-      console.error("[v0] Error parsing diagnosis data:", error);
-      setLoading(false);
-      navigate("/diagnose");
-    }
-  }, [navigate]);
+    loadDiagnosisResult();
+  }, [navigate, toast]);
 
   const getAlertInfo = (alert: AlertLevel) => {
     switch (alert) {
@@ -233,17 +265,17 @@ export default function ResultsPage() {
       });
 
       await generatePDFReport({
-        businessName: diagnosisInfo.businessName || "내 가게",
-        industry: diagnosisInfo.industry || "정보 없음",
+        businessName: diagnosisInfo?.business_name || "내 가게",
+        industry: industryCode || "정보 없음",
         diagnosisDate: new Date().toLocaleDateString("ko-KR"),
         overallRisk: resultData.p_final,
         riskLevel: resultData.alert,
         salesRisk: resultData.risk_components.sales_risk,
         customerRisk: resultData.risk_components.customer_risk,
         marketRisk: resultData.risk_components.market_risk,
-        revenue: diagnosisInfo.revenue || 0,
-        customerCount: diagnosisInfo.customerCount || 0,
-        operatingMonths: diagnosisInfo.operatingMonths || 0,
+        revenue: 0, // 매출은 별도 표시
+        customerCount: 0, // 고객 수는 별도 표시
+        operatingMonths: 0, // 운영 개월은 별도 표시
         recommendations: resultData.recommendations.map((rec) => ({
           title: rec.title,
           description: rec.description,
@@ -820,22 +852,90 @@ export default function ResultsPage() {
                       </p>
                     </div>
 
-                    {/* 매출 비교 - 가상 데이터 (실제로는 API에서) */}
+                    {/* 매출 비교 */}
                     <div>
                       <h3 className="font-semibold text-lg mb-4 text-center">월 평균 매출</h3>
-                      <div className="text-center py-8">
-                        <div className="space-y-4">
-                          <div className="bg-blue-50 rounded-lg p-4">
-                            <p className="text-sm text-muted-foreground mb-1">업종 평균</p>
-                            <p className="text-2xl font-bold text-blue-600">
-                              ₩{benchmarkData.metrics.revenue.average.toLocaleString()}
-                            </p>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            실제 매출 데이터는 진단 시 입력한 정보를 기반으로 합니다.
-                          </p>
+                      {/* 디버깅 정보 */}
+                      {import.meta.env.DEV && (
+                        <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                          <p>🔍 Debug: revenue_ratio = {resultData.revenue_ratio?.toString() ?? "null/undefined"}</p>
+                          <p>🔍 Has benchmarkData: {benchmarkData ? "Yes" : "No"}</p>
                         </div>
-                      </div>
+                      )}
+                      {resultData.revenue_ratio && benchmarkData ? (
+                        <>
+                          <ResponsiveContainer width="100%" height={250}>
+                            <BarChart
+                              data={[
+                                {
+                                  name: "내 가게",
+                                  value: benchmarkData.metrics.revenue.average * (resultData.revenue_ratio / 100),
+                                  type: "mine",
+                                },
+                                {
+                                  name: "업종 평균",
+                                  value: benchmarkData.metrics.revenue.average,
+                                  type: "average",
+                                },
+                              ]}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                              <XAxis dataKey="name" tick={{ fill: "#6b7280", fontSize: 12 }} />
+                              <YAxis
+                                tick={{ fill: "#6b7280", fontSize: 12 }}
+                                tickFormatter={(value: number) => `₩${(value / 1000000).toFixed(0)}M`}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: "white",
+                                  border: "1px solid #e5e7eb",
+                                  borderRadius: "8px",
+                                }}
+                                formatter={(value: number) => [`₩${value.toLocaleString()}`, "매출액"]}
+                              />
+                              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                                {[
+                                  {
+                                    name: "내 가게",
+                                    value: benchmarkData.metrics.revenue.average * (resultData.revenue_ratio / 100),
+                                    type: "mine",
+                                  },
+                                  {
+                                    name: "업종 평균",
+                                    value: benchmarkData.metrics.revenue.average,
+                                    type: "average",
+                                  },
+                                ].map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.type === "mine" ? "#3b82f6" : "#94a3b8"} />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                          <p className="text-center text-sm text-muted-foreground mt-2">
+                            {resultData.revenue_ratio > 100 ? (
+                              <span className="text-green-600 font-semibold">
+                                업종 평균보다 {(resultData.revenue_ratio - 100).toFixed(1)}% 높음
+                              </span>
+                            ) : (
+                              <span className="text-orange-600 font-semibold">
+                                업종 평균보다 {(100 - resultData.revenue_ratio).toFixed(1)}% 낮음
+                              </span>
+                            )}
+                          </p>
+                        </>
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="space-y-4">
+                            <div className="bg-blue-50 rounded-lg p-4">
+                              <p className="text-sm text-muted-foreground mb-1">업종 평균</p>
+                              <p className="text-2xl font-bold text-blue-600">
+                                ₩{benchmarkData?.metrics.revenue.average.toLocaleString()}
+                              </p>
+                            </div>
+                            <p className="text-sm text-muted-foreground">내 가게의 매출 데이터가 없습니다.</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* 고객 수 비교 */}

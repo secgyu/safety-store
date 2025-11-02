@@ -113,6 +113,7 @@ class DiagnosisResponse(CamelBaseModel):
     insights: list[str]
     created_at: str
     ta_ym: Optional[str] = None
+    revenue_ratio: Optional[float] = None  # 업종 평균 대비 매출 비율 (100% = 평균)
 
 
 class DiagnosisHistory(CamelBaseModel):

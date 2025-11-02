@@ -67,24 +67,9 @@ export default function DiagnosePage() {
   // 최근 진단 체크 - 있으면 바로 결과 페이지로
   useEffect(() => {
     if (!isLoadingAuth && !isLoadingRecent && user && recentDiagnosis) {
-      // 최근 진단이 있으면 해당 가게로 바로 진단 실행
-      const proceedWithRecentDiagnosis = async () => {
-        try {
-          const result = await predict.mutateAsync({
-            encodedMct: recentDiagnosis.encodedMct,
-          });
-
-          sessionStorage.setItem("diagnosisData", JSON.stringify({ encoded_mct: recentDiagnosis.encodedMct }));
-          sessionStorage.setItem("diagnosisResult", JSON.stringify(result));
-
-          navigate("/results");
-        } catch (error) {
-          console.error("Error loading recent diagnosis:", error);
-          // 에러 발생 시 그냥 진단 페이지 계속 진행
-        }
-      };
-
-      proceedWithRecentDiagnosis();
+      // 최근 진단이 있으면 바로 결과 페이지로 이동
+      // (결과 페이지에서 알아서 API 호출함)
+      navigate("/results");
     }
   }, [user, recentDiagnosis, isLoadingAuth, isLoadingRecent, predict, navigate]);
 
@@ -141,11 +126,8 @@ export default function DiagnosePage() {
         encodedMct: encodedMct,
       });
 
-      // Store result in sessionStorage for results page
-      sessionStorage.setItem("diagnosisData", JSON.stringify({ encoded_mct: encodedMct }));
-      sessionStorage.setItem("diagnosisResult", JSON.stringify(result));
-
-      // Navigate to results page
+      // 진단 완료 - 결과 페이지로 이동
+      // (결과 페이지에서 알아서 API 호출해서 최신 데이터를 가져옴)
       navigate("/results");
     } catch (error) {
       console.error("Error submitting diagnosis:", error);

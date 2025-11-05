@@ -1,10 +1,10 @@
 import { AlertTriangle, Bell, Calendar, Check, Filter, Info, Target, TrendingDown, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { useDeleteNotification, useMarkNotificationAsRead, useNotifications } from '@/features/notifications';
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
-import { useDeleteNotification, useMarkNotificationAsRead, useNotifications } from "@/lib/api";
 
 const notificationTypes = [
   { value: "all", label: "전체" },

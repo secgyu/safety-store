@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
+
 import { client, handleResponse } from '@/shared/lib/api-client'
+
 import type { Statistics } from '../types'
 
 class StatisticsApi {

@@ -20,11 +20,11 @@ import {
   ZAxis,
 } from "recharts";
 
+import { useBenchmark, useScatterData } from '@/features/benchmark';
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { useBenchmark, useScatterData } from "@/lib/api";
 
 const industries = [
   { value: "restaurant", label: "음식점 (한식/양식/일식/중식 등)" },

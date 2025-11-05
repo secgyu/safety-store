@@ -1,6 +1,7 @@
 import { Bell, LayoutDashboard, LogOut, Settings, UserIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { useAuth, useLogout } from "@/lib/api";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -11,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { useAuth, useLogout } from "@/lib/api";
 
 export function UserMenu() {
   const { data: authData } = useAuth();

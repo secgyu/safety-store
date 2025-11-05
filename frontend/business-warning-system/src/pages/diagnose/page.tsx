@@ -2,13 +2,14 @@ import { ArrowLeft, Bot, Building2, Loader2, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "@/features/auth";
+import { usePredictDiagnosis, useRecentDiagnosis, useSearchBusinesses } from "@/features/diagnosis";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Progress } from "@/shared/components/ui/progress";
 import { useToast } from "@/shared/hooks/use-toast";
-import { useAuth, usePredictDiagnosis, useRecentDiagnosis, useSearchBusinesses } from "@/lib/api";
 
 type Step = {
   id: number;

@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import { client, handleResponse } from '@/shared/lib/api-client'
+
 import { useAuthStore } from '../store/authStore'
-import type { BearerResponse, LoginRequest, SignupRequest, User, UserResponse, UserUpdate } from '../types'
+import type { LoginRequest, SignupRequest, User, UserResponse, UserUpdate } from '../types'
 
 // ========== Token Refresh ==========
 async function refreshAccessToken(): Promise<string | null> {
@@ -124,6 +126,16 @@ export function useLogout() {
       resetAuthToken()
       queryClient.clear()
     },
+  })
+}
+
+export function useAuth() {
+  const { authToken } = useAuthStore()
+
+  return useQuery({
+    queryKey: ['auth', 'me'],
+    queryFn: authApi.getMe,
+    enabled: !!authToken,
   })
 }
 

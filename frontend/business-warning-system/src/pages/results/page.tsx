@@ -34,14 +34,16 @@ import {
   YAxis,
 } from "recharts";
 
+import { useBenchmark } from '@/features/benchmark'
+import { useDiagnosisHistory } from '@/features/diagnosis';
 import { ActionCard } from "@/features/diagnosis/components/RiskIndicators/ActionCard";
-import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { RiskCard } from "@/features/diagnosis/components/RiskIndicators/RiskCard";
 import { RiskGauge } from "@/features/diagnosis/components/RiskIndicators/RiskGauge";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { useToast } from "@/shared/hooks/use-toast";
-import { client, useBenchmark, useDiagnosisHistory } from "@/lib/api";
+import { client } from '@/shared/lib/api-client'
 import { generatePDFReport } from "@/shared/services/pdf/pdfGenerator";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";

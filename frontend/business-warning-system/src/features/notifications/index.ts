@@ -1,7 +1,7 @@
 export {
   notificationsApi,
-  useNotifications,
   useMarkAsRead,
+  useNotifications,
   useUpdateNotificationSettings,
 } from './api/notificationsApi'
 export * from './types'

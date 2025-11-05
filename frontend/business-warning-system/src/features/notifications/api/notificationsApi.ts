@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import { client, handleResponse } from '@/shared/lib/api-client'
+
 import type { Notification, NotificationSettings, NotificationSettingsResponse, SuccessResponse } from '../types'
 
 class NotificationsApi {

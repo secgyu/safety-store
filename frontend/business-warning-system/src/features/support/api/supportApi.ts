@@ -1,6 +1,8 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
+
 import { client, handleResponse } from '@/shared/lib/api-client'
-import type { FAQ, ContactRequest, ContactResponse, ChatRequest, ChatResponse, SuccessStory } from '../types'
+
+import type { ChatRequest, ChatResponse, ContactRequest, ContactResponse, FAQ, SuccessStory } from '../types'
 
 class SupportApi {
   async sendChatMessage(data: ChatRequest): Promise<ChatResponse> {

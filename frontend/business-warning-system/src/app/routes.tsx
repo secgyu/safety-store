@@ -1,6 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-import { ScrollToTop } from '@/shared/components/common/ScrollToTop'
 import ActionPlanPage from '@/pages/action-plan/page'
 import CalculatorsPage from '@/pages/calculators/page'
 import ComparePage from '@/pages/compare/page'
@@ -21,6 +20,7 @@ import StatisticsPage from '@/pages/statistics/page'
 import SuccessStoriesPage from '@/pages/success-stories/page'
 import SupportPage from '@/pages/support/page'
 import TermsPage from '@/pages/terms/page'
+import { ScrollToTop } from '@/shared/components/common/ScrollToTop'
 
 export function AppRoutes() {
   return (

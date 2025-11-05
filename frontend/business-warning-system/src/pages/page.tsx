@@ -2,12 +2,12 @@ import { ArrowRight, BarChart3, CheckCircle2, Clock, TrendingUp, Users } from "l
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { AppHeader } from "@/shared/components/layout/AppHeader";
+import { useAuth } from '@/features/auth';
 import { OnboardingTour } from "@/shared/components/common/OnboardingTour";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
+import Footer from "@/shared/components/layout/Footer";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import Footer from "@/shared/components/layout/Footer";
-import { useAuth } from "@/lib/api";
 import { useToast } from "@/shared/hooks/use-toast";
 import { hasCompletedOnboarding, markOnboardingComplete } from "@/shared/services/onboarding/onboardingService";
 

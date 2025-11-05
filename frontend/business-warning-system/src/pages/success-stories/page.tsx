@@ -1,10 +1,10 @@
 import { ArrowLeft, Quote } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { useSuccessStories } from '@/features/support';
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { useSuccessStories } from "@/lib/api";
 
 export default function SuccessStoriesPage() {
   const { data: stories, isLoading, error } = useSuccessStories();

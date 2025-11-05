@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
 import { client, handleResponse } from '@/shared/lib/api-client'
+
 import type {
+  BusinessSearchResponse,
+  DiagnosisHistory,
+  DiagnosisRecordList,
+  DiagnosisRecordSimple,
   DiagnosisRequest,
   DiagnosisResponse,
-  DiagnosisHistory,
-  DiagnosisRecordSimple,
-  DiagnosisRecordList,
-  BusinessSearchResponse,
 } from '../types'
 
 // ========== API Functions ==========

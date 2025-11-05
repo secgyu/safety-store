@@ -1,2 +1,2 @@
-export { supportApi, useSendChatMessage, useFAQs, useSubmitContact, useSuccessStories } from './api/supportApi'
+export { supportApi, useFAQs, useSendChatMessage, useSubmitContact, useSuccessStories } from './api/supportApi'
 export * from './types'

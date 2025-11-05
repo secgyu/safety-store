@@ -1,4 +1,4 @@
 // Auth Feature Public API
+export { authApi,useAuth, useCurrentUser, useLogin, useLogout, useSignup, useUpdateUser } from './api/authApi'
 export { useAuthStore } from './store/authStore'
-export { useLogin, useSignup, useLogout, useCurrentUser, useUpdateUser, authApi } from './api/authApi'
 export * from './types'

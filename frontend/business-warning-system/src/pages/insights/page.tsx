@@ -1,9 +1,9 @@
 import { ArrowLeft, DollarSign, Lightbulb, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 
+import { useInsights } from '@/features/insights';
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { useInsights } from "@/lib/api";
 
 // 인사이트 타입별 아이콘 매핑
 const industryIcons: Record<string, typeof TrendingUp> = {

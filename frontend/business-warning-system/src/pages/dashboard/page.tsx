@@ -2,12 +2,12 @@ import { AlertCircle, Bell, Calendar, Download, Eye, MessageCircle, TrendingUp }
 import { Link } from "react-router-dom";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { AppHeader } from "@/shared/components/layout/AppHeader";
+import { useAuth } from '@/features/auth'
 import { RiskGauge } from "@/features/diagnosis/components/RiskIndicators/RiskGauge";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { useAuth, useDiagnosisHistory } from "@/lib/api";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 

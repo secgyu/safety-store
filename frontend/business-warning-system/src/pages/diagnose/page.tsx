@@ -1,13 +1,13 @@
-import { ArrowLeft, Bot, Building2, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Bot, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/features/auth";
 import { useBusinessSearch, useDiagnose, useRecentDiagnosis } from "@/features/diagnosis";
+import { BusinessList, BusinessSearchForm } from "@/shared/components/diagnose";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { Input } from "@/shared/components/ui/input";
 import { Progress } from "@/shared/components/ui/progress";
 import { useToast } from "@/shared/hooks/use-toast";
 
@@ -65,16 +65,14 @@ export default function DiagnosePage() {
     }
   }, [user, isLoadingAuth, navigate, toast]);
 
-  // 최근 진단 체크 - 있으면 바로 결과 페이지로
+  // 최근 진단 체크
   useEffect(() => {
     if (!isLoadingAuth && !isLoadingRecent && user && recentDiagnosis) {
-      // 최근 진단이 있으면 바로 결과 페이지로 이동
-      // (결과 페이지에서 알아서 API 호출함)
       navigate("/results");
     }
   }, [user, recentDiagnosis, isLoadingAuth, isLoadingRecent, predict, navigate]);
 
-  // 로딩 중이면 아무것도 렌더링하지 않음
+  // 로딩 중
   if (isLoadingAuth || isLoadingRecent) {
     return (
       <>
@@ -86,7 +84,7 @@ export default function DiagnosePage() {
     );
   }
 
-  // 로그인하지 않은 경우 렌더링하지 않음
+  // 로그인하지 않은 경우
   if (!user) {
     return null;
   }
@@ -94,215 +92,146 @@ export default function DiagnosePage() {
   const currentStepData = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
 
-  const handleTextInput = (value: string) => {
-    const field = currentStepData.field;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleSearch = () => {
-    const keyword = formData.search_keyword;
-    if (!keyword || keyword.length < 1) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "검색어를 1자 이상 입력해주세요." }]);
-      return;
-    }
-
-    setMessages((prev) => [...prev, { role: "user", content: keyword }]);
-    setSearchKeyword(keyword);
-
-    // 다음 스텝으로 이동
-    if (currentStep < steps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-      setMessages((prev) => [...prev, { role: "assistant", content: steps[currentStep + 1].question }]);
-    }
-  };
-
-  const handleSelectBusiness = async (encodedMct: string, businessName: string) => {
-    setFormData((prev) => ({ ...prev, selected_mct: encodedMct }));
-    setMessages((prev) => [...prev, { role: "user", content: businessName }]);
-    setMessages((prev) => [...prev, { role: "assistant", content: "분석 중입니다... 잠시만 기다려주세요." }]);
-
-    try {
-      // API call - send encoded_mct to /predict endpoint
-      const result = await predict.mutateAsync({
-        encodedMct: encodedMct,
-      });
-
-      // 진단 완료 - 결과 페이지로 이동
-      // (결과 페이지에서 알아서 API 호출해서 최신 데이터를 가져옴)
-      navigate("/results");
-    } catch (error) {
-      console.error("Error submitting diagnosis:", error);
+    if (formData.search_keyword.trim()) {
+      setSearchKeyword(formData.search_keyword.trim());
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "일시적인 오류가 발생했습니다. 다시 시도해주세요." },
+        { role: "user", content: formData.search_keyword },
+        { role: "assistant", content: steps[1].question },
       ]);
+      setCurrentStep(1);
     }
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-      // Remove last two messages (user answer and assistant question)
-      setMessages((prev) => prev.slice(0, -2));
-      // 검색 초기화
-      if (currentStep === 1) {
-        setSearchKeyword("");
+  const handleSelectBusiness = (mct: string) => {
+    setFormData((prev) => ({ ...prev, selected_mct: mct }));
+  };
+
+  const handleSubmit = async () => {
+    if (formData.selected_mct) {
+      const selectedBusiness = searchResults?.find((b) => b.encoded_mct === formData.selected_mct);
+      if (selectedBusiness) {
+        setMessages((prev) => [
+          ...prev,
+          { role: "user", content: selectedBusiness.business_name },
+          { role: "assistant", content: "진단을 시작합니다..." },
+        ]);
+
+        await predict.mutateAsync(
+          { encoded_mct: formData.selected_mct },
+          {
+            onSuccess: () => {
+              setTimeout(() => {
+                navigate("/results");
+              }, 1000);
+            },
+            onError: (error: Error) => {
+              toast({
+                title: "진단 실패",
+                description: error.message || "진단 중 오류가 발생했습니다.",
+                variant: "destructive",
+              });
+              setMessages((prev) => [
+                ...prev.slice(0, -1),
+                {
+                  role: "assistant",
+                  content: "죄송합니다. 진단 중 오류가 발생했습니다. 다시 시도해주세요.",
+                },
+              ]);
+            },
+          }
+        );
       }
     }
   };
+
+  const canProceed = currentStep === 0 ? formData.search_keyword.trim() : formData.selected_mct;
 
   return (
     <>
       <AppHeader />
       <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-muted-foreground">
-                진행 상황: {currentStep + 1} / {steps.length}
-              </span>
-              <span className="text-sm font-medium text-primary">{Math.round(progress)}%</span>
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => (currentStep > 0 ? setCurrentStep(currentStep - 1) : navigate("/dashboard"))}
+              className="rounded-full"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <Bot className="h-8 w-8 text-primary" />
+                <h1 className="text-2xl font-bold">AI 진단 시작</h1>
+              </div>
+              <Progress value={progress} className="h-2" />
+              <p className="text-sm text-muted-foreground mt-2">
+                {currentStep + 1} / {steps.length} 단계
+              </p>
             </div>
-            <Progress value={progress} className="h-2" />
           </div>
 
-          {/* Chat Interface */}
-          <Card className="mb-6 min-h-[500px] flex flex-col">
-            <CardContent className="flex-1 p-6 flex flex-col">
-              {/* Messages */}
-              <div className="flex-1 space-y-4 mb-6 overflow-y-auto max-h-[400px]">
-                {messages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    {message.role === "assistant" && (
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <Bot className="h-5 w-5 text-primary" />
-                      </div>
-                    )}
-                    <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                        message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
-                      }`}
-                    >
-                      <p className="text-sm leading-relaxed">{message.content}</p>
-                    </div>
-                  </div>
-                ))}
-                {(predict.isPending || isSearching) && (
-                  <div className="flex gap-3 justify-start">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
-                    </div>
-                    <div className="bg-muted rounded-2xl px-4 py-3">
-                      <div className="flex gap-1">
-                        <div
-                          className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce"
-                          style={{ animationDelay: "0ms" }}
-                        />
-                        <div
-                          className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        />
-                        <div
-                          className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+          {/* Chat Messages */}
+          <div className="space-y-4 mb-8">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <Card
+                  className={`max-w-[80%] ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-card"
+                  }`}
+                >
+                  <CardContent className="p-4">
+                    <p className="whitespace-pre-line">{msg.content}</p>
+                  </CardContent>
+                </Card>
               </div>
+            ))}
+          </div>
 
-              {/* Input Area */}
-              {!predict.isPending && (
-                <div className="border-t pt-6">
-                  {currentStepData.type === "search" && (
-                    <div className="space-y-4">
-                      <div className="flex gap-2">
-                        <Input
-                          type="text"
-                          value={formData[currentStepData.field]}
-                          onChange={(e) => handleTextInput(e.target.value)}
-                          placeholder={currentStepData.placeholder}
-                          className="text-lg h-12"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              handleSearch();
-                            }
-                          }}
-                        />
-                        <Button onClick={handleSearch} size="lg" className="px-8">
-                          <Search className="mr-2 h-5 w-5" />
-                          검색
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {currentStepData.type === "select" && (
-                    <div className="space-y-4">
-                      {isSearching ? (
-                        <div className="text-center py-8">
-                          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                          <p className="text-sm text-muted-foreground">검색 중...</p>
-                        </div>
-                      ) : searchResults && searchResults.results.length > 0 ? (
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                          <p className="text-sm text-muted-foreground mb-3">
-                            {searchResults.results.length}개의 가게를 찾았습니다.
-                            <br />
-                            <span className="text-xs">※ 개인정보 보호를 위해 가게명이 일부 가려져 있습니다.</span>
-                          </p>
-                          {searchResults.results.map((business, index) => (
-                            <Card
-                              key={index}
-                              className="p-4 cursor-pointer hover:bg-primary/5 hover:border-primary transition-all"
-                              onClick={() => handleSelectBusiness(business.encodedMct, business.name)}
-                            >
-                              <div className="flex items-start gap-3">
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                  <Building2 className="h-5 w-5 text-primary" />
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="font-semibold text-base">{business.name}</h3>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {business.area} • {business.businessType}
-                                  </p>
-                                </div>
-                              </div>
-                            </Card>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <Building2 className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-                          <p className="text-sm text-muted-foreground">
-                            검색 결과가 없습니다. 다른 검색어로 시도해보세요.
-                            <br />
-                            <span className="text-xs mt-1 block">TIP: 가게명의 앞 1-2글자만 입력해보세요.</span>
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+          {/* Input Area */}
+          <Card className="sticky bottom-4 shadow-lg">
+            <CardContent className="p-6">
+              {currentStepData.type === "search" ? (
+                <BusinessSearchForm
+                  searchKeyword={formData.search_keyword}
+                  onSearchChange={(value) =>
+                    setFormData((prev) => ({ ...prev, search_keyword: value }))
+                  }
+                  onSearch={handleSearch}
+                  placeholder={currentStepData.placeholder}
+                  isSearching={isSearching}
+                />
+              ) : currentStepData.type === "select" ? (
+                <div className="space-y-4">
+                  <BusinessList
+                    businesses={searchResults || []}
+                    selectedMct={formData.selected_mct}
+                    onSelect={handleSelectBusiness}
+                  />
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!canProceed || predict.isPending}
+                    className="w-full h-12 text-lg font-semibold"
+                  >
+                    {predict.isPending ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                        진단 중...
+                      </>
+                    ) : (
+                      "진단 시작"
+                    )}
+                  </Button>
                 </div>
-              )}
+              ) : null}
             </CardContent>
           </Card>
-
-          {/* Navigation */}
-          <div className="flex justify-between">
-            <Button onClick={handleBack} variant="ghost" disabled={currentStep === 0 || predict.isPending}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              이전
-            </Button>
-            <Button onClick={() => navigate("/")} variant="ghost" disabled={predict.isPending}>
-              취소
-            </Button>
-          </div>
         </div>
       </div>
     </>

@@ -2,8 +2,8 @@ import { AlertCircle, ArrowLeft, Calendar, CheckCircle2, Edit3, Target, Trash2, 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useActionPlans, useDeleteActionPlanItem, useUpdateActionPlan } from '@/features/action-plan';
-import { ActionPlanItem } from '@/features/action-plan/types'
+import { useActionPlans, useDeleteActionPlanItem, useUpdateActionPlan } from "@/features/action-plan";
+import type { ActionPlanItem } from "@/features/action-plan/types";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";

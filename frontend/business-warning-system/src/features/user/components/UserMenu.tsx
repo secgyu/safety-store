@@ -1,7 +1,7 @@
 import { Bell, LayoutDashboard, LogOut, Settings, UserIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { useAuth, useLogout } from "@/lib/api";
+import { useAuth, useLogout } from "@/features/auth";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {

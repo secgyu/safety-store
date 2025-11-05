@@ -2,8 +2,8 @@ import { HelpCircle, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { UserMenu } from "@/features/user/components/UserMenu"; // TODO: Phase 6에서 @/features/user로 변경
-import { useLogout } from "@/lib/api";
+import { useLogout } from "@/features/auth";
+import { UserMenu } from "@/features/user/components/UserMenu";
 import { Button } from "@/shared/components/ui/button";
 import { resetOnboarding } from "@/shared/services/onboarding/onboardingService";
 

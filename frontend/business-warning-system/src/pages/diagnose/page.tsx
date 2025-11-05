@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/features/auth";
-import { usePredictDiagnosis, useRecentDiagnosis, useSearchBusinesses } from "@/features/diagnosis";
+import { useBusinessSearch, useDiagnose, useRecentDiagnosis } from "@/features/diagnosis";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
@@ -41,14 +41,14 @@ export default function DiagnosePage() {
   const { toast } = useToast();
   const { data: user, isLoading: isLoadingAuth } = useAuth();
   const { data: recentDiagnosis, isLoading: isLoadingRecent } = useRecentDiagnosis();
-  const predict = usePredictDiagnosis();
+  const predict = useDiagnose();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState({
     search_keyword: "",
     selected_mct: "",
   });
   const [searchKeyword, setSearchKeyword] = useState("");
-  const { data: searchResults, isLoading: isSearching } = useSearchBusinesses(searchKeyword);
+  const { data: searchResults, isLoading: isSearching } = useBusinessSearch(searchKeyword);
   const [messages, setMessages] = useState<Array<{ role: "assistant" | "user"; content: string }>>([
     { role: "assistant", content: steps[0].question },
   ]);

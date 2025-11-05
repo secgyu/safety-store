@@ -1,7 +1,7 @@
 import { AlertTriangle, Bell, Calendar, Check, Filter, Info, Target, TrendingDown, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { useDeleteNotification, useMarkNotificationAsRead, useNotifications } from '@/features/notifications';
+import { useMarkAsRead, useNotifications } from "@/features/notifications";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card } from "@/shared/components/ui/card";
@@ -70,13 +70,13 @@ function formatTimestamp(timestamp: string) {
 
 export default function NotificationsPage() {
   const { data: notifications, isLoading, error } = useNotifications();
-  const deleteMutation = useDeleteNotification();
-  const markAsReadMutation = useMarkNotificationAsRead();
+  // const deleteMutation = useDeleteNotification();
+  const markAsReadMutation = useMarkAsRead();
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
 
   const handleDelete = async (id: string) => {
-    await deleteMutation.mutateAsync(id);
+    // await deleteMutation.mutateAsync(id);
   };
 
   const handleMarkAsRead = async (id: string) => {

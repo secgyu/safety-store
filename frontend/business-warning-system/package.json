@@ -8,8 +8,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc --noEmit --project tsconfig.app.json",
     "preview": "vite preview",
-    "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o src/types/api-generated.ts",
-    "generate-types:file": "openapi-typescript ./openapi.json -o src/types/api-generated.ts"
+    "generate-types": "openapi-typescript http://localhost:8000/openapi.json -o src/shared/types//api-generated.ts",
+    "generate-types:file": "openapi-typescript ./openapi.json -o src/shared/types/api-generated.ts"
   },
   "dependencies": {
     "@eslint/js": "^9.36.0",

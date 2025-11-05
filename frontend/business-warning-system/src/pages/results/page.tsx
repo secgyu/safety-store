@@ -14,7 +14,8 @@ import {
   RiskDetailCards,
   TimeSeriesTrend,
 } from "@/features/diagnosis/components/Results";
-import { useResultData, usePDFExport } from "@/features/diagnosis/hooks";
+import { usePDFExport } from "@/features/diagnosis/hooks/usePDFExport";
+import { useResultData } from "@/features/diagnosis/hooks/useResultData";
 import { getScoreDescription } from "@/features/diagnosis/utils/scoreDescriptions";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";

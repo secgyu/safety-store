@@ -9,14 +9,15 @@ import {
   SalesTrendChart,
   ScatterPlotAnalysis,
 } from "@/features/benchmark/components/Compare";
-import { useCompareData, useScatterPlot } from "@/features/benchmark/hooks";
+import { useCompareData } from "@/features/benchmark/hooks/useCompareData";
+import { useScatterPlot } from "@/features/benchmark/hooks/useScatterPlot";
 import { getIndustryLabel, industries, subIndustries } from "@/features/benchmark/utils/industryConfig";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 
 export default function ComparePage() {
   const [selectedCategory, setSelectedCategory] = useState("restaurant");
-  const [selectedSubIndustry, setSelectedSubIndustry] = useState<string>("__all__");
+  const [selectedSubIndustry, setSelectedSubIndustry] = useState("__all__");
 
   // 실제 조회할 업종: 세부업종이 선택되면 그것을, 아니면 대분류 사용
   const actualIndustry = selectedSubIndustry === "__all__" ? selectedCategory : selectedSubIndustry;

@@ -1,4 +1,4 @@
-import { PartyPopper, TrendingUp, AlertTriangle } from "lucide-react";
+import { AlertTriangle, PartyPopper, TrendingUp } from "lucide-react";
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
@@ -60,9 +60,7 @@ export function TimeSeriesTrend({ diagnoses }: TimeSeriesTrendProps) {
       <Card className="glass-card">
         <CardHeader>
           <CardTitle>시간에 따른 위험도 변화</CardTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            최근 {diagnoses.length}개월간의 위험도 추세를 확인하세요
-          </p>
+          <p className="text-sm text-muted-foreground mt-2">최근 {diagnoses.length}개월간의 위험도 추세를 확인하세요</p>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={350}>
@@ -133,4 +131,3 @@ export function TimeSeriesTrend({ diagnoses }: TimeSeriesTrendProps) {
     </div>
   );
 }
-

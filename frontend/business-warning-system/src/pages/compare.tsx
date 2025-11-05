@@ -76,7 +76,7 @@ export default function ComparePage() {
               {/* 벤치마크 정보 */}
               <BenchmarkInfo
                 industryLabel={industryLabel}
-                totalBusinesses={currentIndustryData.metrics?.totalBusinesses || 0}
+                totalBusinesses={currentIndustryData.metrics?.customers.average || 0}
                 avgRevenue={currentIndustryData.metrics?.revenue?.average || 0}
                 avgCustomers={currentIndustryData.metrics?.customers?.average || 0}
                 avgRiskScore={currentIndustryData.averageRiskScore || 0}

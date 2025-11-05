@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/features/auth";
 import { useBusinessSearch, useDiagnose, useRecentDiagnosis } from "@/features/diagnosis";
-import { BusinessList, BusinessSearchForm } from "@/shared/components/diagnose";
+import { BusinessList, BusinessSearchForm } from "@/features/diagnosis/components/DiagnosisForm";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";

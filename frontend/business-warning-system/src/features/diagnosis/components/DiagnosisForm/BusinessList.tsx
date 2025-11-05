@@ -1,6 +1,6 @@
 import { Building2, CheckCircle } from "lucide-react";
 
-import { Card } from "../ui/card";
+import { Card } from "@/shared/components/ui/card";
 
 interface Business {
   encoded_mct: string;

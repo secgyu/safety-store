@@ -180,11 +180,7 @@ export default function DiagnosePage() {
             {messages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 <Card
-                  className={`max-w-[80%] ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card"
-                  }`}
+                  className={`max-w-[80%] ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card"}`}
                 >
                   <CardContent className="p-4">
                     <p className="whitespace-pre-line">{msg.content}</p>
@@ -200,9 +196,7 @@ export default function DiagnosePage() {
               {currentStepData.type === "search" ? (
                 <BusinessSearchForm
                   searchKeyword={formData.search_keyword}
-                  onSearchChange={(value) =>
-                    setFormData((prev) => ({ ...prev, search_keyword: value }))
-                  }
+                  onSearchChange={(value) => setFormData((prev) => ({ ...prev, search_keyword: value }))}
                   onSearch={handleSearch}
                   placeholder={currentStepData.placeholder}
                   isSearching={isSearching}
@@ -210,7 +204,7 @@ export default function DiagnosePage() {
               ) : currentStepData.type === "select" ? (
                 <div className="space-y-4">
                   <BusinessList
-                    businesses={searchResults || []}
+                    businesses={searchResults?.results || []}
                     selectedMct={formData.selected_mct}
                     onSelect={handleSelectBusiness}
                   />

@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, EmailStr, ConfigDict
 from pydantic.alias_generators import to_camel  # Pydantic 내장 함수 사용
+from fastapi_users import schemas as fastapi_users_schemas
 
 
 # 모든 스키마의 베이스 클래스 - 자동으로 camelCase 변환
@@ -25,31 +26,42 @@ class CamelBaseModel(BaseModel):
 
 
 # ========== User Schemas ==========
-class UserRead(CamelBaseModel):
-    id: int
-    email: EmailStr
+class UserRead(fastapi_users_schemas.BaseUser[int]):
+    """fastapi-users BaseUser를 상속하면서 camelCase 변환"""
     name: str
     business_name: Optional[str] = None
     industry: Optional[str] = None
     created_at: datetime
-    is_active: bool = True
-    is_superuser: bool = False
-    is_verified: bool = False
+    
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        from_attributes=True,
+    )
 
 
-class UserCreate(CamelBaseModel):
-    email: EmailStr
-    password: str
+class UserCreate(fastapi_users_schemas.BaseUserCreate):
+    """fastapi-users BaseUserCreate를 상속하면서 camelCase 변환"""
     name: str
     business_name: Optional[str] = None
     industry: Optional[str] = None
+    
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
 
 
-class UserUpdate(CamelBaseModel):
+class UserUpdate(fastapi_users_schemas.BaseUserUpdate):
+    """fastapi-users BaseUserUpdate를 상속하면서 camelCase 변환"""
     name: Optional[str] = None
     business_name: Optional[str] = None
     industry: Optional[str] = None
-    password: Optional[str] = None
+    
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
 
 
 # ========== Auth Schemas ==========

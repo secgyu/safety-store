@@ -2,16 +2,18 @@ import { Building2, CheckCircle } from "lucide-react";
 
 import { Card } from "@/shared/components/ui/card";
 
+import type { BusinessSearchResponse } from "../../types";
+
 interface Business {
-  encoded_mct: string;
-  business_name: string;
-  industry_code: string;
-  industry_name?: string;
+  encodedMct: string;
+  businessName: string;
+  industryCode: string;
+  industryName?: string;
   region?: string;
 }
 
 interface BusinessListProps {
-  businesses: Business[];
+  businesses: BusinessSearchResponse["results"];
   selectedMct: string;
   onSelect: (mct: string) => void;
 }
@@ -27,36 +29,33 @@ export function BusinessList({ businesses, selectedMct, onSelect }: BusinessList
     );
   }
 
+  console.log(businesses);
   return (
     <div className="space-y-3">
       {businesses.map((business) => (
         <Card
-          key={business.encoded_mct}
+          key={business.encodedMct}
           className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-            selectedMct === business.encoded_mct
+            selectedMct === business.encodedMct
               ? "border-primary bg-primary/5 ring-2 ring-primary"
               : "hover:border-primary/50"
           }`}
-          onClick={() => onSelect(business.encoded_mct)}
+          onClick={() => onSelect(business.encodedMct)}
         >
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Building2 className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold text-lg">{business.business_name}</h3>
-                {selectedMct === business.encoded_mct && <CheckCircle className="h-5 w-5 text-primary" />}
+                <h3 className="font-semibold text-lg">{business.name}</h3>
+                {selectedMct === business.encodedMct && <CheckCircle className="h-5 w-5 text-primary" />}
               </div>
               <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                {business.industry_name && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">
-                    {business.industry_name}
-                  </span>
+                {business.businessType && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">{business.businessType}</span>
                 )}
-                {business.region && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">{business.region}</span>
-                )}
+                {business.area && <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">{business.area}</span>}
                 <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded font-mono text-xs">
-                  {business.encoded_mct}
+                  {business.encodedMct}
                 </span>
               </div>
             </div>
@@ -66,4 +65,3 @@ export function BusinessList({ businesses, selectedMct, onSelect }: BusinessList
     </div>
   );
 }
-

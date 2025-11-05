@@ -22,7 +22,16 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": "warn",
+      // 사용하지 않는 변수/인자: warning 레벨, _로 시작하는 변수 무시
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          vars: "all",
+          varsIgnorePattern: "^_",
+          args: "after-used",
+          argsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {

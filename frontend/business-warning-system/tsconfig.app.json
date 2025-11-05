@@ -18,6 +18,8 @@
 
     /* Linting */
     "strict": true,
+    // TypeScript 컴파일러에서는 unused 체크 비활성화
+    // ESLint에서 warning 레벨로 체크 (_로 시작하는 변수 무시 설정 포함)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "erasableSyntaxOnly": true,

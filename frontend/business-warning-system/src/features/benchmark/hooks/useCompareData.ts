@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { useBenchmark } from "./useBenchmark";
+import { useBenchmark } from "../api/benchmarkApi";
 
 interface TrendData {
   월: string;

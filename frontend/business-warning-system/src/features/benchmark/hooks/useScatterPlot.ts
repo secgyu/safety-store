@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { useScatterData } from "./useScatterData";
+import { useScatterData } from "../api/benchmarkApi";
 
 interface ScatterPoint {
   가게명: string;

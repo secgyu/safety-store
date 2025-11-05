@@ -2,7 +2,7 @@ import { ArrowRight, BarChart3, CheckCircle2, Clock, TrendingUp, Users } from "l
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useAuth } from '@/features/auth';
+import { useAuth } from "@/features/auth";
 import { OnboardingTour } from "@/shared/components/common/OnboardingTour";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 import Footer from "@/shared/components/layout/Footer";

@@ -31,7 +31,7 @@ export function BusinessList({ businesses, selectedMct, onSelect }: BusinessList
 
   console.log(businesses);
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
       {businesses.map((business) => (
         <Card
           key={business.encodedMct}

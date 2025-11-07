@@ -1,5 +1,5 @@
 import { ArrowLeft, Bot, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/features/auth";
@@ -52,6 +52,12 @@ export default function DiagnosePage() {
   const [messages, setMessages] = useState<Array<{ role: "assistant" | "user"; content: string }>>([
     { role: "assistant", content: steps[0].question },
   ]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 메시지 스크롤
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   // 로그인 체크
   useEffect(() => {
@@ -176,22 +182,25 @@ export default function DiagnosePage() {
           </div>
 
           {/* Chat Messages */}
-          <div className="space-y-4 mb-8">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <Card
-                  className={`max-w-[80%] ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card"}`}
-                >
-                  <CardContent className="p-4">
-                    <p className="whitespace-pre-line">{msg.content}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
+          <div className="mb-4 max-h-[calc(100vh-380px)] overflow-y-auto">
+            <div className="space-y-4">
+              {messages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <Card
+                    className={`max-w-[80%] ${msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card"}`}
+                  >
+                    <CardContent className="p-4">
+                      <p className="whitespace-pre-line">{msg.content}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
 
           {/* Input Area */}
-          <Card className="sticky bottom-4 shadow-lg">
+          <Card className="shadow-lg">
             <CardContent className="p-6">
               {currentStepData.type === "search" ? (
                 <BusinessSearchForm

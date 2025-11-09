@@ -1,8 +1,24 @@
 import { useMemo } from "react";
 
+import { getIndustryLabel, getMainCategoryForSub } from "@/features/benchmark/utils/industryConfig";
 import { useStatistics } from "@/features/statistics/api/statisticsApi";
 
 import { useBenchmark } from "../api/benchmarkApi";
+
+const INDUSTRY_STATISTICS_ALIAS: Record<string, string[]> = {
+  restaurant: ["음식점", "외식", "restaurant"],
+  cafe: ["카페", "베이커리", "coffee", "cafe"],
+  fastfood: ["패스트푸드", "치킨", "fastfood"],
+  pub: ["주점", "술집", "pub", "bar"],
+  retail: ["소매", "소매업", "도소매", "식자재", "편의점", "retail"],
+  other: ["기타", "other"],
+};
+
+const normalizeText = (input?: string | null) =>
+  (input || "")
+    .replace(/\(.*?\)/g, "")
+    .replace(/[^0-9A-Za-z가-힣]/g, "")
+    .toLowerCase();
 
 interface TrendData {
   월: string;
@@ -21,7 +37,7 @@ interface RadarData {
   소매: number;
 }
 
-export function useCompareData(industryCode: string) {
+export function useCompareData(industryCode: string, fallbackIndustryCode?: string) {
   // 모든 대분류 업종의 벤치마크 데이터 가져오기
   const { data: restaurantData } = useBenchmark("restaurant", undefined);
   const { data: cafeData } = useBenchmark("cafe", undefined);
@@ -33,8 +49,25 @@ export function useCompareData(industryCode: string) {
   const { data: currentIndustryData, isLoading } = useBenchmark(industryCode, undefined);
   const { data: statisticsData } = useStatistics();
 
-  const industryStats = statisticsData?.byIndustry?.find(
-    (item) => item.industry === industryCode
+  const mainCategoryCode = getMainCategoryForSub(industryCode) ?? industryCode;
+  const candidateCodes = Array.from(
+    new Set(
+      [industryCode, mainCategoryCode, fallbackIndustryCode].filter(
+        (value): value is string => Boolean(value)
+      )
+    )
+  );
+
+  const candidateStrings = candidateCodes.flatMap((code) => [
+    code,
+    getIndustryLabel(code),
+    ...(INDUSTRY_STATISTICS_ALIAS[code] ?? []),
+  ]);
+
+  const normalizedCandidates = new Set(candidateStrings.map((value) => normalizeText(value)));
+
+  const industryStats = statisticsData?.byIndustry?.find((item) =>
+    normalizedCandidates.has(normalizeText(item.industry))
   );
 
   const totalBusinesses = industryStats?.count ?? 0;

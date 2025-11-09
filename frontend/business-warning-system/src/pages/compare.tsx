@@ -24,8 +24,10 @@ export default function ComparePage() {
   const industryLabel = getIndustryLabel(actualIndustry);
 
   // Custom hooks
-  const { trendData, radarChartData, currentIndustryData, isLoading, summary, multiIndustryData } =
-    useCompareData(actualIndustry);
+  const { trendData, radarChartData, currentIndustryData, isLoading, summary } = useCompareData(
+    actualIndustry,
+    selectedCategory
+  );
   const { scatterData, scatterDataRaw, isLoading: isScatterLoading } = useScatterPlot(actualIndustry, 500);
 
   // 카테고리 변경 핸들러

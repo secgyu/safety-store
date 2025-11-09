@@ -1,5 +1,7 @@
-import { Calendar, Download, Eye } from "lucide-react";
+import { Calendar, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
+
+import { useRecentDiagnosis } from "@/features/diagnosis";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -42,7 +44,9 @@ function formatDate(dateString: string) {
 }
 
 export function DiagnosisHistory({ records }: DiagnosisHistoryProps) {
-  if (records.length === 0) {
+  const { data: recentDiagnosis } = useRecentDiagnosis();
+
+  if (recentDiagnosis === null) {
     return (
       <Card>
         <CardHeader>
@@ -72,44 +76,40 @@ export function DiagnosisHistory({ records }: DiagnosisHistoryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">과거 진단 기록을 확인하고 변화 추이를 비교해보세요</p>
         <div className="space-y-3">
-          {records.map((record) => (
+          {recentDiagnosis && (
             <div
-              key={record.id}
+              // key={record.id}
               className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
             >
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                {/* <div className="flex items-center gap-3 mb-2">
                   {getAlertBadge(record.alert)}
                   <span className="font-bold text-lg">{record.riskScore}점</span>
                   <span className="text-sm text-muted-foreground">{formatDate(record.date)}</span>
-                </div>
+                </div> */}
                 <div className="flex gap-4 text-sm">
-                  <span className={record.salesChange >= 0 ? "text-success" : "text-danger"}>
-                    매출: {record.salesChange > 0 ? "+" : ""}
-                    {record.salesChange}%
-                  </span>
-                  <span className={record.customerChange >= 0 ? "text-success" : "text-danger"}>
-                    고객: {record.customerChange > 0 ? "+" : ""}
-                    {record.customerChange}%
-                  </span>
+                  {/* <span className={"text-success"}>사업자명 : {recentDiagnosis.businessName}</span> */}
+                  <span className={"text-success"}>진단일 : {formatDate(recentDiagnosis.createdAt)}</span>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Eye className="h-4 w-4" />
-                  보기
-                </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Link to="/diagnose">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Eye className="h-4 w-4" />
+                    보기
+                  </Button>
+                </Link>
+                {/* <Button variant="outline" size="sm" className="gap-2">
                   <Download className="h-4 w-4" />
                   PDF
-                </Button>
+                </Button> */}
               </div>
             </div>
-          ))}
+          )}
         </div>
       </CardContent>
     </Card>
   );
 }
-

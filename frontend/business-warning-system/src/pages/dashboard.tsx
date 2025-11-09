@@ -17,7 +17,7 @@ type HistoryRecord = {
 
 export default function DashboardPage() {
   const { data: authData } = useAuth();
-  
+
   // Mock data for now
   const historyData: HistoryRecord[] = [];
 
@@ -74,9 +74,7 @@ export default function DashboardPage() {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Page Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-3">
-              안녕하세요, {authData?.user?.name || "사업자"}님 👋
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">안녕하세요, {authData?.user?.name || "사업자"}님 👋</h1>
             <p className="text-lg text-muted-foreground">오늘도 건강한 사업 운영을 응원합니다</p>
           </div>
 

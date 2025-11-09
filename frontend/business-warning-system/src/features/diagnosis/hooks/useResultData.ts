@@ -27,7 +27,7 @@ export type DiagnosisInfo = {
   business_name: string;
 };
 
-export function useResultData() {
+export function useResultData(forceDiagnosis: boolean = true) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -40,17 +40,21 @@ export function useResultData() {
       try {
         setLoading(true);
 
+
         // 1단계: 내가 진단한 기록이 있는지 API로 확인
         const recentResponse = await client.GET("/api/diagnose/recent");
 
         if (!recentResponse.data || !recentResponse.data.encodedMct) {
-          // 진단 기록이 없으면 진단 페이지로
-          toast({
-            title: "진단 기록 없음",
-            description: "진단을 먼저 진행해주세요.",
-            variant: "default",
-          });
-          navigate("/diagnose");
+
+          if (forceDiagnosis) {
+            // 진단 기록이 없으면 진단 페이지로
+            toast({
+              title: "진단 기록 없음",
+              description: "진단을 먼저 진행해주세요.",
+              variant: "default",
+            });
+            navigate("/diagnose");
+          }
           return;
         }
 

@@ -1,6 +1,7 @@
 import { TrendingUp } from "lucide-react";
 
 import { useAuth } from "@/features/auth";
+import { useResultData } from "@/features/diagnosis/hooks/useResultData";
 import { DiagnosisHistory, LatestDiagnosisSummary, RiskTrendChart } from "@/shared/components/dashboard";
 import { AppHeader } from "@/shared/components/layout/AppHeader";
 
@@ -21,11 +22,14 @@ export default function DashboardPage() {
   // Mock data for now
   const historyData: HistoryRecord[] = [];
 
-  const latestDiagnosis = historyData[0] || {
-    id: "1",
+  const { resultData: latestDiagnosis0, encodedMct } = useResultData(false);
+
+  console.log(latestDiagnosis0, encodedMct);
+
+  const latestDiagnosis = {
     date: new Date().toISOString(),
-    riskScore: 0,
-    alert: "GREEN" as AlertLevel,
+    riskScore: latestDiagnosis0?.p_final || 0,
+    alert: latestDiagnosis0?.alert || "GREEN",
     salesChange: 0,
     customerChange: 0,
   };

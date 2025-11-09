@@ -74,7 +74,9 @@ export default function DiagnosePage() {
   // 최근 진단 체크
   useEffect(() => {
     if (!isLoadingAuth && !isLoadingRecent && user && recentDiagnosis) {
-      navigate("/results");
+      if (user.user.name !== "admin") {
+        navigate("/results");
+      }
     }
   }, [user, recentDiagnosis, isLoadingAuth, isLoadingRecent, predict, navigate]);
 

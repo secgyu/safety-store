@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 
+import { useStatistics } from "@/features/statistics/api/statisticsApi";
+
 import { useBenchmark } from "../api/benchmarkApi";
 
 interface TrendData {
@@ -29,6 +31,24 @@ export function useCompareData(industryCode: string) {
 
   // 현재 선택된 업종의 데이터
   const { data: currentIndustryData, isLoading } = useBenchmark(industryCode, undefined);
+  const { data: statisticsData } = useStatistics();
+
+  const industryStats = statisticsData?.byIndustry?.find(
+    (item) => item.industry === industryCode
+  );
+
+  const totalBusinesses = industryStats?.count ?? 0;
+  const closureRateRaw = industryStats?.closureRate;
+  const closureRate =
+    typeof closureRateRaw === "number"
+      ? closureRateRaw > 1
+        ? closureRateRaw
+        : closureRateRaw * 100
+      : null;
+  const closedLastMonth =
+    totalBusinesses > 0 && typeof closureRate === "number"
+      ? Math.round((totalBusinesses * closureRate) / 100)
+      : null;
 
   // 트렌드 데이터 생성 (시뮬레이션)
   const trendData = useMemo((): TrendData[] => {
@@ -91,10 +111,10 @@ export function useCompareData(industryCode: string) {
   }, [currentIndustryData]);
 
   // 레이더 차트 데이터 생성
-  const radarChartData = useMemo((): RadarData[] => {
+  const radarChartData = (): RadarData[] => {
     // 정규화 함수: 주어진 배열에서 최소-최대 범위를 0-100으로 변환
     const normalize = (values: number[]) => {
-      const min = Math.min(...values);
+      const min = Math.min(...values, 0);
       const max = Math.max(...values);
       if (max === min) return values.map(() => 50); // 모두 같으면 중간값
       return values.map((v) => Math.round(((v - min) / (max - min)) * 100));
@@ -194,13 +214,18 @@ export function useCompareData(industryCode: string) {
         소매: normalizedSpending[4],
       },
     ];
-  }, [restaurantData, cafeData, fastfoodData, pubData, retailData]);
+  }
 
   return {
     trendData,
     radarChartData,
     currentIndustryData,
     isLoading,
+    summary: {
+      totalBusinesses,
+      closureRate,
+      closedLastMonth,
+    },
     multiIndustryData: {
       restaurant: restaurantData,
       cafe: cafeData,

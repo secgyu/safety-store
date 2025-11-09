@@ -4,21 +4,73 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 
 interface BenchmarkInfoProps {
   industryLabel: string;
-  totalBusinesses: number;
   avgRevenue: number;
   avgCustomers: number;
   avgRiskScore: number;
-  closedLastMonth: number;
+  totalBusinesses?: number | null;
+  closureRate?: number | null;
+  closedLastMonth?: number | null;
 }
 
 export function BenchmarkInfo({
   industryLabel,
-  totalBusinesses,
   avgRevenue,
   avgCustomers,
   avgRiskScore,
-  closedLastMonth,
+  totalBusinesses = null,
+  closureRate = null,
+  closedLastMonth = null,
 }: BenchmarkInfoProps) {
+  const formattedTotalBusinesses =
+    typeof totalBusinesses === "number" && totalBusinesses > 0
+      ? `${totalBusinesses.toLocaleString()}개`
+      : "데이터 없음";
+
+  const formattedRevenue =
+    typeof avgRevenue === "number" && avgRevenue > 0
+      ? `₩${(avgRevenue / 10000).toFixed(0)}만`
+      : "데이터 없음";
+
+  const formattedCustomers =
+    typeof avgCustomers === "number" && avgCustomers > 0
+      ? `${avgCustomers.toLocaleString()}명`
+      : "데이터 없음";
+
+  const calculatedClosedLastMonth =
+    typeof closedLastMonth === "number"
+      ? closedLastMonth
+      : typeof totalBusinesses === "number" &&
+        totalBusinesses > 0 &&
+        typeof closureRate === "number"
+      ? Math.round((totalBusinesses * closureRate) / 100)
+      : null;
+
+  const effectiveClosureRate =
+    typeof closureRate === "number"
+      ? closureRate
+      : typeof calculatedClosedLastMonth === "number" &&
+        typeof totalBusinesses === "number" &&
+        totalBusinesses > 0
+      ? (calculatedClosedLastMonth / totalBusinesses) * 100
+      : null;
+
+  const averageCustomerSpend =
+    typeof avgRevenue === "number" &&
+    avgRevenue > 0 &&
+    typeof avgCustomers === "number" &&
+    avgCustomers > 0
+      ? Math.round(avgRevenue / avgCustomers)
+      : null;
+
+  const competitionLevel =
+    typeof totalBusinesses === "number" && totalBusinesses > 0
+      ? totalBusinesses > 1000
+        ? { label: "매우 높음 (레드오션)", className: "text-red-600" }
+        : totalBusinesses > 500
+        ? { label: "높음", className: "text-orange-600" }
+        : { label: "보통", className: "text-green-600" }
+      : { label: "데이터 부족", className: "text-muted-foreground" };
+
   return (
     <Card className="mb-8">
       <CardHeader>
@@ -33,21 +85,21 @@ export function BenchmarkInfo({
           <div className="p-4 bg-blue-50 rounded-lg text-center">
             <Building className="h-8 w-8 text-blue-600 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground mb-1">총 사업체 수</p>
-            <p className="text-2xl font-bold text-blue-600">{totalBusinesses.toLocaleString()}개</p>
+            <p className="text-2xl font-bold text-blue-600">{formattedTotalBusinesses}</p>
           </div>
 
           {/* 평균 매출 */}
           <div className="p-4 bg-green-50 rounded-lg text-center">
             <DollarSign className="h-8 w-8 text-green-600 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground mb-1">월평균 매출</p>
-            <p className="text-2xl font-bold text-green-600">₩{(avgRevenue / 10000).toFixed(0)}만</p>
+            <p className="text-2xl font-bold text-green-600">{formattedRevenue}</p>
           </div>
 
           {/* 평균 고객 수 */}
           <div className="p-4 bg-purple-50 rounded-lg text-center">
             <Users className="h-8 w-8 text-purple-600 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground mb-1">월평균 고객수</p>
-            <p className="text-2xl font-bold text-purple-600">{avgCustomers.toLocaleString()}명</p>
+            <p className="text-2xl font-bold text-purple-600">{formattedCustomers}</p>
           </div>
 
           {/* 평균 위험도 */}
@@ -65,7 +117,11 @@ export function BenchmarkInfo({
               <TrendingDown className="h-8 w-8 text-red-600" />
               <div>
                 <p className="text-sm text-muted-foreground">지난달 폐업 수</p>
-                <p className="text-2xl font-bold text-red-600">{closedLastMonth.toLocaleString()}개</p>
+                <p className="text-2xl font-bold text-red-600">
+                  {typeof calculatedClosedLastMonth === "number"
+                    ? `${calculatedClosedLastMonth.toLocaleString()}개`
+                    : "데이터 없음"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -73,7 +129,9 @@ export function BenchmarkInfo({
               <div>
                 <p className="text-sm text-muted-foreground">폐업률</p>
                 <p className="text-2xl font-bold text-blue-600">
-                  {((closedLastMonth / totalBusinesses) * 100).toFixed(2)}%
+                  {typeof effectiveClosureRate === "number"
+                    ? `${effectiveClosureRate.toFixed(2)}%`
+                    : "데이터 없음"}
                 </p>
               </div>
             </div>
@@ -89,7 +147,12 @@ export function BenchmarkInfo({
           <h4 className="font-semibold mb-2 text-blue-900">💡 업종 특성 인사이트</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>
-              • 평균 고객 단가: <span className="font-semibold">₩{Math.round(avgRevenue / avgCustomers).toLocaleString()}원</span>
+              • 평균 고객 단가:{" "}
+              <span className="font-semibold">
+                {typeof averageCustomerSpend === "number"
+                  ? `₩${averageCustomerSpend.toLocaleString()}원`
+                  : "데이터 없음"}
+              </span>
             </li>
             <li>
               • 운영 난이도:{" "}
@@ -103,13 +166,9 @@ export function BenchmarkInfo({
             </li>
             <li>
               • 시장 경쟁도:{" "}
-              {totalBusinesses > 1000 ? (
-                <span className="font-semibold text-red-600">매우 높음 (레드오션)</span>
-              ) : totalBusinesses > 500 ? (
-                <span className="font-semibold text-orange-600">높음</span>
-              ) : (
-                <span className="font-semibold text-green-600">보통</span>
-              )}
+              <span className={`font-semibold ${competitionLevel.className}`}>
+                {competitionLevel.label}
+              </span>
             </li>
           </ul>
         </div>

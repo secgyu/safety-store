@@ -20,16 +20,16 @@ export function ResultHeader({ riskScore, alertLevel, alertInfo }: ResultHeaderP
       <CardContent className="pt-10 pb-10">
         <div className="flex flex-col md:flex-row items-center gap-10">
           <div className="flex-shrink-0">
-            <RiskGauge value={riskScore} alert={alertLevel} size="large" />
+            <RiskGauge value={Math.round((100 - riskScore) * 100) / 100} alert={alertLevel} size="large" />
           </div>
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
-              현재 안전점수는 <span className={alertInfo.color}>'{alertInfo.label}'</span> 단계입니다
+              현재 위험도는 <span className={alertInfo.color}>'{alertInfo.label}'</span> 단계입니다
             </h1>
             <p className="text-xl text-muted-foreground mb-6">{alertInfo.description}</p>
             <p className="text-lg text-muted-foreground">
-              우리 가게는 같은 업종 평균보다{" "}
-              <span className="font-semibold">{riskScore > 20 ? "조금 낮은" : "양호한"}</span> 상태입니다
+              이 가게는 같은 업종 평균보다{" "}
+              <span className="font-semibold">{riskScore > 20 ? "조금 높은" : "양호한"}</span> 상태입니다
             </p>
           </div>
         </div>

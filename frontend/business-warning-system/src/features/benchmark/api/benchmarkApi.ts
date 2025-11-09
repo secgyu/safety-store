@@ -2,7 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { client, handleResponse } from '@/shared/lib/api-client'
 
-import type { BenchmarkData, CompareRequest, CompareResponse } from '../types'
+import type { BenchmarkData, CompareRequest, CompareResponse, ScatterData } from '../types'
 
 // ========== API Functions ==========
 class BenchmarkApi {
@@ -27,7 +27,7 @@ class BenchmarkApi {
     return handleResponse(response)
   }
 
-  async getScatterData(industry?: string, limit?: number): Promise<any> {
+  async getScatterData(industry?: string, limit?: number): Promise<ScatterData> {
     const response = await client.GET('/api/benchmark/scatter-data', {
       params: {
         query: {
@@ -58,7 +58,7 @@ export function useCompareBenchmark() {
 }
 
 export function useScatterData(industry?: string, limit?: number) {
-  return useQuery({
+  return useQuery<ScatterData>({
     queryKey: ['scatterData', industry, limit],
     queryFn: () => benchmarkApi.getScatterData(industry, limit),
     enabled: !!industry,

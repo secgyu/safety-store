@@ -1,5 +1,5 @@
 import { BarChart3, Lightbulb, MapPin, Star } from "lucide-react";
-import { CartesianGrid, Scatter, ScatterChart, ResponsiveContainer, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
+import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
@@ -62,7 +62,9 @@ const ScatterTooltip = ({
             <span className="text-xs text-muted-foreground ml-1">(상위 {data.고객백분위}%)</span>
           </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">* 백분위가 낮을수록 해당 업종 내 상위권입니다</p>
+        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+          * 백분위가 낮을수록 해당 업종 내 상위권입니다
+        </p>
       </div>
     );
   }
@@ -75,6 +77,7 @@ export function ScatterPlotAnalysis({
   isLoading,
   industryLabel,
 }: ScatterPlotAnalysisProps) {
+  console.log(scatterData.map((item) => item.위험도));
   return (
     <Card className="mb-8">
       <CardHeader>
@@ -176,7 +179,9 @@ export function ScatterPlotAnalysis({
                   </div>
                   <div>
                     <span className="text-muted-foreground">평균 고객 수준:</span>
-                    <p className="font-semibold text-lg text-purple-600">상위 {Math.round(scatterDataRaw.avgCustomers)}%</p>
+                    <p className="font-semibold text-lg text-purple-600">
+                      상위 {Math.round(scatterDataRaw.avgCustomers)}%
+                    </p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">평균 위험도:</span>
@@ -184,7 +189,8 @@ export function ScatterPlotAnalysis({
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-3 pt-3 border-t">
-                  💡 백분위는 업종 내 순위를 나타냅니다. 0%에 가까울수록 상위권(높은 매출), 100%에 가까울수록 하위권입니다.
+                  💡 백분위는 업종 내 순위를 나타냅니다. 0%에 가까울수록 상위권(높은 매출), 100%에 가까울수록
+                  하위권입니다.
                 </p>
               </div>
             )}
@@ -280,8 +286,8 @@ export function ScatterPlotAnalysis({
               </span>
             </p>
             <p className="mt-4 text-xs">
-              * 데이터는 성동구 최근 6개월 실제 데이터 기반 업종 내 상대적 순위입니다. 개별 매장의 성과는 위치, 운영 방식에
-              따라 다를 수 있습니다.
+              * 데이터는 성동구 최근 6개월 실제 데이터 기반 업종 내 상대적 순위입니다. 개별 매장의 성과는 위치, 운영
+              방식에 따라 다를 수 있습니다.
             </p>
           </div>
         </div>
@@ -289,4 +295,3 @@ export function ScatterPlotAnalysis({
     </Card>
   );
 }
-

@@ -115,8 +115,9 @@ export default function DiagnosePage() {
   };
 
   const handleSubmit = async () => {
-    if (formData.selected_mct) {
-      const selectedBusiness = searchResults?.find((b) => b.encoded_mct === formData.selected_mct);
+    if (formData.selected_mct.length > 0) {
+      console.log(formData, searchResults);
+      const selectedBusiness = searchResults?.results.find((b) => b.encodedMct === formData.selected_mct);
       if (selectedBusiness) {
         setMessages((prev) => [
           ...prev,

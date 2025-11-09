@@ -49,7 +49,7 @@ export default function ActionPlanPage() {
 
     await updatePlanMutation.mutateAsync({
       id: currentPlanId,
-      data: { items: updatedItems },
+      data: { diagnosisId: currentPlanId, items: updatedItems },
     });
   };
 

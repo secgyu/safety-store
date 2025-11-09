@@ -110,15 +110,18 @@ export function useCompareData(industryCode: string) {
     ];
   }, [currentIndustryData]);
 
+  const normalize = (values: number[]) => {
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((acc, v) => acc + v, 0) / values.length;
+    if (max === min) return values.map(() => 50); // 모두 같으면 중간값
+    return values.map((v) => Math.round(((v - avg) / (max - min)) * 50 + 50));
+  };
+
+
   // 레이더 차트 데이터 생성
-  const radarChartData = (): RadarData[] => {
+  const getRadarChartData = (): RadarData[] => {
     // 정규화 함수: 주어진 배열에서 최소-최대 범위를 0-100으로 변환
-    const normalize = (values: number[]) => {
-      const min = Math.min(...values, 0);
-      const max = Math.max(...values);
-      if (max === min) return values.map(() => 50); // 모두 같으면 중간값
-      return values.map((v) => Math.round(((v - min) / (max - min)) * 100));
-    };
 
     // 각 지표별 원본 값 수집
     const revenueValues = [
@@ -218,7 +221,7 @@ export function useCompareData(industryCode: string) {
 
   return {
     trendData,
-    radarChartData,
+    radarChartData: getRadarChartData(),
     currentIndustryData,
     isLoading,
     summary: {

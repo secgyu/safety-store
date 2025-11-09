@@ -16,7 +16,7 @@ interface MultiIndustryRadarProps {
   radarChartData: RadarData[];
 }
 
-export function MultiIndustryRadar({ radarChartData, multiIndustryData }: MultiIndustryRadarProps) {
+export function MultiIndustryRadar({ radarChartData }: MultiIndustryRadarProps) {
   console.log(radarChartData);
   return (
     <Card className="mb-8">

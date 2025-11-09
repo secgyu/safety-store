@@ -1,5 +1,7 @@
 import { AlertTriangle, Trash2 } from "lucide-react";
 
+import { useToast } from "@/shared/hooks/use-toast";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +15,6 @@ import {
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { useToast } from "@/shared/hooks/use-toast";
 
 interface DataManagementProps {
   onDeleteHistory?: () => void;

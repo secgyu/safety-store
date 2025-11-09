@@ -1,8 +1,8 @@
 import { TrendingUp } from "lucide-react";
 
 import { useAuth } from "@/features/auth";
-import { AppHeader } from "@/shared/components/layout/AppHeader";
 import { DiagnosisHistory, LatestDiagnosisSummary, RiskTrendChart } from "@/shared/components/dashboard";
+import { AppHeader } from "@/shared/components/layout/AppHeader";
 
 type AlertLevel = "GREEN" | "YELLOW" | "ORANGE" | "RED";
 

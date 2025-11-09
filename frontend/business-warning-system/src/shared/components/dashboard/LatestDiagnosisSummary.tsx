@@ -2,6 +2,7 @@ import { AlertCircle, Calendar, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { RiskGauge } from "@/features/diagnosis/components/RiskIndicators/RiskGauge";
+
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";

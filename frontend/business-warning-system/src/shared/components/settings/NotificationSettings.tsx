@@ -1,12 +1,13 @@
 import { Bell, Mail, Save } from "lucide-react";
 import { useState } from "react";
 
+import { useToast } from "@/shared/hooks/use-toast";
+
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Switch } from "../ui/switch";
-import { useToast } from "@/shared/hooks/use-toast";
 
 interface NotificationConfig {
   emailAlerts: boolean;

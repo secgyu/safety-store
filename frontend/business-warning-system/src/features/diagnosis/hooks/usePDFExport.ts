@@ -1,8 +1,9 @@
 import html2canvas from "html2canvas";
 
-import type { ResultData, DiagnosisInfo } from "./useResultData";
 import { useToast } from "@/shared/hooks/use-toast";
 import { generatePDFReport } from "@/shared/services/pdf/pdfGenerator";
+
+import type { DiagnosisInfo,ResultData } from "./useResultData";
 
 interface BenchmarkData {
   averageRiskScore: number;

@@ -175,10 +175,7 @@ export function IndustryComparison({
             <div className="flex items-start gap-3">
               <Lightbulb className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-blue-600" />
-                  업종 비교 인사이트
-                </h3>
+                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">업종 비교 인사이트</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {myRiskScore > averageRiskScore ? (
                     <>
@@ -200,4 +197,3 @@ export function IndustryComparison({
     </div>
   );
 }
-

@@ -51,4 +51,17 @@ Thumbs.db
 # Node
 node_modules/
 
+# Docs - Generated files (캡처 스크립트 자동 생성)
+docs/screenshots/
+docs/videos/
+docs/gifs/
+docs/node_modules/
 
+# 예외: README에 사용할 주요 이미지들
+!docs/screenshots/landing.png
+!docs/screenshots/dashboard.png
+!docs/screenshots/diagnose.png
+!docs/screenshots/results.png
+!docs/screenshots/statistics.png
+!docs/gifs/results-full.gif
+!docs/gifs/diagnose-flow.gif

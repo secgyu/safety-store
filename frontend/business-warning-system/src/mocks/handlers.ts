@@ -1,6 +1,12 @@
 import { http, HttpResponse } from 'msw'
 
-import type { ActionPlan, BenchmarkData, ChatResponse, CompareResponse, ContactResponse, DiagnosisHistory, DiagnosisResponse, FAQ, Insight, Statistics, SuccessStory } from '@/lib/api'
+import type { ActionPlan } from '@/features/action-plan/types'
+import type { AuthResponse } from '@/features/auth/types'
+import type { BenchmarkData, CompareResponse } from '@/features/benchmark/types'
+import type { DiagnosisHistory, DiagnosisResponse } from '@/features/diagnosis/types'
+import type { Insight } from '@/features/insights/types'
+import type { Statistics } from '@/features/statistics/types'
+import type { ChatResponse, ContactResponse, FAQ, SuccessStory } from '@/features/support/types'
 
 
 // Mock 데이터 저장소
@@ -43,13 +49,10 @@ export const handlers = [
       }
 
       const { password: _, ...userWithoutPassword } = user
-      const response: AuthResponse = {
+      return HttpResponse.json({
         user: userWithoutPassword,
-        token: user.id, // Mock: userId를 token으로 사용
-      }
-
-
-      return HttpResponse.json(response)
+        token: user.id,
+      })
     } catch {
       return HttpResponse.json({ error: '로그인 중 오류가 발생했습니다.' }, { status: 500 })
     }
@@ -85,12 +88,10 @@ export const handlers = [
       mockUsers.set(userId, user)
 
       const { password: _, ...userWithoutPassword } = user
-      const response: AuthResponse = {
+      return HttpResponse.json({
         user: userWithoutPassword,
         token: userId,
-      }
-
-      return HttpResponse.json(response)
+      })
     } catch {
       return HttpResponse.json({ error: '회원가입 중 오류가 발생했습니다.' }, { status: 500 })
     }
@@ -213,7 +214,7 @@ export const handlers = [
 
       const actionPlan: ActionPlan = {
         id: `plan-${Date.now()}`,
-        userId,
+        userId: parseInt(userId) || 0,
         diagnosisId,
         items,
         createdAt: new Date().toISOString(),
@@ -306,10 +307,10 @@ export const handlers = [
           profitMargin: { average: 22, median: 21 },
         },
         riskDistribution: {
-          GREEN: 25,
-          YELLOW: 40,
-          ORANGE: 25,
-          RED: 10,
+          green: 25,
+          yellow: 40,
+          orange: 25,
+          red: 10,
         },
       }
 

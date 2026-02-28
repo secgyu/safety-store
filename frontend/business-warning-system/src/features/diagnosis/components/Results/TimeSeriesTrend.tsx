@@ -4,7 +4,7 @@ import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, X
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 
 interface DiagnosisRecord {
-  taYm: string;
+  taYm?: string | null;
   overallScore: number;
   components: {
     sales: { score: number };

@@ -123,12 +123,12 @@ export default function DiagnosePage() {
       if (selectedBusiness) {
         setMessages((prev) => [
           ...prev,
-          { role: "user", content: selectedBusiness.business_name },
+          { role: "user", content: selectedBusiness.name },
           { role: "assistant", content: "진단을 시작합니다..." },
         ]);
 
         await predict.mutateAsync(
-          { encoded_mct: formData.selected_mct },
+          { encodedMct: formData.selected_mct },
           {
             onSuccess: () => {
               setTimeout(() => {

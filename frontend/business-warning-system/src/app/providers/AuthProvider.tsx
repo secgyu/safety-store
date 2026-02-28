@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 
 import { useAuthStore } from '@/features/auth'
+import { API_BASE_URL } from '@/shared/lib/api-client'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { setAuthToken, setInitialized, isInitialized } = useAuthStore()
@@ -9,7 +10,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function initAuth() {
       try {
         // Refresh Token으로 Access Token 발급 시도
-        const response = await fetch('http://localhost:8000/api/auth/refresh', {
+        const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         })

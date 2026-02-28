@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
+import { API_BASE_URL } from "@/shared/lib/api-client";
 import { Textarea } from "@/shared/components/ui/textarea";
 
 type Message = {
@@ -46,7 +47,7 @@ export default function ConsultationPage() {
       const diagnosisData = sessionStorage.getItem("diagnosisData");
       const context = diagnosisData ? JSON.parse(diagnosisData) : null;
 
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

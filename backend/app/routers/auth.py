@@ -9,6 +9,7 @@ from app.core.auth import (
 )
 from app.models.user import UserTable
 from app.schemas import UserRead, UserCreate, UserUpdate, UserResponse, LoginRequest, AuthResponse
+from app.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_async_session
 from typing import Optional
@@ -50,13 +51,13 @@ async def custom_login(
     # Refresh Token 생성
     refresh_token = create_refresh_token(user.id)
     
-    # Refresh Token을 httpOnly 쿠키에 저장
+    is_production = not settings.debug
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        httponly=True,  # JavaScript 접근 불가
-        secure=False,    # Production에서는 True (HTTPS only)
-        samesite="lax",  # CSRF 방어
+        httponly=True,
+        secure=is_production,
+        samesite="none" if is_production else "lax",
         max_age=7 * 24 * 60 * 60,  # 7일
         path="/"
     )
@@ -125,7 +126,13 @@ async def refresh_access_token(
 @router.post("/logout-custom", response_model=dict)
 async def logout_custom(response: Response):
     """로그아웃: Refresh Token 쿠키 삭제"""
-    response.delete_cookie(key="refresh_token", path="/")
+    is_production = not settings.debug
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        secure=is_production,
+        samesite="none" if is_production else "lax",
+    )
     return {"message": "Logged out successfully"}
 
 

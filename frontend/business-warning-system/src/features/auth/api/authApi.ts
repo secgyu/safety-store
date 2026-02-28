@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import { client, handleResponse } from '@/shared/lib/api-client'
+import { API_BASE_URL, client, handleResponse } from '@/shared/lib/api-client'
 
 import { useAuthStore } from '../store/authStore'
 import type { LoginRequest, SignupRequest, User, UserResponse, UserUpdate } from '../types'
@@ -8,7 +8,7 @@ import type { LoginRequest, SignupRequest, User, UserResponse, UserUpdate } from
 // ========== Token Refresh ==========
 async function refreshAccessToken(): Promise<string | null> {
   try {
-    const response = await fetch('http://localhost:8000/api/auth/refresh', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     })
@@ -53,7 +53,7 @@ client.use({
 // ========== API Functions ==========
 class AuthApi {
   async login(data: LoginRequest): Promise<{ user: User; token: string }> {
-    const response = await fetch('http://localhost:8000/api/auth/login-custom', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login-custom`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -83,7 +83,7 @@ class AuthApi {
   }
 
   async logout(): Promise<void> {
-    await fetch('http://localhost:8000/api/auth/logout-custom', {
+    await fetch(`${API_BASE_URL}/api/auth/logout-custom`, {
       method: 'POST',
       credentials: 'include',
     })

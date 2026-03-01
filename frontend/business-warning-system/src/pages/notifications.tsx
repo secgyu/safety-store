@@ -100,7 +100,7 @@ export default function NotificationsPage() {
                 to="/"
                 className="flex items-center font-bold text-xl text-primary hover:opacity-80 transition-opacity"
               >
-                <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+                <img src="/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
                 <span className="hidden sm:inline">구해줘 가게</span>
               </Link>
             </div>
@@ -148,7 +148,7 @@ export default function NotificationsPage() {
               to="/"
               className="flex items-center font-bold text-xl text-primary hover:opacity-80 transition-opacity"
             >
-              <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+              <img src="/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
               <span className="hidden sm:inline">구해줘 가게</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6">
@@ -223,7 +223,7 @@ export default function NotificationsPage() {
                 {/* Icon */}
                 <div
                   className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getPriorityColor(
-                    notification.type
+                    notification.type,
                   )}`}
                 >
                   {getNotificationIcon(notification.type)}

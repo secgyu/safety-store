@@ -9,7 +9,7 @@ const footer = () => {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+                <img src="/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
                 <span className="font-bold">구해줘 가게</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">

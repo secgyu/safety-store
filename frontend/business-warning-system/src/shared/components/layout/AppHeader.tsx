@@ -39,7 +39,7 @@ export function AppHeader() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center font-bold text-xl text-primary hover:opacity-80 transition-opacity">
-            <img src="/public/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
+            <img src="/favicon.svg" alt="구해줘 가게" className="w-12 h-12" />
             <span className="hidden sm:inline">구해줘 가게</span>
           </Link>
 

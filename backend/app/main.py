@@ -42,11 +42,10 @@ class CamelCaseJSONResponse(JSONResponse):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 시작 시 데이터베이스 테이블 생성
+    print(f"🔧 CORS origins: {settings.cors_origins_list}")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    # 종료 시 정리 작업
 
 
 # FastAPI 앱 생성 - 기본 응답 클래스를 CamelCase용으로 설정
@@ -60,7 +59,7 @@ app = FastAPI(
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
